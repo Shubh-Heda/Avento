@@ -7,6 +7,7 @@ import { Textarea } from './ui/textarea';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { AnimatedBackground } from './AnimatedBackground';
 import { toast } from 'sonner';
+import { generateUpcomingDates, getMinBookingDate } from '../utils/dateUtils';
 
 interface CreateMatchPlanProps {
   onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability', turfId?: string, matchId?: string) => void;
@@ -91,17 +92,11 @@ const timeSlots = [
   '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM'
 ];
 
-const dates = [
-  { date: '2025-11-14', label: 'Today' },
-  { date: '2025-11-15', label: 'Tomorrow' },
-  { date: '2025-11-16', label: 'Sun, Nov 16' },
-  { date: '2025-11-17', label: 'Mon, Nov 17' },
-  { date: '2025-11-18', label: 'Tue, Nov 18' },
-  { date: '2025-11-19', label: 'Wed, Nov 19' },
-  { date: '2025-11-20', label: 'Thu, Nov 20' },
-];
-
 export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanProps) {
+  // Generate dates dynamically from today
+  const dates = generateUpcomingDates(7);
+  const minDate = getMinBookingDate();
+  
   const [step, setStep] = useState(1);
   const [selectedTurf, setSelectedTurf] = useState<typeof turfs[0] | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
@@ -321,7 +316,7 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm mb-3">Select Date</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       {dates.map(date => (
                         <button
                           key={date.date}
@@ -336,6 +331,22 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
                           <div className="text-sm">{date.label}</div>
                         </button>
                       ))}
+                    </div>
+                    
+                    {/* Custom Date Picker */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-slate-200" />
+                      <span className="text-xs text-slate-500">or pick a custom date</span>
+                      <div className="h-px flex-1 bg-slate-200" />
+                    </div>
+                    <div className="mt-3">
+                      <Input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        min={minDate}
+                        className="w-full"
+                      />
                     </div>
                   </div>
 

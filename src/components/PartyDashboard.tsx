@@ -125,8 +125,16 @@ export function PartyDashboard({ onNavigate, userProfile: userProfileProp, onBoo
                   <Trophy className="w-4 h-4" />
                   Events
                 </Button>
+                <Button 
+                  onClick={() => onNavigate('comprehensive-dashboard')}
+                  className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white animate-pulse shadow-lg"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden sm:inline">New Features ✨</span>
+                  <Badge className="bg-white text-purple-600 text-xs">17</Badge>
+                </Button>
                 
-                {/* Menu Dropdown - Contains Profile, Help, Map, Notifications, New Features */}
+                {/* Menu Dropdown - Contains Profile, Help, Map, Notifications */}
                 <MenuDropdown 
                   onNavigate={onNavigate} 
                   category="parties"

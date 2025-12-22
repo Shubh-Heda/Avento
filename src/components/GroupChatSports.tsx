@@ -654,10 +654,10 @@ export function GroupChatSports({ onNavigate, matchId, matches }: GroupChatSport
 
       {/* Payment Confirmation Modal */}
       {showPaymentConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200" onClick={(e) => {
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 overflow-y-auto" onClick={(e) => {
           if (e.target === e.currentTarget) setShowPaymentConfirm(false);
         }}>
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 my-8 animate-in zoom-in-95 duration-200 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <AlertCircle className="w-8 h-8 text-white" />
             </div>

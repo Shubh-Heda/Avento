@@ -132,8 +132,16 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
                   <Trophy className="w-4 h-4" />
                   Events
                 </Button>
+                <Button 
+                  onClick={() => onNavigate('comprehensive-dashboard')}
+                  className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white animate-pulse shadow-lg"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden sm:inline">New Features ✨</span>
+                  <Badge className="bg-white text-purple-600 text-xs">17</Badge>
+                </Button>
                 
-                {/* Menu Dropdown - Contains Profile, Help, Map, Notifications, New Features */}
+                {/* Menu Dropdown - Contains Profile, Help, Map, Notifications */}
                 <MenuDropdown 
                   onNavigate={onNavigate} 
                   category="sports"
@@ -167,50 +175,6 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* NEW FEATURES ANNOUNCEMENT - Big Prominent Button */}
-          <div className="mb-8">
-            <button
-              onClick={() => onNavigate('comprehensive-dashboard')}
-              className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 rounded-2xl p-8 text-white shadow-2xl hover:shadow-3xl transition-all transform hover:scale-[1.02] relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-              
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="text-left">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center animate-bounce">
-                      <Sparkles className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-white/80 uppercase tracking-wider mb-1">🎉 NEW!</div>
-                      <h2 className="text-white text-2xl">17 Amazing New Features</h2>
-                    </div>
-                  </div>
-                  <p className="text-white/90 max-w-2xl">
-                    Explore your comprehensive dashboard with achievements, wallet, trust score breakdown, activity feed, squads, notifications & more!
-                  </p>
-                </div>
-                <div className="hidden md:block">
-                  <div className="flex flex-wrap gap-2 max-w-xs">
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">🏆 Achievements</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">💰 Wallet</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">🛡️ Trust Score</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">🔔 Activity Feed</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">📸 Photo Sharing</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">👥 Squads</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">🎊 Celebrations</div>
-                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white border border-white/30">⚙️ Settings</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Animated arrow */}
-              <div className="absolute right-8 top-1/2 -translate-y-1/2 text-white text-4xl group-hover:translate-x-2 transition-transform">
-                →
-              </div>
-            </button>
           </div>
 
           {/* Hero Image Section - Community in Action */}

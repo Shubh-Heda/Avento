@@ -66,7 +66,7 @@ class PostMatchService {
     tags?: string[];
   }): PostMatchMemory {
     const memory: PostMatchMemory = {
-      id: `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `mem_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       matchId: params.matchId,
       userId: params.userId,
       photos: params.photos || [],
@@ -184,7 +184,7 @@ class PostMatchService {
     createdBy: string;
   }): HangoutPoll {
     const poll: HangoutPoll = {
-      id: `poll_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `poll_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       matchId: params.matchId,
       question: params.question,
       options: params.options,

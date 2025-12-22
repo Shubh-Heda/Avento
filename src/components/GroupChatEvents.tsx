@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Users, Send, Plus, Search, MessageCircle, MoreVertical, Check, Calendar, MapPin, Clock, Music } from 'lucide-react';
+import { ArrowLeft, Users, Send, Plus, Search, MessageCircle, MoreVertical, Check, Calendar, MapPin, Clock, Music, CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -76,6 +76,9 @@ export function GroupChatEvents({ onNavigate, matchId, events }: GroupChatEvents
   const [selectedRoom, setSelectedRoom] = useState<string>(matchId || chatRooms[0]?.id || 'events-2');
   const [newMessage, setNewMessage] = useState('');
   const [showSoftExitMenu, setShowSoftExitMenu] = useState(false);
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [eventStage, setEventStage] = useState<'open' | 'soft-locked' | 'payment-window' | 'hard-locked' | 'confirmed'>('open');
 
   const currentEvent = events.find(e => e.id === selectedRoom);
 
@@ -113,6 +116,18 @@ export function GroupChatEvents({ onNavigate, matchId, events }: GroupChatEvents
     if (!newMessage.trim()) return;
     toast.success('Message sent!');
     setNewMessage('');
+  };
+
+  const handleImIn = () => {
+    setShowPaymentConfirm(true);
+  };
+
+  const confirmJoin = () => {
+    setHasJoined(true);
+    setShowPaymentConfirm(false);
+    toast.success("You're in! 🎉", {
+      description: "Payment will be collected after more people join"
+    });
   };
 
   return (
@@ -261,6 +276,37 @@ export function GroupChatEvents({ onNavigate, matchId, events }: GroupChatEvents
               ))}
             </div>
 
+            {/* I'm In Button */}
+            {currentEvent && eventStage === 'open' && !hasJoined && (
+              <div className="p-4 border-t-2 border-purple-200 bg-gradient-to-br from-purple-50 via-pink-50 to-fuchsia-50">
+                <div className="mb-3 text-center">
+                  <p className="text-sm text-slate-700 mb-1">
+                    🎭 Join this event for <strong>FREE</strong>
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Connect with other attendees and get updates
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleImIn} 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                >
+                  <Check className="w-6 h-6 mr-2" />
+                  I'm In! (Join Free)
+                </Button>
+              </div>
+            )}
+
+            {/* Success State */}
+            {hasJoined && eventStage === 'open' && (
+              <div className="p-4 border-t-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+                <div className="flex items-center justify-center gap-2 text-purple-600">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">You're In! Waiting for others...</span>
+                </div>
+              </div>
+            )}
+
             {/* Message Input */}
             <div className="p-4 border-t border-purple-200">
               <div className="flex gap-3">
@@ -293,6 +339,97 @@ export function GroupChatEvents({ onNavigate, matchId, events }: GroupChatEvents
             onNavigate('events-dashboard');
           }}
         />
+      )}
+
+      {/* Payment Confirmation Modal */}
+      {showPaymentConfirm && currentEvent && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Music className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Join Event</h3>
+                  <p className="text-purple-100 text-sm">Confirm your participation</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="space-y-4">
+                {/* Event Details */}
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4">
+                  <h4 className="font-semibold text-slate-900 mb-3">{currentEvent.title}</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-purple-600" />
+                      <span className="text-slate-700">{currentEvent.turfName}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-purple-600" />
+                      <span className="text-slate-700">{currentEvent.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-purple-600" />
+                      <span className="text-slate-700">{currentEvent.time}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Join Info */}
+                <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 rounded-xl p-4 border-2 border-emerald-200">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-slate-900 mb-1">Join for FREE!</p>
+                      <p className="text-sm text-slate-600">
+                        Connect with other attendees, chat, and get event updates. No payment required now!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {currentEvent.amount && (
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
+                    <div className="flex items-start gap-3">
+                      <CreditCard className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-slate-700">
+                          <strong>Event Cost:</strong> ₹{currentEvent.amount}
+                        </p>
+                        <p className="text-xs text-slate-600 mt-1">
+                          Payment will be collected after more attendees join
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={() => setShowPaymentConfirm(false)}
+                  variant="outline"
+                  className="flex-1 border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmJoin}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                >
+                  <Check className="w-5 h-5 mr-2" />
+                  Confirm
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

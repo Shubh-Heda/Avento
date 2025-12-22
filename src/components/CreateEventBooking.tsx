@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Calendar, Clock, Users, MapPin, CreditCard, Music, Heart, Sparkles, DollarSign, UserPlus, MessageCircle, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, MapPin, CreditCard, Music, Heart, Sparkles, DollarSign, UserPlus, MessageCircle, Shield, Zap, UserCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -7,6 +7,7 @@ import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { communityService } from '../services/communityService';
+import { PaymentModal } from './PaymentModal';
 
 interface CreateEventBookingProps {
   onNavigate: (page: string, eventId?: string) => void;
@@ -26,6 +27,8 @@ interface CreateEventBookingProps {
 
 export function CreateEventBooking({ onNavigate, onEventBook, eventDetails }: CreateEventBookingProps) {
   const [step, setStep] = useState(1);
+  const [showPaymentChoice, setShowPaymentChoice] = useState(false);
+  const [showDirectPayment, setShowDirectPayment] = useState(false);
   const [bookingData, setBookingData] = useState({
     attendeeName: '',
     email: '',
@@ -44,6 +47,18 @@ export function CreateEventBooking({ onNavigate, onEventBook, eventDetails }: Cr
       return;
     }
 
+    // Show payment choice modal
+    setShowPaymentChoice(true);
+  };
+
+  const handleDirectPayment = () => {
+    setShowPaymentChoice(false);
+    setShowDirectPayment(true);
+  };
+
+  const handleGroupPayment = () => {
+    setShowPaymentChoice(false);
+    
     const pricePerTicket = parseInt(eventDetails?.price.replace('₹', '') || '0');
     const totalAmount = pricePerTicket * bookingData.numberOfTickets;
 
@@ -531,13 +546,129 @@ export function CreateEventBooking({ onNavigate, onEventBook, eventDetails }: Cr
                 size="lg"
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 gap-2"
               >
-                <DollarSign className="w-5 h-5" />
-                Pay Now ₹{totalPrice}
+                <UserCheck className="w-5 h-5" />
+                Continue to Booking
               </Button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Payment Choice Modal */}
+      {showPaymentChoice && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]" onClick={() => setShowPaymentChoice(false)}>
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-8 animate-in zoom-in-95 duration-200 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CreditCard className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="mb-2 text-slate-900">Choose Payment Method</h2>
+              <p className="text-slate-600">Select how you'd like to book this event</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-6">
+              {/* Direct Payment Option */}
+              <button
+                onClick={handleDirectPayment}
+                className="group relative bg-gradient-to-br from-emerald-50 to-cyan-50 hover:from-emerald-100 hover:to-cyan-100 border-2 border-emerald-200 hover:border-emerald-400 rounded-2xl p-6 text-left transition-all hover:shadow-xl"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Pay Now</h3>
+                    <p className="text-sm text-emerald-700 font-semibold">Instant Confirmation</p>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-700 mb-4">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                    Pay immediately and secure your spot
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                    Get instant booking confirmation
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                    No waiting for others
+                  </li>
+                </ul>
+                <div className="bg-emerald-100 border border-emerald-300 rounded-lg p-3 text-center">
+                  <p className="text-emerald-900 font-bold text-lg">₹{totalPrice}</p>
+                  <p className="text-emerald-700 text-xs">Total Amount</p>
+                </div>
+              </button>
+
+              {/* 5-Step Payment (Group) Option */}
+              <button
+                onClick={handleGroupPayment}
+                className="group relative bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 border-2 border-purple-200 hover:border-purple-400 rounded-2xl p-6 text-left transition-all hover:shadow-xl"
+              >
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">5-Step Group Payment</h3>
+                    <p className="text-sm text-purple-700 font-semibold">Connect & Share Cost</p>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-700 mb-4">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                    Create group & notify community
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                    Soft lock your spot for free
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                    Pay when minimum people join
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                    Meet attendees before the event
+                  </li>
+                </ul>
+                <div className="bg-purple-100 border border-purple-300 rounded-lg p-3 text-center">
+                  <p className="text-purple-900 font-bold text-lg">FREE to Join</p>
+                  <p className="text-purple-700 text-xs">Pay later when group forms</p>
+                </div>
+              </button>
+            </div>
+
+            <Button
+              onClick={() => setShowPaymentChoice(false)}
+              variant="outline"
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Direct Payment Modal */}
+      {showDirectPayment && (
+        <PaymentModal
+          isOpen={showDirectPayment}
+          onClose={() => setShowDirectPayment(false)}
+          amount={totalPrice}
+          itemName={`${eventDetails?.title} (${bookingData.numberOfTickets} ticket${bookingData.numberOfTickets > 1 ? 's' : ''})`}
+          onPaymentSuccess={() => {
+            setShowDirectPayment(false);
+            toast.success('Payment Successful! 🎉', {
+              description: 'Your booking is confirmed. Redirecting...',
+            });
+            setTimeout(() => {
+              onNavigate('events-dashboard');
+            }, 1500);
+          }}
+        />
+      )}
     </div>
   );
 }

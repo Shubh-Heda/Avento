@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Menu, X, User, HelpCircle, MapPin, Bell, LogOut, Settings, Trophy, Camera, Video, Heart, Sparkles } from 'lucide-react';
+import { Menu, X, User, HelpCircle, MapPin, Bell, LogOut, Settings, Trophy, Camera, Video, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Badge } from './ui/badge';
 
@@ -149,18 +149,6 @@ export function MenuDropdown({
       },
       color: 'text-orange-600',
       bgColor: 'hover:bg-orange-50',
-    },
-    {
-      icon: Sparkles,
-      label: 'New Features',
-      badge: 17,
-      action: () => {
-        setIsOpen(false);
-        onNavigate('comprehensive-dashboard');
-      },
-      color: 'text-purple-600',
-      bgColor: 'hover:bg-purple-50',
-      highlight: true,
     },
     {
       icon: Settings,

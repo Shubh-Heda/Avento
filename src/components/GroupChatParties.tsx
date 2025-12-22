@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Users, Send, Plus, Search, MessageCircle, MoreVertical, Check, Calendar, MapPin, Clock, PartyPopper, Sparkles } from 'lucide-react';
+import { ArrowLeft, Users, Send, Plus, Search, MessageCircle, MoreVertical, Check, Calendar, MapPin, Clock, PartyPopper, Sparkles, CheckCircle, AlertCircle, CreditCard } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -76,6 +76,9 @@ export function GroupChatParties({ onNavigate, matchId, parties }: GroupChatPart
   const [selectedRoom, setSelectedRoom] = useState<string>(matchId || chatRooms[0]?.id || 'party-2');
   const [newMessage, setNewMessage] = useState('');
   const [showSoftExitMenu, setShowSoftExitMenu] = useState(false);
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [partyStage, setPartyStage] = useState<'open' | 'soft-locked' | 'payment-window' | 'hard-locked' | 'confirmed'>('open');
 
   const currentParty = parties.find(p => p.id === selectedRoom);
 
@@ -113,6 +116,18 @@ export function GroupChatParties({ onNavigate, matchId, parties }: GroupChatPart
     if (!newMessage.trim()) return;
     toast.success('Message sent!');
     setNewMessage('');
+  };
+
+  const handleImIn = () => {
+    setShowPaymentConfirm(true);
+  };
+
+  const confirmJoin = () => {
+    setHasJoined(true);
+    setShowPaymentConfirm(false);
+    toast.success("You're in! 🎉", {
+      description: "Payment will be collected after more people join"
+    });
   };
 
   return (

@@ -1,10 +1,11 @@
 import { Users, Heart, Sparkles, Music, PartyPopper, Shield, TrendingUp, ArrowRight, Star, Zap, Clock, DollarSign, CheckCircle, UserPlus, ChevronDown, Play, X, Gamepad2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
-import { useEffect, useState, useRef } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { ColorfulBackground } from './ColorfulBackground';
-import { AventoDemo } from './AventoDemo';
+
+const AventoDemo = lazy(() => import('./AventoDemo'));
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -25,6 +26,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isDemoPlaying, setIsDemoPlaying] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
 
   // Calculate parallax offsets based on mouse position
   const getParallaxStyle = (intensity: number = 20) => {
-    if (typeof window === 'undefined') return {};
+    if (reduceMotion || typeof window === 'undefined') return {};
     const xOffset = (mousePosition.x - window.innerWidth / 2) / intensity;
     const yOffset = (mousePosition.y - window.innerHeight / 2) / intensity;
     return {
@@ -72,34 +74,37 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
   const faqs = [
     {
       question: "How does the 5-stage payment flow work?",
-      answer: "First, you join for free. When minimum players are reached, there's a soft lock. Then you get a dynamic payment window (30-90 mins based on match timing). Unpaid players are removed at hard lock, and finally you see exact share amounts with the confirmed team."
+      answer: "First, you join for free. When the minimum number of players is reached, there's a soft lock. Then you get a dynamic payment window (30-90 minutes based on match timing). Unpaid players are removed at hard lock, and finally, you see exact share amounts with the confirmed team."
     },
     {
       question: "What are Trust Scores and how do I build them?",
-      answer: "Trust Scores are earned through reliability (showing up on time), respect (positive interactions), and consistency (regular participation). Higher trust scores unlock premium features and give you priority in match selection."
+      answer: "Trust Scores are earned through reliability (showing up on time), respect (positive interactions), and consistency (regular participation). Higher Trust Scores unlock premium features and give you priority in match selection."
     },
     {
       question: "What happens if I need to cancel after joining?",
-      answer: "Before soft lock, you can cancel anytime for free. After payment, cancellations may affect your trust score unless you have a valid reason. We prioritize emotional safety and understanding."
+      answer: "Before soft lock, you can cancel anytime for free. After payment, cancellations may affect your Trust Score unless you have a valid reason. We prioritize emotional safety and understanding."
     },
     {
       question: "How do Friendship Streaks work?",
-      answer: "Play with the same people regularly, and you'll build friendship streaks! The longer your streak, the more perks you unlock together - like priority booking, special badges, and exclusive community events."
+      answer: "Play with the same people regularly, and you'll build Friendship Streaks! The longer your streak, the more perks you unlock together—like priority booking, special badges, and exclusive community events."
     },
     {
       question: "Can I create private matches with friends?",
-      answer: "Absolutely! You can set visibility to 'Private' and invite specific friends. You can also choose 'Nearby' to connect with players in your area, or 'Community' to open it up to everyone."
+      answer: "Absolutely! You can set visibility to 'Private' and invite specific friends. You can also choose 'Nearby' to connect with players in your area or 'Community' to open it up to everyone."
     },
     {
       question: "What makes Avento different from other booking platforms?",
-      answer: "We're friendship-first, not just coordination. Every feature - from trust scores to post-match reflections - is designed to help you build genuine connections, not just fill slots."
+      answer: "We're friendship-first, not just coordination. Every feature—from Trust Scores to post-match reflections—is designed to help you build genuine connections, not just fill slots."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 overflow-hidden relative">
+    <div className="min-h-screen avento-hero-bg overflow-hidden relative text-white">
       {/* Colorful Animated Background */}
       <ColorfulBackground />
+      
+      {/* Dark Overlay for Text Visibility */}
+      <div className="absolute inset-0 bg-black/35 pointer-events-none" />
       
       {/* Video Modal */}
       <AnimatePresence>
@@ -123,7 +128,9 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               <div className="relative bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
                 {/* Avento Animated Demo */}
                 <div className="w-full aspect-video">
-                  <AventoDemo isPlaying={isDemoPlaying} />
+                  <Suspense fallback={<div className="w-full h-full bg-black/60 flex items-center justify-center text-white/60">Loading demo…</div>}>
+                    <AventoDemo isPlaying={isDemoPlaying} />
+                  </Suspense>
                 </div>
 
                 {/* Close Button - Inside Video as Overlay */}
@@ -220,22 +227,21 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
-        className="border-b border-white/10 bg-black/40 backdrop-blur-xl sticky top-0 z-50"
+        className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-50"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
           <motion.div 
             className="flex items-center gap-3"
             whileHover={{ scale: 1.05 }}
           >
             <motion.div 
-              className="w-14 h-14 bg-gradient-to-br from-red-500 via-yellow-500 to-green-500 rounded-xl flex items-center justify-center relative"
+              className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-amber-400 rounded-xl flex items-center justify-center relative"
               animate={{
                 rotate: [0, 5, -5, 0],
                 boxShadow: [
-                  "0 0 20px rgba(239, 68, 68, 0.5)",
-                  "0 0 40px rgba(234, 179, 8, 0.6)",
-                  "0 0 40px rgba(34, 197, 94, 0.6)",
-                  "0 0 20px rgba(239, 68, 68, 0.5)"
+                  "0 0 20px rgba(14, 165, 233, 0.4)",
+                  "0 0 30px rgba(245, 158, 11, 0.5)",
+                  "0 0 20px rgba(14, 165, 233, 0.4)",
                 ]
               }}
               transition={{ duration: 3, repeat: Infinity }}
@@ -248,10 +254,10 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 animate={{
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
                 style={{
-                  background: "linear-gradient(90deg, #ef4444, #f59e0b, #22c55e, #06b6d4, #8b5cf6, #ec4899, #ef4444)",
-                  backgroundSize: "200% auto",
+                  background: "linear-gradient(90deg, #0ea5e9, #22d3ee, #f59e0b)",
+                  backgroundSize: "180% auto",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -260,7 +266,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 Avento
               </motion.h1>
               <motion.p 
-                className="text-xs bg-gradient-to-r from-orange-300 via-yellow-300 to-green-300 bg-clip-text text-transparent"
+                className="text-xs bg-gradient-to-r from-cyan-200 to-amber-200 bg-clip-text text-transparent"
                 animate={{
                   opacity: [0.7, 1, 0.7],
                 }}
@@ -270,11 +276,20 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               </motion.p>
             </div>
           </motion.div>
+
+          <button
+            onClick={() => setReduceMotion(!reduceMotion)}
+            className="flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-full border border-white/15 bg-white/5 hover:border-white/30 transition"
+            aria-pressed={reduceMotion}
+          >
+            <Zap className="w-4 h-4" />
+            {reduceMotion ? 'Motion Off' : 'Motion On'}
+          </button>
         </div>
       </motion.header>
 
       {/* Hero Section */}
-      <section ref={heroRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+      <section ref={heroRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <motion.div 
           className="text-center max-w-5xl mx-auto relative z-10"
           initial={{ opacity: 0, y: 50 }}
@@ -282,68 +297,105 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
           transition={{ duration: 0.8 }}
         >
           <motion.div 
-            className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md text-white px-6 py-3 rounded-full mb-8 border border-white/20"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", delay: 0.2 }}
-            style={getParallaxStyle(40)}
+            className="inline-flex items-center justify-center gap-4 bg-black/85 backdrop-blur-md text-white px-8 py-5 rounded-full mb-5 border-2 border-white/60 shadow-2xl hover:shadow-3xl transition-shadow"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 15, delay: 0.1 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Sports • Cultural Events • Parties - All in One Place</span>
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="flex-shrink-0"
+            >
+              <Sparkles className="w-6 h-6" />
+            </motion.div>
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-black tracking-tight text-green-300">⚽ Sports</span>
+              <span className="text-white/70">•</span>
+              <span className="text-lg font-black tracking-tight text-purple-300">🎵 Culture</span>
+              <span className="text-white/70">•</span>
+              <span className="text-lg font-black tracking-tight text-pink-400">🎉 Parties</span>
+              <span className="text-white/70">•</span>
+              <span className="text-lg font-black tracking-tight text-blue-300">🎮 Gaming</span>
+            </div>
+            <motion.div 
+              animate={{ rotate: -360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="flex-shrink-0"
+            >
+              <Heart className="w-6 h-6 text-pink-300" />
+            </motion.div>
           </motion.div>
           
           <motion.h1 
-            className="mb-8 text-white relative"
+            className="mb-4 relative text-5xl md:text-7xl font-black leading-tight tracking-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             style={getParallaxStyle(30)}
           >
-            <span className="relative z-10">
-              Turn Every <motion.span 
-                className="bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent inline-block"
-                animate={{ 
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                style={{ backgroundSize: "200% auto" }}
-              >
-                Experience
-              </motion.span>
-              <br />
-              Into a <motion.span 
-                className="bg-gradient-to-r from-green-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent inline-block"
-                animate={{ 
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
-                style={{ backgroundSize: "200% auto" }}
-              >
-                Connection
-              </motion.span>
+            <span className="relative z-10 block text-white drop-shadow-2xl">
+              Belong through
+            </span>
+            <span className="relative z-10 block mt-2 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-2xl font-black">
+              sports, culture, and celebrations
             </span>
           </motion.h1>
           
           <motion.p 
-            className="text-slate-100 mb-10 max-w-3xl mx-auto relative backdrop-blur-sm bg-black/10 rounded-2xl px-6 py-4 border border-white/10"
+            className="text-white text-xl md:text-2xl mb-6 max-w-3xl mx-auto relative bg-black/50 rounded-2xl px-8 py-5 border-2 border-white/50 font-medium leading-relaxed shadow-2xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
             style={getParallaxStyle(35)}
           >
             <span className="relative z-10">
-              From turf bookings to cultural festivals, from weekend sports to unforgettable parties — 
-              Avento is your gateway to meaningful experiences and lasting friendships. 
-              Because life's best moments happen when we come together.
+              Book games, join festivals, and meet people you can trust. Avento connects you to experiences that feel safe, welcoming, and memorable.
             </span>
           </motion.p>
+
+          {/* Remove the buttons section completely */}
+
+          <motion.div
+            className="flex flex-wrap justify-center gap-4 text-lg md:text-xl text-white mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            style={getParallaxStyle(28)}
+          >
+            <motion.div
+              className="px-8 py-5 rounded-full bg-white/95 backdrop-blur-md border-2 border-cyan-400/90 text-slate-900 font-black shadow-2xl hover:shadow-3xl transition-shadow"
+              whileHover={{ scale: 1.08, y: -2 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🤝</span>
+                <span className="text-lg md:text-xl"><span className="text-slate-900 font-black">Play</span> with people you trust</span>
+              </div>
+            </motion.div>
+            <motion.div
+              className="px-8 py-5 rounded-full bg-white/95 backdrop-blur-md border-2 border-purple-400/90 text-slate-900 font-black shadow-2xl hover:shadow-3xl transition-shadow"
+              whileHover={{ scale: 1.08, y: -2 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🎭</span>
+                <span className="text-lg md:text-xl"><span className="text-slate-900 font-black">Celebrate</span> culture together</span>
+              </div>
+            </motion.div>
+          </motion.div>
 
           {/* Preview Animation/Video Section */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7 }}
-            className="mb-12"
+            className="mb-8"
             style={getParallaxStyle(25)}
           >
             <div className="relative max-w-3xl mx-auto">
@@ -351,8 +403,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 {/* Video Thumbnail */}
                 <div className="relative rounded-3xl overflow-hidden border-4 border-white/20 shadow-2xl">
                   <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800"
-                    alt="Avento Preview"
+                    src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800&auto=format&fm=webp"
+                    alt="Friends celebrating after a match"
                     className="w-full h-[400px] object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -432,23 +484,23 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
 
         {/* Category Selector Cards */}
         <motion.div 
-          className="mt-20 relative"
+          className="mt-12 relative"
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.8 }}
         >
           {/* Welcome Text */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <motion.h2 
-              className="text-white mb-3"
+              className="text-slate-900 mb-3 text-3xl md:text-4xl font-bold"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
             >
-              Welcome, <span className="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 bg-clip-text text-transparent">Friend!</span> 👋
+              <span className="text-blue-700">Welcome,</span> <span className="text-amber-700">Friend!</span> 👋
             </motion.h2>
             <motion.p 
-              className="text-slate-200"
+              className="text-slate-800 text-xl md:text-2xl font-medium"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9 }}
@@ -457,46 +509,44 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
             {/* Sports Card */}
             <motion.div
               onClick={() => onCategorySelect?.('sports')}
-              whileHover={{ scale: 1.03, y: -5 }}
+              whileHover={{ scale: 1.05, y: -8 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.0 }}
-              className="relative group overflow-hidden rounded-3xl shadow-2xl border-2 border-white/20 cursor-pointer h-[550px]"
+              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-cyan-400/40 cursor-pointer hover:border-cyan-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[320px] overflow-hidden">
+              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
                 <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1630420598771-dd52ab08c8cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
+                  src="https://images.unsplash.com/photo-1630420598771-dd52ab08c8cb?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Sports and Turf"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                    <Users className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+                    <Users className="w-7 h-7 text-cyan-600" />
                   </div>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-t-3xl p-6 border-t-2 border-cyan-500/30">
-                <h3 className="mb-2 text-white">Sports & Turf</h3>
-                <p className="text-slate-300 mb-4">
-                  Book turfs, find players, build your sports community with trust scores and friendship streaks
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 flex flex-col flex-1">
+                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Sports & Turf</h3>
+                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
+                  Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks
                 </p>
                 <Button 
-                  className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white gap-2 group/btn shadow-lg"
+                  className="w-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-600 hover:via-cyan-500 hover:to-blue-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
                 >
                   Get Started
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </motion.div>
@@ -504,42 +554,40 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             {/* Cultural Events Card */}
             <motion.div
               onClick={() => onCategorySelect?.('events')}
-              whileHover={{ scale: 1.03, y: -5 }}
+              whileHover={{ scale: 1.05, y: -8 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.1 }}
-              className="relative group overflow-hidden rounded-3xl shadow-2xl border-2 border-white/20 cursor-pointer h-[550px]"
+              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-purple-400/40 cursor-pointer hover:border-purple-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[320px] overflow-hidden">
+              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
                 <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1735748917428-be035e873f97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
+                  src="https://images.unsplash.com/photo-1735748917428-be035e873f97?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Cultural Events"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                    <Music className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+                    <Music className="w-7 h-7 text-purple-600" />
                   </div>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-t-3xl p-6 border-t-2 border-purple-500/30">
-                <h3 className="mb-2 text-white">Cultural Events</h3>
-                <p className="text-slate-300 mb-4">
-                  Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 flex flex-col flex-1">
+                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Cultural Events</h3>
+                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
+                  Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity.
                 </p>
                 <Button 
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 group/btn shadow-lg"
+                  className="w-full bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 hover:from-purple-600 hover:via-purple-500 hover:to-pink-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
                 >
                   Explore Events
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </motion.div>
@@ -547,42 +595,40 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             {/* Parties Card */}
             <motion.div
               onClick={() => onCategorySelect?.('parties')}
-              whileHover={{ scale: 1.03, y: -5 }}
+              whileHover={{ scale: 1.05, y: -8 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.2 }}
-              className="relative group overflow-hidden rounded-3xl shadow-2xl border-2 border-white/20 cursor-pointer h-[550px]"
+              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-pink-400/40 cursor-pointer hover:border-pink-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[320px] overflow-hidden">
+              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
                 <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1739734963154-7a8b3c8e5944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
+                  src="https://images.unsplash.com/photo-1739734963154-7a8b3c8e5944?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Parties and Celebrations"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                    <PartyPopper className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+                    <PartyPopper className="w-7 h-7 text-pink-600" />
                   </div>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-t-3xl p-6 border-t-2 border-pink-500/30">
-                <h3 className="mb-2 text-white">Parties & Celebrations</h3>
-                <p className="text-slate-300 mb-4">
-                  Create unforgettable nights, meet new people, and celebrate life's special moments together
+              <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-5 flex flex-col flex-1">
+                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">Parties & Celebrations</h3>
+                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
+                  Create unforgettable nights, meet new people, and celebrate life's special moments together.
                 </p>
                 <Button 
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white gap-2 group/btn shadow-lg"
+                  className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 hover:from-pink-600 hover:via-rose-500 hover:to-red-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
                 >
                   Join Parties
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </motion.div>
@@ -590,42 +636,40 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             {/* Gaming Hub Card - NEW! */}
             <motion.div
               onClick={() => onCategorySelect?.('gaming')}
-              whileHover={{ scale: 1.03, y: -5 }}
+              whileHover={{ scale: 1.05, y: -8 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.3 }}
-              className="relative group overflow-hidden rounded-3xl shadow-2xl border-2 border-white/20 cursor-pointer h-[550px]"
+              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-indigo-400/40 cursor-pointer hover:border-indigo-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[320px] overflow-hidden">
+              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
                 <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
+                  src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Gaming Hub"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                    <Gamepad2 className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+                    <Gamepad2 className="w-7 h-7 text-indigo-600" />
                   </div>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 rounded-t-3xl p-6 border-t-2 border-indigo-500/30">
-                <h3 className="mb-2 text-white">Gaming Hub</h3>
-                <p className="text-slate-300 mb-4">
-                  Join gaming clubs, play PS5/Xbox/PC, compete in tournaments, and level up your friendships
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 flex flex-col flex-1">
+                <h3 className="mb-3 text-2xl md:text-3xl font-black tracking-tight leading-tight bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent">Gaming Hub</h3>
+                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
+                  Join gaming clubs, play PS5/Xbox/PC, compete in tournaments, and level up your friendships.
                 </p>
                 <Button 
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white gap-2 group/btn shadow-lg"
+                  className="w-full bg-gradient-to-r from-indigo-500 via-blue-400 to-violet-500 hover:from-indigo-600 hover:via-blue-500 hover:to-violet-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
                 >
                   Start Gaming
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </motion.div>
@@ -637,15 +681,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20 bg-gradient-to-b from-transparent via-black/30 to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 bg-black/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/40 shadow-2xl"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             style={getParallaxStyle(50)}
           >
-            <h2 className="mb-4 text-white">Build Your <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">Reputation</span></h2>
-            <p className="text-slate-200 max-w-2xl mx-auto">
-              Earn badges, build trust, and unlock exclusive perks as you connect with your community
+            <h2 className="mb-4 text-white text-3xl md:text-5xl font-black tracking-tight">Build Your <span className="text-cyan-300">Reputation</span></h2>
+            <p className="text-white/90 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
+              Earn badges, build trust, and unlock exclusive perks as you connect with your community.
             </p>
           </motion.div>
 
@@ -678,7 +722,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               </div>
               <h3 className="text-white text-center mb-2">Trust Score</h3>
               <p className="text-slate-300 text-center text-sm mb-4">
-                Built through reliability, respect, and positive vibes
+                Built through reliability, respect, and positive vibes.
               </p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -716,7 +760,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               </div>
               <h3 className="text-white text-center mb-2">12 Day Streak</h3>
               <p className="text-slate-300 text-center text-sm mb-4">
-                Consistency builds deeper connections
+                Consistency builds deeper connections.
               </p>
               <div className="flex justify-center gap-1">
                 {[...Array(7)].map((_, i) => (
@@ -756,7 +800,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               </div>
               <h3 className="text-white text-center mb-2">Your Badges</h3>
               <p className="text-slate-300 text-center text-sm mb-4">
-                Earned through exceptional behavior
+                Earned through exceptional behavior.
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -787,21 +831,21 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20 bg-gradient-to-b from-black/40 via-black/60 to-black/40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             style={getParallaxStyle(50)}
           >
-            <h2 className="mb-4 text-white">How <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">Payment</span> Works</h2>
-            <p className="text-slate-200 max-w-2xl mx-auto">
-              Our unique 5-stage flow ensures fairness, transparency, and commitment
+            <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">How <span className="text-orange-600">Payment</span> Works</h2>
+            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
+              Our unique 5-stage flow ensures fairness, transparency, and commitment.
             </p>
           </motion.div>
 
           <div className="relative">
             {/* Connection Line */}
-            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-blue-500 to-purple-500 transform -translate-x-1/2 rounded-full" />
+            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-cyan-400 to-amber-400 transform -translate-x-1/2 rounded-full" />
 
             {/* Stages */}
             <div className="space-y-12">
@@ -811,15 +855,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   title: "Free Joining",
                   description: "Join any match completely free. Browse, explore, and commit only when you're ready.",
                   icon: UserPlus,
-                  color: "from-green-500 to-emerald-500",
+                  color: "from-cyan-500 to-amber-400",
                   badge: "No commitment"
                 },
                 {
                   stage: "2",
                   title: "Soft Lock",
-                  description: "When minimum players join, the match is soft-locked. You're in, but payment window hasn't started yet.",
+                  description: "When the minimum number of players join, the match is soft-locked. You're in, but the payment window hasn't started yet.",
                   icon: Users,
-                  color: "from-yellow-500 to-orange-500",
+                  color: "from-cyan-500 to-amber-400",
                   badge: "Min players reached"
                 },
                 {
@@ -827,15 +871,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   title: "Dynamic Payment Window",
                   description: "Get 30-90 minutes to pay based on match timing. Plenty of time to complete your payment hassle-free.",
                   icon: Clock,
-                  color: "from-orange-500 to-red-500",
-                  badge: "30-90 mins"
+                  color: "from-cyan-500 to-amber-400",
+                  badge: "30-90 minutes"
                 },
                 {
                   stage: "4",
                   title: "Hard Lock",
                   description: "Payment window closes. Unpaid players are automatically removed to ensure committed teams.",
                   icon: Shield,
-                  color: "from-red-500 to-pink-500",
+                  color: "from-cyan-500 to-amber-400",
                   badge: "Commitment confirmed"
                 },
                 {
@@ -843,7 +887,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   title: "Final Confirmation",
                   description: "See your exact share amount with the final confirmed team. No surprises, complete transparency.",
                   icon: CheckCircle,
-                  color: "from-purple-500 to-blue-500",
+                  color: "from-cyan-500 to-amber-400",
                   badge: "All set!"
                 },
               ].map((item, i) => (
@@ -858,7 +902,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   {/* Content Card */}
                   <div className="flex-1 lg:w-1/2">
                     <motion.div 
-                      className="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all"
+                      className="bg-black/90 backdrop-blur-md p-8 rounded-3xl border-2 border-white/50 hover:border-white/70 transition-all shadow-xl"
                       whileHover={{ scale: 1.02, y: -5 }}
                       style={getParallaxStyle(80)}
                     >
@@ -868,12 +912,12 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-white">{item.title}</h3>
+                            <h3 className="text-white text-xl font-bold">{item.title}</h3>
                             <span className={`text-xs px-3 py-1 rounded-full bg-gradient-to-r ${item.color} text-white`}>
                               {item.badge}
                             </span>
                           </div>
-                          <p className="text-slate-300">{item.description}</p>
+                          <p className="text-white/85 font-medium">{item.description}</p>
                         </div>
                       </div>
                     </motion.div>
@@ -903,15 +947,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             style={getParallaxStyle(50)}
           >
-            <h2 className="mb-4 text-white">Real Stories, Real <span className="bg-gradient-to-r from-pink-400 via-rose-400 to-red-400 bg-clip-text text-transparent">Connections</span></h2>
-            <p className="text-slate-200 max-w-2xl mx-auto">
-              See what our community is experiencing every day
+            <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Real Stories, Real <span className="text-cyan-600">Connections</span></h2>
+            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
+              See what our community is experiencing every day.
             </p>
           </motion.div>
 
@@ -949,17 +993,17 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -10 }}
-                className="bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-white/10"
+                className="bg-white backdrop-blur-md rounded-3xl overflow-hidden border-2 border-slate-300 shadow-xl"
                 style={getParallaxStyle(70 + i * 10)}
               >
                 {/* Post Header */}
                 <div className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/20">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300">
                     <ImageWithFallback src={post.avatar} alt={post.user} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-white text-sm">{post.user}</div>
-                    <div className="text-slate-400 text-xs">{post.time}</div>
+                    <div className="text-slate-900 text-sm font-semibold">{post.user}</div>
+                    <div className="text-slate-500 text-xs">{post.time}</div>
                   </div>
                 </div>
 
@@ -972,16 +1016,16 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 <div className="p-4">
                   <div className="flex items-center gap-4 mb-3">
                     <motion.button 
-                      className="flex items-center gap-2 text-pink-400"
+                      className="flex items-center gap-2 text-pink-500"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
                       <Heart className="w-5 h-5" fill="currentColor" />
-                      <span className="text-sm">{post.likes}</span>
+                      <span className="text-sm font-semibold">{post.likes}</span>
                     </motion.button>
                   </div>
-                  <p className="text-slate-300 text-sm">
-                    <span className="text-white mr-2">{post.user.split(' ')[0]}</span>
+                  <p className="text-slate-700 text-sm leading-relaxed">
+                    <span className="text-slate-900 font-bold mr-2">{post.user.split(' ')[0]}</span>
                     {post.caption}
                   </p>
                 </div>
@@ -995,14 +1039,14 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20 bg-gradient-to-b from-transparent via-black/40 to-black/60 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
-            <h2 className="mb-4 text-white">Built for <span className="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 bg-clip-text text-transparent">Connection</span>, Not Just Coordination</h2>
-            <p className="text-slate-200 max-w-2xl mx-auto">
-              Every feature is designed with emotional safety and community at its core
+            <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Built for <span className="text-teal-600">Connection</span>, Not Just Coordination</h2>
+            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
+              Every feature is designed with emotional safety and community at its core.
             </p>
           </motion.div>
 
@@ -1023,7 +1067,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   y: -10,
                   boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
                 }}
-                className="bg-white/5 backdrop-blur-md p-8 rounded-2xl border border-white/10 hover:border-white/20 transition-all"
+                className="bg-black/85 backdrop-blur-md p-8 rounded-2xl border-2 border-white/40 hover:border-white/60 transition-all shadow-xl"
               >
                 <motion.div 
                   className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-6`}
@@ -1043,16 +1087,16 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="bg-gradient-to-r from-red-500/10 via-yellow-500/10 to-green-500/10 backdrop-blur-xl rounded-3xl p-12 text-center border border-white/10"
+            className="bg-white/60 backdrop-blur-xl rounded-3xl p-12 text-center border-2 border-white/80 shadow-2xl"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
             <div className="max-w-3xl mx-auto mb-12">
-              <Sparkles className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-              <h2 className="mb-4 text-white">More Than a Platform</h2>
-              <p className="text-slate-200">
-                It's a movement to help people find their people. A space where showing up consistently, 
+              <Sparkles className="w-14 h-14 text-amber-600 mx-auto mb-4" />
+              <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">More Than a Platform</h2>
+              <p className="text-slate-800 text-xl md:text-2xl font-semibold">
+                It's a movement to help people find their people—a space where showing up consistently, 
                 being kind, and building genuine connections is celebrated.
               </p>
             </div>
@@ -1071,15 +1115,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   className="relative"
                 >
                   <motion.div 
-                    className="bg-gradient-to-r from-red-600 via-yellow-600 to-green-600 bg-clip-text text-transparent inline-block"
+                    className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent inline-block text-4xl md:text-5xl font-black"
                     animate={{ 
-                      scale: [1, 1.1, 1]
+                      scale: [1, 1.05, 1]
                     }}
                     transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
                   >
                     {stat.value}
                   </motion.div>
-                  <p className="text-slate-200 mt-2">{stat.label}</p>
+                  <p className="text-white text-lg md:text-xl font-semibold mt-2">{stat.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -1091,15 +1135,15 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <section className="relative py-20 bg-gradient-to-b from-black/40 to-transparent">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             style={getParallaxStyle(50)}
           >
-            <h2 className="mb-4 text-white">Frequently Asked <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Questions</span></h2>
-            <p className="text-slate-200">
-              Everything you need to know about Avento
+            <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Frequently Asked <span className="text-indigo-600">Questions</span></h2>
+            <p className="text-slate-800 text-xl md:text-2xl font-semibold">
+              Everything you need to know about Avento.
             </p>
           </motion.div>
 
@@ -1111,12 +1155,12 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden"
+                className="bg-black/85 backdrop-blur-md rounded-2xl border-2 border-white/30 overflow-hidden shadow-lg"
                 style={getParallaxStyle(60 + i * 5)}
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+                  className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/10 transition-colors"
                 >
                   <span className="text-white pr-4">{faq.question}</span>
                   <motion.div
@@ -1135,7 +1179,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-6 pb-5 text-slate-300">
+                  <div className="px-6 pb-5 text-white/85 font-medium">
                     {faq.answer}
                   </div>
                 </motion.div>
@@ -1148,16 +1192,16 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       {/* CTA Section */}
       <section className="relative py-24 overflow-hidden">
         <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-yellow-600/20 to-green-600/20"
+          className="absolute inset-0 bg-black/60"
           animate={{
             backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
           }}
           transition={{ duration: 10, repeat: Infinity }}
           style={{ backgroundSize: "200% 200%" }}
         />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 bg-black/60 rounded-3xl p-12 border-2 border-white/40 shadow-2xl">
           <motion.h2 
-            className="mb-6 text-white"
+            className="mb-6 text-white text-4xl md:text-6xl font-black tracking-tight"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -1165,13 +1209,13 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             Ready to Find Your People?
           </motion.h2>
           <motion.p 
-            className="text-slate-200"
+            className="text-white/90 text-xl md:text-2xl font-semibold"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Join thousands experiencing sports, culture, and celebrations together
+            Join thousands experiencing sports, culture, and celebrations together.
           </motion.p>
         </div>
       </section>
@@ -1180,13 +1224,13 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <footer className="bg-black/60 backdrop-blur-xl border-t border-white/10 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 via-yellow-500 to-green-500 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-amber-400 rounded-lg flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 bg-clip-text text-transparent">Avento</span>
+            <span className="bg-gradient-to-r from-cyan-300 to-amber-200 bg-clip-text text-transparent">Avento</span>
           </div>
           <p className="text-center text-slate-300">
-            Where Every Moment Becomes a Memory
+            Where Every Moment Becomes a Memory.
           </p>
           <p className="text-center text-slate-400 mt-2">
             Sports • Cultural Events • Parties
