@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, PartyPopper, HelpCircle, Ticket, Clock, Zap, Map, Trophy, Camera, Video } from 'lucide-react';
+import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, PartyPopper, HelpCircle, Ticket, Clock, Zap, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -87,7 +87,7 @@ export function PartyDashboard({ onNavigate, userProfile: userProfileProp, onBoo
                 <button                   onClick={() => onNavigate('landing')}
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Back to Home"
                 >
-                  <MapPin className="w-5 h-5 text-slate-700 group-hover:text-pink-600 transition-colors" />
+                  <ArrowLeft className="w-5 h-5 text-slate-700 group-hover:text-pink-600 transition-colors" />
                 </button>
                 <button                   onClick={() => onNavigate('landing')}
                   className="w-10 h-10 bg-gradient-to-br from-pink-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md hover:scale-110 transition-transform"

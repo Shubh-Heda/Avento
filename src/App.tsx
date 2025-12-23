@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Toaster, toast } from 'sonner';
+import { Toaster, toast } from 'sonner@2.0.3';
 import { ComprehensiveDashboard } from './components/ComprehensiveDashboard';
 import { ThemeProvider } from './components/ThemeProvider';
 import { LandingPage } from './components/LandingPage';

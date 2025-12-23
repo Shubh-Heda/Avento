@@ -1,5 +1,7 @@
 # Avento - Sports & Social Connection Platform 🏆
 
+**Live site:** https://shubh-heda.github.io/Avento/
+
 A comprehensive social platform that connects people through sports, events, parties, and gaming. Built with React, TypeScript, and modern web technologies.
 
 ## ✨ Features
@@ -60,7 +62,9 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173` to see the app running.
+Live demo: https://shubh-heda.github.io/Avento/
+
+Visit `http://localhost:5173` to run it locally during development.
 
 ### Build for Production
 

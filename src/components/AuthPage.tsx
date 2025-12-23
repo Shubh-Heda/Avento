@@ -4,14 +4,14 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { useAuth } from '../lib/AuthProvider';
-import { Loader2, PartyPopper, Trophy, Music, AlertCircle } from 'lucide-react';
+import { Loader2, PartyPopper, Trophy, Music, AlertCircle, LogOut } from 'lucide-react';
 
 interface AuthPageProps {
   onAuthSuccess: () => void;
 }
 
 export function AuthPage({ onAuthSuccess }: AuthPageProps) {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle, user, signOut } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -109,6 +109,26 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
     }, 100);
   };
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await signInWithGoogle();
+      
+      if (error) {
+        console.error('Google sign in error:', error);
+        toast.error(error.message || 'Failed to sign in with Google');
+      } else if (data) {
+        toast.success('Welcome! 🎉');
+        onAuthSuccess();
+      }
+    } catch (error: any) {
+      console.error('Google auth error:', error);
+      toast.error('Failed to sign in with Google. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-purple-50 to-orange-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
@@ -173,22 +193,62 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           </div>
         </div>
 
-        {/* Right side - Auth form */}
+        {/* Right side - Auth form or Email Display */}
         <div className="w-full">
           <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-8">
-            <div className="text-center mb-8">
-              <h2 className="mb-2">
-                {isLogin ? 'Welcome Back!' : 'Create Account'}
-              </h2>
-              <p className="text-slate-600">
-                {isLogin 
-                  ? 'Sign in to continue your journey' 
-                  : 'Join the Avento community today'
-                }
-              </p>
-            </div>
+            {user ? (
+              <div>
+                <div className="text-center mb-8">
+                  <div className="inline-block mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 via-purple-500 to-orange-500 rounded-full flex items-center justify-center">
+                      <span className="text-2xl font-bold text-white">
+                        {(user.name || user.email).charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <h2 className="mb-2 text-2xl font-bold">Welcome! 👋</h2>
+                  <div className="bg-gradient-to-r from-cyan-50 to-purple-50 rounded-lg p-4 mb-6 border border-cyan-200">
+                    <p className="text-sm text-slate-600 mb-1">Logged in as</p>
+                    <p className="text-lg font-semibold text-slate-900 break-all">{user.email}</p>
+                    {user.name && <p className="text-sm text-slate-600 mt-2">Name: {user.name}</p>}
+                  </div>
+                  <p className="text-slate-600 mb-6">You're all set! Click below to continue to the app.</p>
+                </div>
+                <Button
+                  type="button"
+                  onClick={onAuthSuccess}
+                  className="w-full bg-gradient-to-r from-cyan-500 via-purple-500 to-orange-500 hover:from-cyan-600 hover:via-purple-600 hover:to-orange-600 text-white mb-3"
+                >
+                  Continue to App
+                </Button>
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    await signOut();
+                    toast.success('Logged out successfully');
+                  }}
+                  variant="outline"
+                  className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <div className="text-center mb-8">
+                  <h2 className="mb-2">
+                    {isLogin ? 'Welcome Back!' : 'Create Account'}
+                  </h2>
+                  <p className="text-slate-600">
+                    {isLogin 
+                      ? 'Sign in to continue your journey' 
+                      : 'Join the Avento community today'
+                    }
+                  </p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
                 <div>
                   <Label htmlFor="name">Full Name</Label>
@@ -251,6 +311,39 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
               </Button>
             </form>
 
+            {/* Divider */}
+            {isLogin && (
+              <>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="flex-1 h-px bg-slate-200"></div>
+                  <span className="text-xs text-slate-500">OR</span>
+                  <div className="flex-1 h-px bg-slate-200"></div>
+                </div>
+
+                {/* Google Sign In Button */}
+                <Button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="w-full mt-4 bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <image href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTIyLjU2IDEyLjI1YzAtLjYxLS4wNS0xLjIxLS4xNi0xLjc5SDEydjMuMzloNC44NGMtLjIgMS4wOC0uODIgMi4wMS0xLjc0IDIuNjF2Mi4xN2g0LjY5YzEuNjgtMS41NSAyLjY0LTMuODMgMi42NC02LjU5eiIgZmlsbD0iIzQyODVGNCIvPjxwYXRoIGQ9Ik0xMiAyMi41YzIuMjcgMCA0LjE3LS43NCA1LjU2LTIuMDNsLTQuNjktMy42MWMtLjc3LjUyLTEuNzcuODItMi44Ny44Mi0yLjIgMC00LjA2LTEuNDgtNC42OS0zLjQ3SDIuMTh2Mi4yM0MzLjU3IDIwLjc4IDcuNDMgMjIuNSAxMiAyMi41eiIgZmlsbD0iIzM0QTg1MyIvPjxwYXRoIGQ9Ik03LjMxIDE0LjdjLS40Ni0uMzItLjc2LS44Mi0uNzYtMS40M3MuMy0xLjExLjc2LTEuNDNWOS4wN0gyLjE4Yy0uNDQuODktLjcgMS45LS43IDIuOTdzLjI2IDIuMDguNyAyLjk3bDQuNDctMy4zN3oiIGZpbGw9IiNGQkJDMDQiLz48cGF0aCBkPSJNMTIgNS4zOGMxLjI0IDAgMi4zNS40MiAzLjIyIDEuMjRsNC4xOC00LjE4QzE2LjE2IDEuMDIgMTQuMTMgMCAxMiAwYy00LjU3IDAtOC40MyAxLjY5LTExLjM2IDQuNDdMNS4zIDcuMDdjLjYzLTEuOTkgMi40OS0zLjM2IDQuNy0zLjM2eiIgZmlsbD0iI0VBNDMzNSIvPjwvc3ZnPg==" width="24" height="24" />
+                      </svg>
+                      Sign in with Google
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+
             <div className="mt-6 text-center">
               <button
                 onClick={() => {
@@ -307,6 +400,8 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
                 )}
               </Button>
             </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

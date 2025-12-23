@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, Shield, GraduationCap, Award, HelpCircle, CreditCard, Map, Trophy, Camera, Video } from 'lucide-react';
+import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, Shield, GraduationCap, Award, HelpCircle, CreditCard, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -13,7 +13,8 @@ import { NotificationInbox } from './NotificationInbox';
 import { MatchCountdownTimer } from './MatchCountdownTimer';
 import { MatchCardSkeleton } from './LoadingSkeleton';
 import { MenuDropdown } from './MenuDropdown';
-import sportsHeroImage from 'figma:asset/5b426e88efada297ecdec98d2b58ae7554e49c33.png';
+
+const sportsHeroImage = 'https://images.unsplash.com/photo-1509077613385-f89402467146?q=80&w=1940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
 interface Match {
   id: string;
@@ -92,7 +93,7 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
                   onClick={() => onNavigate('landing')}
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Back to Home"
                 >
-                  <MapPin className="w-5 h-5 text-slate-700 group-hover:text-cyan-600 transition-colors" />
+                  <ArrowLeft className="w-5 h-5 text-slate-700 group-hover:text-cyan-600 transition-colors" />
                 </button>
                 <button 
                   onClick={() => onNavigate('landing')}

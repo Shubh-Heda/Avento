@@ -509,7 +509,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             </motion.p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto items-stretch">
             {/* Sports Card */}
             <motion.div
               onClick={() => onCategorySelect?.('sports')}
