@@ -3,9 +3,11 @@ import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import type { LazyExoticComponent, ComponentType } from 'react';
 import { ColorfulBackground } from './ColorfulBackground';
+import Traction from './Traction';
 
-const AventoDemo = lazy(() => import('./AventoDemo'));
+const AventoDemo: LazyExoticComponent<ComponentType<{ isPlaying: boolean }>> = lazy(() => import('./AventoDemo').then(m => ({ default: (m as any).default || (m as any).AventoDemo })) as any);
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -365,7 +367,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             style={getParallaxStyle(28)}
           >
             <motion.div
-              className="px-8 py-5 rounded-full bg-white/95 backdrop-blur-md border-2 border-cyan-400/90 text-slate-900 font-black shadow-2xl hover:shadow-3xl transition-shadow"
+              className="px-8 py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-cyan-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
               whileHover={{ scale: 1.08, y: -2 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -373,11 +375,11 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🤝</span>
-                <span className="text-lg md:text-xl"><span className="text-slate-900 font-black">Play</span> with people you trust</span>
+                <span className="text-xl md:text-2xl leading-relaxed"><span className="text-slate-900 font-semibold">Play</span> with people you trust</span>
               </div>
             </motion.div>
             <motion.div
-              className="px-8 py-5 rounded-full bg-white/95 backdrop-blur-md border-2 border-purple-400/90 text-slate-900 font-black shadow-2xl hover:shadow-3xl transition-shadow"
+              className="px-8 py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-purple-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
               whileHover={{ scale: 1.08, y: -2 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -385,7 +387,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🎭</span>
-                <span className="text-lg md:text-xl"><span className="text-slate-900 font-black">Celebrate</span> culture together</span>
+                <span className="text-xl md:text-2xl leading-relaxed"><span className="text-slate-900 font-semibold">Celebrate</span> culture together</span>
               </div>
             </motion.div>
           </motion.div>
@@ -521,13 +523,19 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-cyan-400/40 cursor-pointer hover:border-cyan-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
+              <div className="relative h-[200px] w-flex-shrink-0 overflow-hidden">
                 <ImageWithFallback 
                   src="https://images.unsplash.com/photo-1630420598771-dd52ab08c8cb?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Sports and Turf"
-                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
-                
+                <div className="absolute inset-0 bg-black/30 z-10"></div>
+                  <div className="absolute bottom-4 left-4 z-20 text-white">
+                  <h3 className="text-lg font-semibold">Sports & Turf</h3>
+                  <p className="text-sm mt-1 max-w-[250px]">Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks.</p>
+                  <button className="mt-3 px-4 py-2 bg-white text-black rounded-md text-sm font-medium hover:bg-gray-200 transition">Get Started</button>
+                  </div>
+
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
                   <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
@@ -1082,6 +1090,128 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
           </div>
         </div>
       </section>
+
+      {/* Why Avento is Different */}
+      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/30 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-8 rounded-3xl p-8 mx-auto max-w-4xl border border-white/10 shadow-2xl bg-gradient-to-br from-pink-50/30 via-rose-50/20 to-white/10 backdrop-blur-lg"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="mb-4 text-white text-3xl md:text-5xl font-black tracking-tight">Why Avento is <span className="text-cyan-300">Different</span></h2>
+            <p className="text-white text-lg md:text-xl max-w-2xl mx-auto">A quick comparison showing how Avento focuses on community, safety, and lasting connections.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-6 rounded-2xl shadow-2xl border border-white/8 bg-gradient-to-br from-rose-50/60 via-rose-100/40 to-amber-50/40 backdrop-blur-md"
+            >
+              <h3 className="text-white font-bold mb-3">Typical Competitors</h3>
+                <ul className="text-white/90 list-disc list-inside space-y-2">
+                <li><strong>Booking-only apps</strong>: Transaction-first, little social context or reputation.</li>
+                <li><strong>Matchmaking services</strong>: Algorithm-heavy matchmaking, weak on emotional safety and rituals.</li>
+                <li><strong>Event listings</strong>: Broad discovery but high cancellation and low accountability.</li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-6 rounded-2xl shadow-2xl border border-white/8 bg-gradient-to-br from-emerald-50/60 via-slate-50/30 to-green-50/30 backdrop-blur-md"
+            >
+              <h3 className="text-white font-bold mb-3">How Avento Stands Out</h3>
+                <ul className="text-white/90 list-disc list-inside space-y-2">
+                <li><strong>Trust Scores</strong>: Reputation-based matching for safer, more reliable meetups.</li>
+                <li><strong>5-stage payment flow</strong>: Reduces no-shows with fair, transparent commitment stages.</li>
+                <li><strong>Friendship Streaks & Rituals</strong>: Encourages repeated, meaningful interactions—not one-off bookings.</li>
+                <li><strong>Post-match reflections</strong>: Emotional-safety features that strengthen community norms.</li>
+                <li><strong>Privacy & Controls</strong>: Private matches and invite-only groups to protect your circle.</li>
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business Model & Refund Policy */}
+      <section className="relative py-20 bg-gradient-to-b from-[#0b1021]/85 via-[#12172d]/65 to-[#0b1021]/85">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-8 bg-gradient-to-r from-[#111827]/90 via-[#0f172a]/90 to-[#0b1021]/90 rounded-3xl p-8 mx-auto max-w-4xl border border-cyan-200/15 shadow-[0_25px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="mb-4 text-3xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-cyan-200 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">Business Model & Refund Policy</h2>
+            <p className="text-slate-100 text-lg md:text-xl max-w-2xl mx-auto">Clear, fair, and built to encourage lasting community participation.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-7 rounded-2xl shadow-[0_20px_70px_rgba(0,0,0,0.35)] border border-amber-200/20 bg-gradient-to-br from-amber-900/70 via-rose-900/55 to-fuchsia-900/55 backdrop-blur-xl"
+            >
+              <h3 className="text-amber-50 font-extrabold mb-3 drop-shadow">Business Model Clarity</h3>
+              <ul className="text-amber-50/90 list-disc list-inside space-y-2 leading-relaxed">
+                <li><span className="font-semibold text-amber-100">Freemium</span>: Core features (browsing, joining, basic messaging) are free so everyone can start building connections.</li>
+                <li><span className="font-semibold text-amber-100">Premium Perks</span>: Subscription adds perks like priority booking, advanced match filters, exclusive events, and enhanced profile visibility.</li>
+                <li><span className="font-semibold text-amber-100">Venue & Brand Partnerships</span>: Strategic partnerships with venues and brands provide discounts, sponsored events, and co-hosted community experiences.</li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-7 rounded-2xl shadow-[0_20px_70px_rgba(0,0,0,0.35)] border border-cyan-200/20 bg-gradient-to-br from-[#0b1224]/90 via-[#12233f]/80 to-[#1e2b4f]/80 backdrop-blur-xl"
+            >
+              <h3 className="text-cyan-50 font-extrabold mb-3 drop-shadow">Refund Policy (Short)</h3>
+              <ul className="text-cyan-50/90 list-disc list-inside space-y-2 leading-relaxed">
+                <li><span className="font-semibold text-cyan-100">Before Soft Lock</span>: Full cancellation and refund available at no charge.</li>
+                <li><span className="font-semibold text-cyan-100">During Payment Window</span>: Partial refunds possible depending on timing; automated rules apply to keep matches fair.</li>
+                <li><span className="font-semibold text-cyan-100">After Hard Lock / Post-Payment</span>: Refunds are limited—cancellations may affect your Trust Score unless a verified reason is provided.</li>
+                <li><span className="font-semibold text-cyan-100">Disputes & Support</span>: Contact support for exceptional cases; we aim to resolve refunds within 5–10 business days.</li>
+              </ul>
+              <p className="text-indigo-100/80 text-sm mt-3">Full policy details and eligibility rules are available in Settings → Payments or by contacting Support.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technical Highlights */}
+      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/20 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-8 bg-white/5 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/10 shadow-lg" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+            <h2 className="mb-3 text-white text-3xl md:text-4xl font-black">Technical Highlights</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto">Scalable serverless-first architecture, Postgres-backed analytics, staged payments, and privacy-first controls — designed for rapid growth and reliability.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <h4 className="text-white font-bold mb-2">Architecture</h4>
+              <p className="text-slate-300 text-sm">Serverless functions + managed Postgres (Supabase), CDN-hosted frontend, background workers for payments & notifications.</p>
+            </motion.div>
+            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <h4 className="text-white font-bold mb-2">Tech Stack</h4>
+              <p className="text-slate-300 text-sm">TypeScript, React + Vite, TailwindCSS, Supabase (Auth + Postgres), Stripe for payments, infra-as-code for reproducibility.</p>
+            </motion.div>
+            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <h4 className="text-white font-bold mb-2">Scalability</h4>
+              <p className="text-slate-300 text-sm">Horizontal scaling via serverless, read replicas for analytics, queue-based rate-limiting for payments and invites.</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Traction & Live Metrics */}
+      <Traction />
 
       {/* Stats Section */}
       <section className="relative py-20">
