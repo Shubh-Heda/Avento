@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, Shield, Music, HelpCircle, Ticket, Clock, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
+import { AventoLogo } from './AventoLogo';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -80,35 +81,17 @@ export function EventsDashboard({ onNavigate, userProfile, onBookEvent }: Events
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Top Row - Logo and Actions */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <button                   onClick={() => onNavigate('landing')}
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => onNavigate('landing')}
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Back to Home"
                 >
                   <ArrowLeft className="w-5 h-5 text-slate-700 group-hover:text-purple-600 transition-colors" />
                 </button>
-                <button                   onClick={() => onNavigate('landing')}
-                  className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md hover:scale-110 transition-transform"
-                >
-                  <Music className="w-6 h-6 text-white" />
-                </button>
-                <div>
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Cultural Events</span>
-                  <p className="text-xs text-slate-600">Discover & Connect Through Culture</p>
-                </div>
+                <AventoLogo size="md" variant="with-text" />
               </div>
               
               <div className="flex items-center gap-3">
-                {/* Map View Button */}
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => onNavigate('events-dashboard')} // Will add map page navigation later
-                  className="gap-2 hover:bg-purple-50 hidden md:flex"
-                >
-                  <Map className="w-4 h-4" />
-                  Map
-                </Button>
-                
                 {/* Notification Inbox */}
                 <NotificationInbox onNavigate={onNavigate} category="events" />
                 

@@ -1,201 +1,112 @@
-import { Users, Music, PartyPopper, ArrowRight, Sparkles, Gamepad2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import categoryGridImage from 'figma:asset/f51cc543d73d57a7ec6a7452b72d744ecc45c657.png';
+import { ArrowRight, Gamepad2, Music, PartyPopper, Sparkles, Users } from 'lucide-react';
+
+type CategoryKey = 'sports' | 'events' | 'parties' | 'gaming';
 
 interface CategorySelectorProps {
-  onNavigate: (page: string) => void;
-  onCategorySelect: (category: 'sports' | 'events' | 'parties' | 'gaming') => void;
+  onNavigate?: (page: string) => void;
+  onCategorySelect: (category: CategoryKey) => void;
   userName?: string;
 }
 
+const categories: Array<{
+  key: CategoryKey;
+  title: string;
+  blurb: string;
+  icon: typeof Users;
+  image: string;
+  bullets: string[];
+}> = [
+  {
+    key: 'sports',
+    title: 'Sports & Turf',
+    blurb: 'Book reliable turfs, lock teams quickly, and play with people you trust.',
+    icon: Users,
+    image: 'https://picsum.photos/seed/avento-sports/1200/675',
+    bullets: ['Instant turf slots', 'Trust and streak scores', 'Nearby matches'],
+  },
+  {
+    key: 'events',
+    title: 'Cultural Events',
+    blurb: 'Concerts, festivals, and art nights curated for safe, welcoming meetups.',
+    icon: Music,
+    image: 'https://picsum.photos/seed/avento-events/1200/675',
+    bullets: ['Group RSVPs', 'Verified hosts', 'Plan with friends'],
+  },
+  {
+    key: 'parties',
+    title: 'Parties & Celebrations',
+    blurb: 'Plan nights out, invite friends, and discover hosted experiences.',
+    icon: PartyPopper,
+    image: 'https://picsum.photos/seed/avento-parties/1200/675',
+    bullets: ['Host or join', 'Flexible payments', 'Invite-only or open'],
+  },
+  {
+    key: 'gaming',
+    title: 'Gaming Hub',
+    blurb: 'LAN, console, and PC sessions with brackets, squads, and social play.',
+    icon: Gamepad2,
+    image: 'https://picsum.photos/seed/avento-gaming/1200/675',
+    bullets: ['Team matchmaking', 'Bracket support', 'Clubs and lounges'],
+  },
+];
+
 export function CategorySelector({ onNavigate, onCategorySelect, userName = 'Friend' }: CategorySelectorProps) {
+  const handleSelect = (category: CategoryKey) => {
+    onCategorySelect(category);
+    if (onNavigate) onNavigate(category);
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-900">
-      {/* STUNNING Background Image - 4-panel grid: Soccer field, Concert stage, Basketball court, Outdoor festival */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-        style={{ backgroundImage: `url(${categoryGridImage})` }}
-      ></div>
-      
-      {/* Dark overlay for contrast and readability */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95"></div>
-      
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Header - Dark theme */}
-        <header className="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 via-fuchsia-500 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 bg-clip-text text-transparent">Avento</span>
-                <p className="text-xs text-slate-400">Where Every Moment Becomes a Memory</p>
-              </div>
+    <div className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <header className="flex flex-col items-center gap-3 text-center mb-10">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 via-amber-400 to-pink-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+              <Sparkles className="w-5 h-5" />
             </div>
+            <div className="text-sm text-white/80">Avento · Pick a lane, we kept it even.</div>
           </div>
+          <div className="text-3xl md:text-4xl font-bold tracking-tight">Hey {userName}, choose how you want to vibe</div>
+          <p className="text-white/70 max-w-2xl">Four tiles. Same size. Same layout. No surprises.</p>
         </header>
 
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-12">
-            <h1 className="mb-4 text-white drop-shadow-lg">
-              Welcome, <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">{userName}</span>! 👋
-            </h1>
-            <p className="text-white/90 max-w-2xl mx-auto drop-shadow-md text-lg">
-              Choose your experience and start connecting with your community
-            </p>
-          </div>
-
-          {/* Category Cards */}
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            {/* Sports & Turf */}
+        <div className="grid md:grid-cols-2 gap-6 items-stretch">
+          {categories.map(({ key, title, blurb, icon: Icon, image, bullets }) => (
             <button
-              onClick={() => onCategorySelect('sports')}
-              className="group relative overflow-hidden rounded-3xl bg-white border-2 border-slate-200 hover:border-cyan-400 transition-all hover:shadow-2xl hover:scale-105 text-left"
+              key={key}
+              onClick={() => handleSelect(key)}
+              className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 text-left transition-transform duration-200 hover:-translate-y-1 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
-              <div className="relative h-64">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1731673092066-cff4ea887d57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
-                  alt="Sports and turf"
-                  className="w-full h-full object-cover"
+              <div className="relative h-52 w-full bg-slate-800">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
+                  style={{ backgroundImage: `linear-gradient(0deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${image})` }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/40 to-transparent"></div>
-                <div className="absolute inset-0 flex items-end p-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <Users className="w-7 h-7 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/20 to-transparent" />
+                <div className="absolute bottom-4 left-4 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <Icon className="w-6 h-6" />
                   </div>
+                  <div className="text-lg font-semibold drop-shadow">{title}</div>
                 </div>
               </div>
-              <div className="p-6">
-                <h2 className="mb-2">Sports & Turf</h2>
-                <p className="text-slate-700 mb-4">
-                  Book turfs, find players, build your sports community with trust scores and friendship streaks
-                </p>
-                <div className="flex items-center gap-2 text-cyan-600 group-hover:gap-3 transition-all">
-                  <span>Get Started</span>
-                  <ArrowRight className="w-5 h-5" />
+
+              <div className="flex flex-1 flex-col gap-4 p-6">
+                <p className="text-white/75 leading-relaxed">{blurb}</p>
+                <div className="grid grid-cols-2 gap-2 text-sm text-white/85">
+                  {bullets.map((item, idx) => (
+                    <div key={idx} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-auto flex items-center justify-between pt-1 text-sm text-white/85">
+                  <span>Open</span>
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </button>
-
-            {/* Cultural Events */}
-            <button
-              onClick={() => onCategorySelect('events')}
-              className="group relative overflow-hidden rounded-3xl bg-white border-2 border-slate-200 hover:border-purple-400 transition-all hover:shadow-2xl hover:scale-105 text-left"
-            >
-              <div className="relative h-64">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
-                  alt="Cultural events"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/90 via-purple-900/40 to-transparent"></div>
-                <div className="absolute inset-0 flex items-end p-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <Music className="w-7 h-7 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h2 className="mb-2">Cultural Events</h2>
-                <p className="text-slate-700 mb-4">
-                  Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity
-                </p>
-                <div className="flex items-center gap-2 text-purple-600 group-hover:gap-3 transition-all">
-                  <span>Explore Events</span>
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </button>
-
-            {/* Parties & Celebrations */}
-            <button
-              onClick={() => onCategorySelect('parties')}
-              className="group relative overflow-hidden rounded-3xl bg-white border-2 border-slate-200 hover:border-pink-400 transition-all hover:shadow-2xl hover:scale-105 text-left"
-            >
-              <div className="relative h-64">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
-                  alt="Parties and celebrations"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-pink-900/90 via-pink-900/40 to-transparent"></div>
-                <div className="absolute inset-0 flex items-end p-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <PartyPopper className="w-7 h-7 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h2 className="mb-2">Parties & Celebrations</h2>
-                <p className="text-slate-700 mb-4">
-                  Create unforgettable nights, meet new people, and celebrate life's special moments together
-                </p>
-                <div className="flex items-center gap-2 text-pink-600 group-hover:gap-3 transition-all">
-                  <span>Join Parties</span>
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </button>
-
-            {/* Gaming Hub - NEW! */}
-            <button
-              onClick={() => {
-                console.log('🎮 Gaming Hub button clicked in CategorySelector');
-                onCategorySelect('gaming');
-              }}
-              className="group relative overflow-hidden rounded-3xl bg-white border-2 border-slate-200 hover:border-purple-500 transition-all hover:shadow-2xl hover:scale-105 text-left"
-            >
-              <div className="relative h-64">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=800"
-                  alt="Gaming hub"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/90 via-indigo-900/40 to-transparent"></div>
-                <div className="absolute inset-0 flex items-end p-6">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                    <Gamepad2 className="w-7 h-7 text-white" />
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h2 className="mb-2">Gaming Hub</h2>
-                <p className="text-slate-700 mb-4">
-                  Connect at gaming clubs, play PS5/Xbox/PC games, join tournaments, and level up friendships
-                </p>
-                <div className="flex items-center gap-2 text-purple-600 group-hover:gap-3 transition-all">
-                  <span>Start Gaming</span>
-                  <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </button>
-          </div>
-
-          {/* Quick Stats - Dark theme, floating over the background */}
-          <div className="bg-slate-800/60 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
-            <div className="grid md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="bg-gradient-to-r from-cyan-400 to-cyan-500 bg-clip-text text-transparent mb-2 drop-shadow-sm">2,500+</div>
-                <p className="text-slate-300">Active Turfs & Venues</p>
-              </div>
-              <div>
-                <div className="bg-gradient-to-r from-purple-400 to-purple-500 bg-clip-text text-transparent mb-2 drop-shadow-sm">800+</div>
-                <p className="text-slate-300">Cultural Events Monthly</p>
-              </div>
-              <div>
-                <div className="bg-gradient-to-r from-pink-400 to-pink-500 bg-clip-text text-transparent mb-2 drop-shadow-sm">1,200+</div>
-                <p className="text-slate-300">Parties This Month</p>
-              </div>
-              <div>
-                <div className="bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent mb-2 drop-shadow-sm">300+</div>
-                <p className="text-slate-300">Gaming Clubs & Sessions</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

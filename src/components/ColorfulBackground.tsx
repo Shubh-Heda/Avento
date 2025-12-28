@@ -11,11 +11,11 @@ export function ColorfulBackground() {
         }}
         animate={{
           background: [
-            'radial-gradient(circle at 20% 50%, rgba(255, 71, 87, 0.35) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(34, 211, 238, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(250, 204, 21, 0.35) 0%, transparent 50%)',
-            'radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.35) 0%, transparent 50%), radial-gradient(circle at 20% 70%, rgba(34, 197, 94, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 20%, rgba(251, 146, 60, 0.35) 0%, transparent 50%)',
-            'radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 10%, rgba(96, 165, 250, 0.35) 0%, transparent 50%), radial-gradient(circle at 90% 50%, rgba(74, 222, 128, 0.35) 0%, transparent 50%)',
+            'radial-gradient(circle at 20% 50%, rgba(255, 71, 87, 0.35) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(250, 204, 21, 0.35) 0%, transparent 50%)',
+            'radial-gradient(circle at 80% 30%, rgba(139, 92, 246, 0.35) 0%, transparent 50%), radial-gradient(circle at 20% 70%, rgba(251, 146, 60, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 20%, rgba(251, 146, 60, 0.35) 0%, transparent 50%)',
+            'radial-gradient(circle at 50% 90%, rgba(236, 72, 153, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 10%, rgba(217, 70, 239, 0.35) 0%, transparent 50%), radial-gradient(circle at 90% 50%, rgba(249, 115, 22, 0.35) 0%, transparent 50%)',
             'radial-gradient(circle at 30% 30%, rgba(250, 204, 21, 0.35) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(244, 63, 94, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.35) 0%, transparent 50%)',
-            'radial-gradient(circle at 20% 50%, rgba(255, 71, 87, 0.35) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(34, 211, 238, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(250, 204, 21, 0.35) 0%, transparent 50%)',
+            'radial-gradient(circle at 20% 50%, rgba(255, 71, 87, 0.35) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.35) 0%, transparent 50%), radial-gradient(circle at 50% 80%, rgba(250, 204, 21, 0.35) 0%, transparent 50%)',
           ],
         }}
         transition={{
@@ -31,10 +31,10 @@ export function ColorfulBackground() {
           'rgba(239, 68, 68, 0.4)',
           'rgba(249, 115, 22, 0.4)',
           'rgba(234, 179, 8, 0.4)',
-          'rgba(34, 197, 94, 0.4)',
-          'rgba(20, 184, 166, 0.4)',
-          'rgba(6, 182, 212, 0.4)',
-          'rgba(59, 130, 246, 0.4)',
+          'rgba(251, 146, 60, 0.4)',
+          'rgba(234, 88, 12, 0.4)',
+          'rgba(244, 63, 94, 0.4)',
+          'rgba(251, 113, 133, 0.4)',
           'rgba(139, 92, 246, 0.4)',
           'rgba(217, 70, 239, 0.4)',
           'rgba(236, 72, 153, 0.4)',
@@ -76,10 +76,10 @@ export function ColorfulBackground() {
           'border-red-400/50 bg-red-500/10',
           'border-orange-400/50 bg-orange-500/10',
           'border-yellow-400/50 bg-yellow-500/10',
-          'border-green-400/50 bg-green-500/10',
-          'border-teal-400/50 bg-teal-500/10',
-          'border-cyan-400/50 bg-cyan-500/10',
-          'border-blue-400/50 bg-blue-500/10',
+          'border-rose-400/50 bg-rose-500/10',
+          'border-amber-400/50 bg-amber-500/10',
+          'border-fuchsia-400/50 bg-fuchsia-500/10',
+          'border-violet-400/50 bg-violet-500/10',
           'border-purple-400/50 bg-purple-500/10',
           'border-pink-400/50 bg-pink-500/10',
         ];
@@ -96,9 +96,9 @@ export function ColorfulBackground() {
                 'rgba(239, 68, 68, 0.5)',
                 'rgba(249, 115, 22, 0.5)',
                 'rgba(234, 179, 8, 0.5)',
-                'rgba(34, 197, 94, 0.5)',
-                'rgba(6, 182, 212, 0.5)',
-                'rgba(59, 130, 246, 0.5)',
+                'rgba(251, 146, 60, 0.5)',
+                'rgba(217, 70, 239, 0.5)',
+                'rgba(244, 63, 94, 0.5)',
                 'rgba(139, 92, 246, 0.5)',
                 'rgba(236, 72, 153, 0.5)',
                 'rgba(239, 68, 68, 0.5)',
@@ -124,11 +124,11 @@ export function ColorfulBackground() {
         className="absolute inset-0"
         animate={{
           background: [
-            'linear-gradient(45deg, rgba(239, 68, 68, 0.08) 0%, rgba(234, 179, 8, 0.08) 25%, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 75%, rgba(236, 72, 153, 0.08) 100%)',
-            'linear-gradient(90deg, rgba(234, 179, 8, 0.08) 0%, rgba(34, 197, 94, 0.08) 25%, rgba(59, 130, 246, 0.08) 50%, rgba(236, 72, 153, 0.08) 75%, rgba(239, 68, 68, 0.08) 100%)',
-            'linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(59, 130, 246, 0.08) 25%, rgba(236, 72, 153, 0.08) 50%, rgba(239, 68, 68, 0.08) 75%, rgba(234, 179, 8, 0.08) 100%)',
-            'linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 25%, rgba(239, 68, 68, 0.08) 50%, rgba(234, 179, 8, 0.08) 75%, rgba(34, 197, 94, 0.08) 100%)',
-            'linear-gradient(45deg, rgba(239, 68, 68, 0.08) 0%, rgba(234, 179, 8, 0.08) 25%, rgba(34, 197, 94, 0.08) 50%, rgba(59, 130, 246, 0.08) 75%, rgba(236, 72, 153, 0.08) 100%)',
+            'linear-gradient(45deg, rgba(239, 68, 68, 0.08) 0%, rgba(234, 179, 8, 0.08) 25%, rgba(249, 115, 22, 0.08) 50%, rgba(139, 92, 246, 0.08) 75%, rgba(236, 72, 153, 0.08) 100%)',
+            'linear-gradient(90deg, rgba(234, 179, 8, 0.08) 0%, rgba(249, 115, 22, 0.08) 25%, rgba(139, 92, 246, 0.08) 50%, rgba(236, 72, 153, 0.08) 75%, rgba(239, 68, 68, 0.08) 100%)',
+            'linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(139, 92, 246, 0.08) 25%, rgba(236, 72, 153, 0.08) 50%, rgba(239, 68, 68, 0.08) 75%, rgba(234, 179, 8, 0.08) 100%)',
+            'linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, rgba(236, 72, 153, 0.08) 25%, rgba(239, 68, 68, 0.08) 50%, rgba(234, 179, 8, 0.08) 75%, rgba(249, 115, 22, 0.08) 100%)',
+            'linear-gradient(45deg, rgba(239, 68, 68, 0.08) 0%, rgba(234, 179, 8, 0.08) 25%, rgba(249, 115, 22, 0.08) 50%, rgba(139, 92, 246, 0.08) 75%, rgba(236, 72, 153, 0.08) 100%)',
           ],
         }}
         transition={{

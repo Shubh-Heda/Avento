@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, CreditCard, Wallet, Smartphone, CheckCircle, Lock } from 'lucide-react';
+import { X, CreditCard, Wallet, Smartphone, CheckCircle, Lock, Copy, QrCode } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -20,10 +20,18 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
   const [upiId, setUpiId] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [showUpiGateway, setShowUpiGateway] = useState(false);
+  const [selectedUpiApp, setSelectedUpiApp] = useState<string | null>(null);
 
   const remainingAmount = totalAmount - amountPaid;
+  const merchantUPI = 'merchant@upi'; // Replace with actual merchant UPI
 
   const handlePayment = async () => {
+    if (selectedMethod === 'upi' && !showUpiGateway) {
+      setShowUpiGateway(true);
+      return;
+    }
+
     setProcessing(true);
     
     // Simulate payment processing
@@ -31,6 +39,24 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
       setProcessing(false);
       toast.success('Payment Successful! 🎉', {
         description: `₹${remainingAmount} paid for ${turfName}`,
+      });
+      onClose();
+    }, 2000);
+  };
+
+  const copyUpiId = () => {
+    navigator.clipboard.writeText(merchantUPI);
+    toast.success('UPI ID copied to clipboard!');
+  };
+
+  const handleUpiAppClick = (app: string) => {
+    setSelectedUpiApp(app);
+    setProcessing(true);
+    // Simulate opening UPI app and payment
+    setTimeout(() => {
+      setProcessing(false);
+      toast.success('Payment Successful! 🎉', {
+        description: `₹${remainingAmount} paid via ${app}`,
       });
       onClose();
     }, 2000);
@@ -123,7 +149,7 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
           </div>
 
           {/* Payment Details */}
-          {selectedMethod === 'upi' && (
+          {selectedMethod === 'upi' && !showUpiGateway && (
             <div>
               <label className="block text-sm mb-2">UPI ID</label>
               <Input
@@ -135,6 +161,89 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
               <p className="text-xs text-slate-500">
                 Enter your UPI ID to complete the payment
               </p>
+            </div>
+          )}
+
+          {/* UPI Payment Gateway */}
+          {selectedMethod === 'upi' && showUpiGateway && (
+            <div className="space-y-5">
+              {/* QR Code Section */}
+              <div className="bg-white rounded-xl border-2 border-purple-200 p-6 text-center">
+                <h3 className="font-semibold mb-4">Scan QR Code</h3>
+                <div className="w-48 h-48 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-4 border-4 border-white shadow-lg">
+                  <QrCode className="w-32 h-32 text-purple-600" />
+                </div>
+                <p className="text-sm text-slate-600 mb-3">Scan with any UPI app to pay ₹{remainingAmount}</p>
+                <div className="bg-slate-50 rounded-lg p-3 flex items-center justify-between">
+                  <code className="text-sm text-slate-700">{merchantUPI}</code>
+                  <button
+                    onClick={copyUpiId}
+                    className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
+                  >
+                    <Copy className="w-4 h-4 text-slate-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 border-t border-slate-200"></div>
+                <span className="text-sm text-slate-500">or pay with</span>
+                <div className="flex-1 border-t border-slate-200"></div>
+              </div>
+
+              {/* UPI Apps */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleUpiAppClick('Google Pay')}
+                  disabled={processing}
+                  className="p-4 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    G
+                  </div>
+                  <span className="text-sm font-medium">Google Pay</span>
+                </button>
+
+                <button
+                  onClick={() => handleUpiAppClick('PhonePe')}
+                  disabled={processing}
+                  className="p-4 rounded-xl border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    Pe
+                  </div>
+                  <span className="text-sm font-medium">PhonePe</span>
+                </button>
+
+                <button
+                  onClick={() => handleUpiAppClick('Paytm')}
+                  disabled={processing}
+                  className="p-4 rounded-xl border-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    P
+                  </div>
+                  <span className="text-sm font-medium">Paytm</span>
+                </button>
+
+                <button
+                  onClick={() => handleUpiAppClick('Amazon Pay')}
+                  disabled={processing}
+                  className="p-4 rounded-xl border-2 border-slate-200 hover:border-orange-500 hover:bg-orange-50 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    A
+                  </div>
+                  <span className="text-sm font-medium">Amazon Pay</span>
+                </button>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-900">
+                  ⚡ <strong>Quick Tip:</strong> Click on your preferred UPI app to complete payment instantly
+                </p>
+              </div>
             </div>
           )}
 
@@ -204,31 +313,44 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
         {/* Footer */}
         <div className="sticky bottom-0 bg-white border-t p-6 rounded-b-2xl">
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1"
-              disabled={processing}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handlePayment}
-              disabled={processing || (selectedMethod === 'upi' && !upiId)}
-              className="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white gap-2"
-            >
-              {processing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  Pay ₹{remainingAmount}
-                </>
-              )}
-            </Button>
+            {showUpiGateway && selectedMethod === 'upi' ? (
+              <Button
+                variant="outline"
+                onClick={() => setShowUpiGateway(false)}
+                className="flex-1"
+                disabled={processing}
+              >
+                Back
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1"
+                disabled={processing}
+              >
+                Cancel
+              </Button>
+            )}
+            {!showUpiGateway && (
+              <Button
+                onClick={handlePayment}
+                disabled={processing || (selectedMethod === 'upi' && !upiId)}
+                className="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white gap-2"
+              >
+                {processing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Pay Now
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>

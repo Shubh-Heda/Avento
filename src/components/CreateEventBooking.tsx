@@ -8,6 +8,8 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { communityService } from '../services/communityService';
 import { PaymentModal } from './PaymentModal';
+import chatService from '../services/chatService';
+import { supabase } from '../lib/supabase';
 
 interface CreateEventBookingProps {
   onNavigate: (page: string, eventId?: string) => void;
@@ -56,7 +58,7 @@ export function CreateEventBooking({ onNavigate, onEventBook, eventDetails }: Cr
     setShowDirectPayment(true);
   };
 
-  const handleGroupPayment = () => {
+  const handleGroupPayment = async () => {
     setShowPaymentChoice(false);
     
     const pricePerTicket = parseInt(eventDetails?.price.replace('₹', '') || '0');
@@ -97,14 +99,38 @@ export function CreateEventBooking({ onNavigate, onEventBook, eventDetails }: Cr
     }
     
     if (bookingData.createGroupChat) {
-      toast.success('Event Booked! Group Chat Created 🎉', {
-        description: `You've booked ${bookingData.numberOfTickets} ticket(s). Opening group chat...`,
-      });
+      try {
+        // Create group chat for the event
+        const groupName = bookingData.groupName || `${eventDetails?.title} Group`;
+        const chatRoom = await chatService.createRoom({
+          name: `${groupName} 🎭`,
+          description: `Group chat for ${eventDetails?.title} at ${eventDetails?.venue} on ${eventDetails?.date}`,
+          room_type: 'event',
+          is_private: bookingData.visibility === 'private',
+          category: 'events',
+          related_id: newEvent.id,
+          avatar_url: '🎭'
+        });
 
-      // Navigate to chat
-      setTimeout(() => {
-        onNavigate('events-chat', newEvent.id);
-      }, 1500);
+        // Send welcome message
+        await chatService.sendMessage(
+          chatRoom.id,
+          `🎭 Welcome to ${groupName}!\n\n🎪 Event: ${eventDetails?.title}\n📍 Venue: ${eventDetails?.venue}\n📅 Date: ${eventDetails?.date}\n⏰ Time: ${eventDetails?.time}\n\n👥 Total Tickets: ${bookingData.numberOfTickets}\n💰 Total Cost: ₹${totalAmount}\n\n${bookingData.inviteMessage || 'Get ready for an amazing cultural experience!'}\n\nConnect with fellow attendees, plan what to wear, and share your excitement! 🌟`,
+          'system'
+        );
+
+        toast.success('Event Booked! Group Chat Created 🎉', {
+          description: `You've booked ${bookingData.numberOfTickets} ticket(s). Opening group chat...`,
+        });
+
+        // Navigate to chat
+        setTimeout(() => {
+          onNavigate('events-chat', newEvent.id);
+        }, 1500);
+      } catch (error) {
+        console.error('Error creating chat room:', error);
+        toast.error('Event booked but chat creation failed. Please try again.');
+      }
     } else {
       toast.success('Event booked successfully! 🎉', {
         description: `You've booked ${bookingData.numberOfTickets} ticket(s) for ${eventDetails?.title}`,

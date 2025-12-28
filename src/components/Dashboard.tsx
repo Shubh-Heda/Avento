@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, Shield, GraduationCap, Award, HelpCircle, CreditCard, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
+import { AventoLogo } from './AventoLogo';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -88,23 +89,14 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             {/* Top Row - Logo and Actions */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button 
                   onClick={() => onNavigate('landing')}
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Back to Home"
                 >
                   <ArrowLeft className="w-5 h-5 text-slate-700 group-hover:text-cyan-600 transition-colors" />
                 </button>
-                <button 
-                  onClick={() => onNavigate('landing')}
-                  className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-md hover:scale-110 transition-transform"
-                >
-                  <Users className="w-6 h-6 text-white" />
-                </button>
-                <div>
-                  <span className="bg-gradient-to-r from-cyan-600 to-emerald-600 bg-clip-text text-transparent">Avento</span>
-                  <p className="text-xs text-slate-600">Matchmaking the Sport of Friendships</p>
-                </div>
+                <AventoLogo size="md" variant="with-text" />
               </div>
               
               <div className="flex items-center gap-3">

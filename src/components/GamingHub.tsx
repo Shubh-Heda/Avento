@@ -14,6 +14,7 @@ import { gamingService, GamingClub, GamingSession } from '../services/gamingServ
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
+import { AventoLogo } from './AventoLogo';
 import { CreateGamingSessionModal } from './CreateGamingSessionModal';
 import { GamingSessionCard } from './GamingSessionCard';
 import { toast } from 'sonner';
@@ -193,16 +194,7 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
               >
                 <MapPin className="w-5 h-5 text-slate-700 group-hover:text-purple-600 transition-colors" />
               </button>
-              <button
-                onClick={() => onNavigate('landing')}
-                className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md hover:scale-110 transition-transform"
-              >
-                <Gamepad2 className="w-6 h-6 text-white" />
-              </button>
-              <div>
-                <h2 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Gaming Hub</h2>
-                <p className="text-xs text-slate-600">Level Up Your Friendships</p>
-              </div>
+              <AventoLogo size="md" variant="with-text" />
             </div>
 
             {/* Middle Navigation Buttons */}

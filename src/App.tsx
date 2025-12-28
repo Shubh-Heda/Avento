@@ -4,6 +4,7 @@ import { ComprehensiveDashboard } from './components/ComprehensiveDashboard';
 import { ThemeProvider } from './components/ThemeProvider';
 import { LandingPage } from './components/LandingPage';
 import { AuthPage } from './components/AuthPage';
+import { OnboardingForm } from './components/OnboardingForm';
 import { Dashboard } from './components/Dashboard';
 import { EventsDashboard } from './components/EventsDashboard';
 import { PartyDashboard } from './components/PartyDashboard';
@@ -15,6 +16,9 @@ import { CommunityFeed } from './components/CommunityFeed';
 import { SportsCommunityFeed } from './components/SportsCommunityFeed';
 import { CulturalCommunityFeed } from './components/CulturalCommunityFeed';
 import { PartyCommunityFeed } from './components/PartyCommunityFeed';
+import { GamingCommunityFeed } from './components/GamingCommunityFeed';
+import { EnhancedCommunityFeed } from './components/EnhancedCommunityFeed';
+import { MapView } from './components/MapView';
 import { PostMatchReflection } from './components/PostMatchReflection';
 import { MatchFinder } from './components/MatchFinder';
 import { CreateMatchPlan } from './components/CreateMatchPlan';
@@ -22,6 +26,8 @@ import { CreateEventBooking } from './components/CreateEventBooking';
 import { CreatePartyBooking } from './components/CreatePartyBooking';
 import { TurfDetail } from './components/TurfDetail';
 import { GroupChat } from './components/GroupChat';
+import { EnhancedGroupChat } from './components/EnhancedGroupChat';
+import { WhatsAppChat } from './components/WhatsAppChat';
 import { GroupChatSports } from './components/GroupChatSports';
 import { GroupChatEvents } from './components/GroupChatEvents';
 import { GroupChatParties } from './components/GroupChatParties';
@@ -30,7 +36,7 @@ import { RealTimeAvailability } from './components/RealTimeAvailability';
 import { CategorySelector } from './components/CategorySelector';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GamingProfilePage } from './components/GamingProfilePage';
-import { GamingCommunityFeed } from './components/GamingCommunityFeed';
+
 import { GroupChatGaming } from './components/GroupChatGaming';
 import { GamingMapView } from './components/GamingMapView';
 import { CommunityEvents } from './components/CommunityEvents';
@@ -133,6 +139,27 @@ function AppContent() {
   const [eventsMatches, setEventsMatches] = useState<Match[]>([]);
   const [partiesMatches, setPartiesMatches] = useState<Match[]>([]);
 
+  // Debug: Log page changes
+  useEffect(() => {
+    console.log('📄 Current page changed to:', currentPage);
+  }, [currentPage]);
+
+  // Update profiles when user logs in with onboarded data
+  useEffect(() => {
+    if (user && user.onboarding_completed) {
+      const updatedProfile: UserProfile = {
+        name: user.name,
+        bio: `${user.profession ? `${user.profession} | ` : ''}${user.age ? `Age ${user.age}` : ''}${user.phone ? ` | ${user.phone}` : ''}`,
+        interests: user.profession ? [user.profession] : [],
+        location: 'Ahmedabad, Gujarat',
+        joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      };
+      setSportsProfile(updatedProfile);
+      setEventsProfile(updatedProfile);
+      setPartiesProfile(updatedProfile);
+    }
+  }, [user?.onboarding_completed, user?.name, user?.age, user?.phone, user?.profession]);
+  
   // Debug: Log page changes
   useEffect(() => {
     console.log('📄 Current page changed to:', currentPage);
@@ -750,6 +777,26 @@ function AppContent() {
     return <AuthPage onAuthSuccess={handleAuthSuccess} />;
   }
 
+  // Show onboarding form if user is logged in but hasn't completed onboarding
+  if (user && !user.onboarding_completed && currentPage !== 'landing') {
+    return (
+      <OnboardingForm 
+        onComplete={() => {
+          // After onboarding, redirect to appropriate dashboard
+          if (pendingCategory === 'gaming') {
+            navigateTo('gaming-hub');
+          } else if (pendingCategory === 'events') {
+            navigateTo('events-dashboard');
+          } else if (pendingCategory === 'parties') {
+            navigateTo('party-dashboard');
+          } else {
+            navigateTo('dashboard');
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Toaster position="top-center" richColors />
@@ -853,6 +900,7 @@ function AppContent() {
       {currentPage === 'gaming-community' && <GamingCommunityFeed onNavigate={navigateTo} />}
       {currentPage === 'gaming-chat' && <GroupChatGaming onNavigate={navigateTo} matchId={selectedMatchId} />}
       {currentPage === 'gaming-map' && <GamingMapView onNavigate={navigateTo} />}
+      {currentPage === 'map-view' && <MapView onNavigate={navigateTo} />}
       {currentPage === 'sports-events' && <CommunityEvents category="sports" onNavigate={navigateTo} />}
       {currentPage === 'events-events' && <CommunityEvents category="events" onNavigate={navigateTo} />}
       {currentPage === 'party-events' && <CommunityEvents category="parties" onNavigate={navigateTo} />}
@@ -876,16 +924,17 @@ function AppContent() {
       {currentPage === 'sports-community' && <SportsCommunityFeed onNavigate={navigateTo} />}
       {currentPage === 'cultural-community' && <CulturalCommunityFeed onNavigate={navigateTo} />}
       {currentPage === 'party-community' && <PartyCommunityFeed onNavigate={navigateTo} onGetTickets={handleBookParty} />}
+      {currentPage === 'enhanced-community' && <EnhancedCommunityFeed onNavigate={navigateTo} category="sports" />}
       {currentPage === 'reflection' && <PostMatchReflection onNavigate={navigateTo} />}
       {currentPage === 'finder' && <MatchFinder onNavigate={navigateTo} onMatchJoin={handleMatchJoin} />}
       {currentPage === 'create-match' && <CreateMatchPlan onNavigate={navigateTo} onMatchCreate={handleMatchCreate} />}
       {currentPage === 'create-event-booking' && <CreateEventBooking onNavigate={navigateTo} onEventBook={handleEventBook} eventDetails={selectedEventDetails} />}
       {currentPage === 'create-party-booking' && <CreatePartyBooking onNavigate={navigateTo} onPartyBook={handleEventBook} partyDetails={selectedEventDetails} />}
       {currentPage === 'turf-detail' && <TurfDetail onNavigate={navigateTo} turfId={selectedTurfId} />}
-      {currentPage === 'chat' && <GroupChat onNavigate={navigateTo} matchId={selectedMatchId} chatGroups={chatGroups} matches={sportsMatches} events={eventsMatches} parties={partiesMatches} />}
-      {currentPage === 'sports-chat' && <GroupChatSports onNavigate={navigateTo} matchId={selectedMatchId} matches={sportsMatches} />}
-      {currentPage === 'events-chat' && <GroupChatEvents onNavigate={navigateTo} matchId={selectedMatchId} events={eventsMatches} />}
-      {currentPage === 'party-chat' && <GroupChatParties onNavigate={navigateTo} matchId={selectedMatchId} parties={partiesMatches} />}
+      {currentPage === 'chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} />}
+      {currentPage === 'sports-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} />}
+      {currentPage === 'events-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} />}
+      {currentPage === 'party-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} />}
       {currentPage === 'help' && <HelpSupport onNavigate={navigateTo} category={currentCategory} />}
       {currentPage === 'availability' && <RealTimeAvailability onNavigate={navigateTo} category={currentCategory} />}
       {currentPage === 'comprehensive-dashboard' && (

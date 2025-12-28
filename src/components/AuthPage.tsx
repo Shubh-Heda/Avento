@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { AventoLogo } from './AventoLogo';
 import { toast } from 'sonner';
 import { useAuth } from '../lib/AuthProvider';
 import { Loader2, PartyPopper, Trophy, Music, AlertCircle, LogOut } from 'lucide-react';
@@ -137,14 +138,15 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/20 via-purple-400/20 to-orange-400/20 rounded-3xl blur-3xl"></div>
             <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-12 border border-white shadow-2xl">
-              <h1 className="mb-6">
-                <span className="bg-gradient-to-r from-cyan-600 via-purple-600 to-orange-600 bg-clip-text text-transparent">
-                  Avento
-                </span>
-              </h1>
-              <p className="text-xl text-slate-600 mb-8">
-                Matchmaking the Sport of Friendships
-              </p>
+              <div className="flex items-center gap-4 mb-8">
+                <AventoLogo size="lg" variant="icon-only" />
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 via-purple-600 to-orange-600 bg-clip-text text-transparent">
+                    AVENTO
+                  </h1>
+                  <p className="text-sm text-slate-500">Matchmaking the Sport of Friendships</p>
+                </div>
+              </div>
               
               <div className="space-y-6">
                 <div className="flex items-start gap-4">

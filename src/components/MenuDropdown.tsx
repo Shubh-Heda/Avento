@@ -122,7 +122,7 @@ export function MenuDropdown({
       label: 'Map View',
       action: () => {
         setIsOpen(false);
-        onNavigate('dashboard'); // Will update with map page when ready
+        onNavigate('map-view');
       },
       color: 'text-emerald-600',
       bgColor: 'hover:bg-emerald-50',

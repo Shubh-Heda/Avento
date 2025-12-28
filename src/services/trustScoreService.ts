@@ -1,325 +1,387 @@
-/**
- * Trust Score Service
- * Manages user trust scores based on reliability, respect, and positive interactions
- */
+// ============================================
+// Trust Score Service - Reliability & Behavior Tracking
+// ============================================
+import { supabase } from '../lib/supabase';
 
-import { localStorageService } from './localStorageService';
-
+// Types
 export interface TrustScore {
-  userId: string;
-  overall: number; // 0-100
-  reliability: number; // 0-100
-  respect: number; // 0-100
-  positivity: number; // 0-100
-  totalMatches: number;
-  completedMatches: number;
-  cancelledMatches: number;
-  lateArrivals: number;
-  earlyDepartures: number;
-  positiveReviews: number;
-  negativeReviews: number;
-  lastUpdated: Date;
+  id: string;
+  user_id: string;
+  overall_score: number;
+  reliability_score: number;
+  behavior_score: number;
+  community_score: number;
+  attendance_rate: number;
+  on_time_rate: number;
+  payment_reliability: number;
+  cancellation_rate: number;
+  positive_feedback_count: number;
+  negative_feedback_count: number;
+  reports_received: number;
+  warnings_count: number;
+  posts_count: number;
+  helpful_count: number;
+  matches_organized: number;
+  matches_attended: number;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string;
+  is_verified: boolean;
+  verification_date?: string;
+  badges: string[];
+  level: number;
+  experience_points: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface TrustScoreAction {
-  type: 'match_completed' | 'match_cancelled' | 'late_arrival' | 'early_departure' | 'positive_review' | 'negative_review' | 'helped_player' | 'no_show';
-  userId: string;
-  matchId?: string;
-  timestamp: Date;
-  impact: number; // -50 to +50
+export interface TrustScoreHistory {
+  id: string;
+  user_id: string;
+  score_type: 'overall' | 'reliability' | 'behavior' | 'community';
+  old_score: number;
+  new_score: number;
+  change_amount: number;
+  reason: string;
+  related_id?: string;
+  created_at: string;
 }
 
+export interface UserFeedback {
+  id: string;
+  from_user_id: string;
+  to_user_id: string;
+  match_id?: string;
+  rating: number;
+  feedback_type: 'positive' | 'neutral' | 'negative';
+  categories: string[];
+  comment?: string;
+  is_anonymous: boolean;
+  created_at: string;
+}
+
+export interface Achievement {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  points: number;
+  requirements: any;
+  earned?: boolean;
+  earned_at?: string;
+}
+
+// Trust Score Service
 class TrustScoreService {
-  // Base weights for different aspects
-  private readonly WEIGHTS = {
-    reliability: 0.4,
-    respect: 0.3,
-    positivity: 0.3,
-  };
+  // ==================== SCORE RETRIEVAL ====================
 
-  // Points for different actions
-  private readonly POINTS = {
-    match_completed: 5,
-    match_cancelled: -10,
-    late_arrival: -3,
-    early_departure: -2,
-    positive_review: 8,
-    negative_review: -8,
-    helped_player: 10,
-    no_show: -20,
-    on_time: 3,
-    stayed_full_match: 2,
-  };
+  async getUserScore(userId: string): Promise<TrustScore | null> {
+    const { data, error } = await supabase
+      .from('user_trust_scores')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
-  /**
-   * Get user's trust score
-   */
-  getTrustScore(userId: string): TrustScore {
-    const scores = localStorageService.getTrustScores();
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw error;
+    }
+    return data;
+  }
+
+  async getScoreHistory(userId: string, limit = 50): Promise<TrustScoreHistory[]> {
+    const { data, error} = await supabase
+      .from('trust_score_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getLeaderboard(limit = 100): Promise<TrustScore[]> {
+    const { data, error } = await supabase
+      .from('user_trust_scores')
+      .select(`
+        *,
+        user:profiles(id, full_name, avatar_url)
+      `)
+      .order('overall_score', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  // ==================== SCORE UPDATES ====================
+
+  async recordAttendance(userId: string, matchId: string, wasOnTime: boolean): Promise<void> {
+    const { error } = await supabase.rpc('record_attendance', {
+      p_user_id: userId,
+      p_match_id: matchId,
+      p_was_on_time: wasOnTime
+    });
+
+    if (error) throw error;
+  }
+
+  async recordCancellation(userId: string, matchId: string, hoursBefore: number): Promise<void> {
+    const { error } = await supabase.rpc('record_cancellation', {
+      p_user_id: userId,
+      p_match_id: matchId,
+      p_hours_before: hoursBefore
+    });
+
+    if (error) throw error;
+  }
+
+  async updateScore(
+    userId: string,
+    scoreType: 'reliability_score' | 'behavior_score' | 'community_score',
+    change: number,
+    reason: string,
+    relatedId?: string
+  ): Promise<void> {
+    const { error } = await supabase.rpc('update_trust_score', {
+      p_user_id: userId,
+      p_score_type: scoreType,
+      p_change: change,
+      p_reason: reason,
+      p_related_id: relatedId
+    });
+
+    if (error) throw error;
+  }
+
+  // ==================== FEEDBACK SYSTEM ====================
+
+  async giveFeedback(feedback: {
+    to_user_id: string;
+    match_id?: string;
+    rating: number;
+    feedback_type: 'positive' | 'neutral' | 'negative';
+    categories: string[];
+    comment?: string;
+    is_anonymous?: boolean;
+  }): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('user_feedback')
+      .insert({
+        ...feedback,
+        from_user_id: user.id
+      });
+
+    if (error) throw error;
+
+    // Update behavior score based on feedback
+    const scoreChange = feedback.rating >= 4 ? 2 : feedback.rating <= 2 ? -2 : 0;
+    if (scoreChange !== 0) {
+      await this.updateScore(
+        feedback.to_user_id,
+        'behavior_score',
+        scoreChange,
+        `Received ${feedback.feedback_type} feedback`,
+        feedback.match_id
+      );
+    }
+
+    // Update feedback counts
+    const field = feedback.feedback_type === 'positive' 
+      ? 'positive_feedback_count' 
+      : feedback.feedback_type === 'negative'
+      ? 'negative_feedback_count'
+      : null;
     
-    if (!scores[userId]) {
-      // Initialize new user with default score
-      return this.initializeUserScore(userId);
-    }
+    if (field) {
+      const { data: currentScore } = await supabase
+        .from('user_trust_scores')
+        .select(field)
+        .eq('user_id', feedback.to_user_id)
+        .single();
 
-    return scores[userId];
-  }
-
-  /**
-   * Initialize a new user's trust score
-   */
-  private initializeUserScore(userId: string): TrustScore {
-    const newScore: TrustScore = {
-      userId,
-      overall: 75, // Start at 75 (newbie-friendly)
-      reliability: 75,
-      respect: 75,
-      positivity: 75,
-      totalMatches: 0,
-      completedMatches: 0,
-      cancelledMatches: 0,
-      lateArrivals: 0,
-      earlyDepartures: 0,
-      positiveReviews: 0,
-      negativeReviews: 0,
-      lastUpdated: new Date(),
-    };
-
-    this.saveUserScore(newScore);
-    return newScore;
-  }
-
-  /**
-   * Record an action and update trust score
-   */
-  recordAction(action: TrustScoreAction): TrustScore {
-    const score = this.getTrustScore(action.userId);
-
-    // Update counters based on action type
-    switch (action.type) {
-      case 'match_completed':
-        score.completedMatches++;
-        score.totalMatches++;
-        score.reliability += this.POINTS.match_completed;
-        break;
-
-      case 'match_cancelled':
-        score.cancelledMatches++;
-        score.reliability += this.POINTS.match_cancelled;
-        break;
-
-      case 'late_arrival':
-        score.lateArrivals++;
-        score.reliability += this.POINTS.late_arrival;
-        break;
-
-      case 'early_departure':
-        score.earlyDepartures++;
-        score.reliability += this.POINTS.early_departure;
-        break;
-
-      case 'positive_review':
-        score.positiveReviews++;
-        score.positivity += this.POINTS.positive_review;
-        score.respect += this.POINTS.positive_review * 0.5;
-        break;
-
-      case 'negative_review':
-        score.negativeReviews++;
-        score.positivity += this.POINTS.negative_review;
-        score.respect += this.POINTS.negative_review * 0.5;
-        break;
-
-      case 'helped_player':
-        score.positivity += this.POINTS.helped_player;
-        score.respect += this.POINTS.helped_player * 0.7;
-        break;
-
-      case 'no_show':
-        score.reliability += this.POINTS.no_show;
-        score.respect += this.POINTS.no_show * 0.3;
-        break;
-    }
-
-    // Apply custom impact if specified
-    if (action.impact !== undefined) {
-      score.reliability += action.impact * 0.5;
-      score.respect += action.impact * 0.3;
-      score.positivity += action.impact * 0.2;
-    }
-
-    // Normalize scores (0-100)
-    score.reliability = this.normalize(score.reliability);
-    score.respect = this.normalize(score.respect);
-    score.positivity = this.normalize(score.positivity);
-
-    // Calculate overall score
-    score.overall = this.calculateOverallScore(score);
-    score.lastUpdated = new Date();
-
-    this.saveUserScore(score);
-    return score;
-  }
-
-  /**
-   * Calculate overall trust score
-   */
-  private calculateOverallScore(score: TrustScore): number {
-    const weighted = 
-      score.reliability * this.WEIGHTS.reliability +
-      score.respect * this.WEIGHTS.respect +
-      score.positivity * this.WEIGHTS.positivity;
-
-    return this.normalize(weighted);
-  }
-
-  /**
-   * Normalize score to 0-100 range
-   */
-  private normalize(value: number): number {
-    return Math.max(0, Math.min(100, value));
-  }
-
-  /**
-   * Get trust badge for a score
-   */
-  getTrustBadge(score: number): {
-    label: string;
-    color: string;
-    icon: string;
-  } {
-    if (score >= 90) {
-      return {
-        label: 'Legendary Trust',
-        color: 'text-amber-500',
-        icon: '👑',
-      };
-    } else if (score >= 80) {
-      return {
-        label: 'High Trust Zone',
-        color: 'text-emerald-500',
-        icon: '⭐',
-      };
-    } else if (score >= 70) {
-      return {
-        label: 'Trusted Member',
-        color: 'text-blue-500',
-        icon: '✓',
-      };
-    } else if (score >= 50) {
-      return {
-        label: 'Building Trust',
-        color: 'text-violet-500',
-        icon: '📈',
-      };
-    } else {
-      return {
-        label: 'Newbie-Friendly',
-        color: 'text-orange-500',
-        icon: '🌱',
-      };
+      if (currentScore) {
+        await supabase
+          .from('user_trust_scores')
+          .update({ [field]: (currentScore[field] || 0) + 1 })
+          .eq('user_id', feedback.to_user_id);
+      }
     }
   }
 
-  /**
-   * Check if user is in "High Trust Zone"
-   */
-  isHighTrustZone(userId: string): boolean {
-    const score = this.getTrustScore(userId);
-    return score.overall >= 80;
+  async getFeedback(userId: string, limit = 50): Promise<UserFeedback[]> {
+    const { data, error } = await supabase
+      .from('user_feedback')
+      .select(`
+        *,
+        from_user:profiles!from_user_id(id, full_name, avatar_url)
+      `)
+      .eq('to_user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
   }
 
-  /**
-   * Check if user is "Newbie-Friendly"
-   */
-  isNewbieFriendly(userId: string): boolean {
-    const score = this.getTrustScore(userId);
-    return score.totalMatches < 5 || score.overall < 70;
+  // ==================== ACHIEVEMENTS ====================
+
+  async getAchievements(): Promise<Achievement[]> {
+    const { data, error } = await supabase
+      .from('achievements')
+      .select('*')
+      .order('points', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
   }
 
-  /**
-   * Get reliability percentage
-   */
-  getReliabilityPercentage(userId: string): number {
-    const score = this.getTrustScore(userId);
+  async getUserAchievements(userId: string): Promise<Achievement[]> {
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select(`
+        earned_at,
+        achievement:achievements(*)
+      `)
+      .eq('user_id', userId)
+      .order('earned_at', { ascending: false });
+
+    if (error) throw error;
     
-    if (score.totalMatches === 0) return 100;
-    
-    return Math.round((score.completedMatches / score.totalMatches) * 100);
+    return (data || []).map((item: any) => ({
+      ...item.achievement,
+      earned: true,
+      earned_at: item.earned_at
+    }));
   }
 
-  /**
-   * Save user score
-   */
-  private saveUserScore(score: TrustScore): void {
-    const scores = localStorageService.getTrustScores();
-    scores[score.userId] = score;
-    localStorageService.setTrustScores(scores);
+  async checkAndAwardAchievements(userId: string): Promise<Achievement[]> {
+    const score = await this.getUserScore(userId);
+    if (!score) return [];
+
+    const newAchievements: Achievement[] = [];
+
+    // Check for achievements
+    const checks = [
+      { code: 'first_match', condition: score.matches_attended >= 1 },
+      { code: 'on_time_10', condition: score.matches_attended >= 10 && score.on_time_rate >= 90 },
+      { code: 'streak_7', condition: score.current_streak >= 7 },
+      { code: 'streak_30', condition: score.current_streak >= 30 },
+      { code: 'helpful_10', condition: score.helpful_count >= 10 },
+      { code: 'organizer_5', condition: score.matches_organized >= 5 },
+      { code: 'perfect_score', condition: score.overall_score >= 95 },
+      { code: 'social_butterfly', condition: score.posts_count >= 20 }
+    ];
+
+    for (const check of checks) {
+      if (check.condition) {
+        const { data: achievement } = await supabase
+          .from('achievements')
+          .select('*')
+          .eq('code', check.code)
+          .single();
+
+        if (achievement) {
+          // Try to award (will fail silently if already earned)
+          const { error } = await supabase
+            .from('user_achievements')
+            .insert({
+              user_id: userId,
+              achievement_id: achievement.id
+            });
+
+          if (!error) {
+            newAchievements.push(achievement);
+            // Award XP
+            await this.awardExperience(userId, achievement.points);
+          }
+        }
+      }
+    }
+
+    return newAchievements;
   }
 
-  /**
-   * Get trust score summary
-   */
-  getTrustScoreSummary(userId: string) {
-    const score = this.getTrustScore(userId);
-    const badge = this.getTrustBadge(score.overall);
-    const reliability = this.getReliabilityPercentage(userId);
+  // ==================== EXPERIENCE & LEVELS ====================
 
-    return {
-      overall: score.overall,
-      badge,
-      reliability,
-      stats: {
-        totalMatches: score.totalMatches,
-        completedMatches: score.completedMatches,
-        cancelledMatches: score.cancelledMatches,
-        positiveReviews: score.positiveReviews,
-        negativeReviews: score.negativeReviews,
-      },
-      breakdown: {
-        reliability: score.reliability,
-        respect: score.respect,
-        positivity: score.positivity,
-      },
-      flags: {
-        isHighTrust: this.isHighTrustZone(userId),
-        isNewbie: this.isNewbieFriendly(userId),
-      },
-    };
+  async awardExperience(userId: string, points: number): Promise<void> {
+    const { data: score } = await supabase
+      .from('user_trust_scores')
+      .select('experience_points, level')
+      .eq('user_id', userId)
+      .single();
+
+    if (!score) return;
+
+    const newXP = score.experience_points + points;
+    const newLevel = Math.floor(newXP / 100) + 1;
+
+    await supabase
+      .from('user_trust_scores')
+      .update({
+        experience_points: newXP,
+        level: newLevel
+      })
+      .eq('user_id', userId);
   }
 
-  /**
-   * Compare two users' trust scores
-   */
-  compareScores(userId1: string, userId2: string) {
-    const score1 = this.getTrustScore(userId1);
-    const score2 = this.getTrustScore(userId2);
+  // ==================== REPORTING ====================
 
-    return {
-      user1: {
-        userId: userId1,
-        overall: score1.overall,
-        badge: this.getTrustBadge(score1.overall),
-      },
-      user2: {
-        userId: userId2,
-        overall: score2.overall,
-        badge: this.getTrustBadge(score2.overall),
-      },
-      difference: score1.overall - score2.overall,
-    };
+  async reportUser(reportedUserId: string, reason: string, description: string, matchId?: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('user_reports')
+      .insert({
+        reporter_id: user.id,
+        reported_user_id: reportedUserId,
+        reason,
+        description,
+        match_id: matchId
+      });
+
+    if (error) throw error;
   }
 
-  /**
-   * Get top trusted users
-   */
-  getTopTrustedUsers(limit: number = 10): TrustScore[] {
-    const scores = localStorageService.getTrustScores();
-    
-    return Object.values(scores)
-      .sort((a: any, b: any) => b.overall - a.overall)
-      .slice(0, limit);
+  // ==================== VERIFICATION ====================
+
+  async requestVerification(userId: string): Promise<void> {
+    // In a real app, this would trigger a verification process
+    // For now, just mark as pending
+    await supabase
+      .from('user_trust_scores')
+      .update({
+        is_verified: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId);
+  }
+
+  // ==================== UTILITY ====================
+
+  getScoreColor(score: number): string {
+    if (score >= 90) return 'text-green-600';
+    if (score >= 75) return 'text-emerald-600';
+    if (score >= 60) return 'text-yellow-600';
+    if (score >= 40) return 'text-orange-600';
+    return 'text-red-600';
+  }
+
+  getScoreBadge(score: number): { label: string; color: string } {
+    if (score >= 95) return { label: 'Excellent', color: 'bg-green-100 text-green-800' };
+    if (score >= 85) return { label: 'Great', color: 'bg-emerald-100 text-emerald-800' };
+    if (score >= 70) return { label: 'Good', color: 'bg-blue-100 text-blue-800' };
+    if (score >= 50) return { label: 'Fair', color: 'bg-yellow-100 text-yellow-800' };
+    return { label: 'Needs Improvement', color: 'bg-orange-100 text-orange-800' };
   }
 }
 
 export const trustScoreService = new TrustScoreService();
+export default trustScoreService;

@@ -8,6 +8,8 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { AnimatedBackground } from './AnimatedBackground';
 import { toast } from 'sonner';
 import { generateUpcomingDates, getMinBookingDate } from '../utils/dateUtils';
+import chatService from '../services/chatService';
+import { supabase } from '../lib/supabase';
 
 interface CreateMatchPlanProps {
   onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability', turfId?: string, matchId?: string) => void;
@@ -143,12 +145,13 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
     setInviteEmails(inviteEmails.filter(e => e !== email));
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setCreated(true);
     
     // Create match object with new payment flow data
+    const matchId = 'match-' + Math.random().toString(36).substr(2, 9);
     const match = {
-      id: 'match-' + Math.random().toString(36).substr(2, 9),
+      id: matchId,
       title: matchTitle,
       turfName: selectedTurf?.name || '',
       date: selectedDate,
@@ -164,16 +167,71 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
       turfCost: getTurfCost(),
     };
 
+    // Auto-create WhatsApp group chat for the match
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Create group chat room for this match
+        const chatRoom = await chatService.createRoom({
+          name: `${matchTitle} 🏃‍♂️`,
+          description: `Group chat for ${matchTitle} at ${selectedTurf?.name || 'venue'} on ${selectedDate}`,
+          room_type: 'match',
+          is_private: visibility === 'private',
+          category: 'sports',
+          related_id: matchId,
+          avatar_url: selectedTurf?.sport === 'Football' ? '⚽' : 
+                      selectedTurf?.sport === 'Cricket' ? '🏏' : 
+                      selectedTurf?.sport === 'Basketball' ? '🏀' : '🏃‍♂️'
+        });
+
+        // Send welcome system message
+        await chatService.sendMessage(
+          chatRoom.id,
+          `🎉 Welcome to ${matchTitle}!\n\n📍 Venue: ${selectedTurf?.name || 'TBD'}\n📅 Date: ${selectedDate}\n⏰ Time: ${selectedTime}\n\n💰 Cost: ₹${getTurfCost()} (split between ${minPlayers}-${maxPlayers} players)\n\nPayment opens after ${minPlayers} players join. Let's make this match amazing! 🚀`,
+          'system'
+        );
+
+        // Auto-post to community if 5-step payment is enabled
+        if (visibility === 'community') {
+          const postContent = `🏆 ${matchTitle}\n\n📍 ${selectedTurf?.name || 'Venue'}, ${selectedTurf?.location || 'Location'}\n📅 ${selectedDate} at ${selectedTime}\n${selectedTurf?.sport ? selectedTurf.sport : 'Sport'}\n\n👥 Looking for ${minPlayers}-${maxPlayers} players\n💰 ₹${getTurfCost()} total (₹${Math.round(getTurfCost() / parseInt(minPlayers))} per person)\n\n🎯 Join now! Slots filling fast! 🔥`;
+          
+          await supabase.from('community_posts').insert({
+            author_id: user.id,
+            content: postContent,
+            category: 'sports',
+            post_type: 'match_invite',
+            related_match_id: matchId
+          });
+
+          toast.success('Posted to Community! 🌟', {
+            description: 'Your match is now visible to everyone!',
+          });
+        }
+
+        toast.success('Match & Group Created! 🎉', {
+          description: 'WhatsApp-style group chat is ready for your team!',
+        });
+      } else {
+        // Demo mode - no backend
+        toast.success('Match Plan Created! 🎉', {
+          description: 'Group chat will be created when you sign in!',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating group chat:', error);
+      // Still show success for match creation
+      toast.success('Match Created! 🎉', {
+        description: 'Group chat will be available soon.',
+      });
+    }
+
     // Show success message based on visibility
     const visibilityMessage = visibility === 'community' 
       ? 'Open to all!'
       : visibility === 'nearby'
       ? 'Visible to nearby players!'
       : 'Private match created!';
-    
-    toast.success('Match Plan Created! 🎉', {
-      description: `${visibilityMessage} Group chat is ready. Opening...`,
-    });
 
     // Call onMatchCreate with the match object
     onMatchCreate(match);

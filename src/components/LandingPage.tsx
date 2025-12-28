@@ -1,6 +1,7 @@
 import { Users, Heart, Sparkles, Music, PartyPopper, Shield, TrendingUp, ArrowRight, Star, Zap, Clock, DollarSign, CheckCircle, UserPlus, ChevronDown, Play, X, Gamepad2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { AventoLogo } from './AventoLogo';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import type { LazyExoticComponent, ComponentType } from 'react';
@@ -100,6 +101,113 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
     }
   ];
 
+  const paymentStages = [
+    {
+      stage: "01",
+      title: "Join Free",
+      icon: UserPlus,
+      pill: "No card needed",
+      points: ["Browse lobbies", "Pick your slot", "Stay flexible"],
+    },
+    {
+      stage: "02",
+      title: "Soft Lock",
+      icon: Users,
+      pill: "Min players hit",
+      points: ["Squad is secured", "Everyone notified", "Trust nudges start"],
+    },
+    {
+      stage: "03",
+      title: "Pay Window",
+      icon: Clock,
+      pill: "30-90 mins",
+      points: ["Timer auto-sets", "Split is visible", "Smart reminders (push/SMS)", "Stripe + UPI ready"],
+    },
+    {
+      stage: "04",
+      title: "Hard Lock",
+      icon: Shield,
+      pill: "Only paid stay",
+      points: ["Unpaid drop off", "Teams stabilize", "Host can fill gaps"],
+    },
+    {
+      stage: "05",
+      title: "Final Receipt",
+      icon: CheckCircle,
+      pill: "Zero surprises",
+      points: ["Exact share shown", "Instant confirmations", "Trust Score protected"],
+    },
+  ];
+
+  const businessPillars = [
+    {
+      title: "Freemium Core",
+      icon: Sparkles,
+      accent: "from-amber-400 to-pink-500",
+      points: ["Browse & join for free", "Trust layer included", "Friends-first UX"],
+    },
+    {
+      title: "Premium Boosts",
+      icon: TrendingUp,
+      accent: "from-cyan-400 to-emerald-500",
+      points: ["Priority slots", "Advanced filters", "Spotlighted profile"],
+    },
+    {
+      title: "Partners & Venues",
+      icon: Heart,
+      accent: "from-violet-400 to-blue-500",
+      points: ["Discounted lanes", "Sponsored drops", "Co-hosted events"],
+    },
+  ];
+
+  const refundMoments = [
+    {
+      title: "Before Soft Lock",
+      icon: ArrowRight,
+      color: "from-emerald-500 to-teal-400",
+      copy: "Full cancel + refund, no penalties.",
+    },
+    {
+      title: "During Pay Window",
+      icon: Clock,
+      color: "from-amber-500 to-orange-400",
+      copy: "Partial refunds follow the timer rules to keep squads fair.",
+    },
+    {
+      title: "After Hard Lock",
+      icon: Shield,
+      color: "from-rose-500 to-red-500",
+      copy: "Limited refunds; trust impact only if no verified reason is provided.",
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "Priya S.",
+      role: "Mumbai • Football",
+      quote: "Found my weekend crew fast. Feels like family now.",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fm=webp",
+    },
+    {
+      name: "Rahul P.",
+      role: "Bengaluru • Badminton",
+      quote: "Trust Score 95. Reminders make payments painless.",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fm=webp",
+    },
+    {
+      name: "Ananya D.",
+      role: "Delhi • Parties",
+      quote: "Short pay window + UPI = zero awkwardness at the venue.",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&auto=format&fm=webp",
+    },
+    {
+      name: "Kabir L.",
+      role: "Pune • Gaming",
+      quote: "42k matches later, the lobby still feels clean and fair.",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&auto=format&fm=webp",
+    },
+  ];
+
   return (
     <div className="min-h-screen avento-hero-bg overflow-hidden relative text-white">
       {/* Colorful Animated Background */}
@@ -191,7 +299,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          <span className="text-xs text-white/80">Live Activity</span>
+          <span className="text-sm font-semibold text-white">Live Activity</span>
         </div>
         <div className="space-y-2">
           <motion.div 
@@ -200,8 +308,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             animate={{ x: 0, opacity: 1 }}
             className="flex items-center justify-between gap-4"
           >
-            <span className="text-xs text-white/70">Active now</span>
-            <span className="text-sm text-white">{liveStats.activeUsers}</span>
+            <span className="text-sm font-medium text-white">Active now</span>
+            <span className="text-base font-bold text-white">{liveStats.activeUsers}</span>
           </motion.div>
           <motion.div 
             key={liveStats.newMatches}
@@ -209,8 +317,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             animate={{ x: 0, opacity: 1 }}
             className="flex items-center justify-between gap-4"
           >
-            <span className="text-xs text-white/70">Matches today</span>
-            <span className="text-sm text-green-400">+{liveStats.newMatches}</span>
+            <span className="text-sm font-medium text-white">Matches today</span>
+            <span className="text-base font-bold text-green-400">+{liveStats.newMatches}</span>
           </motion.div>
           <motion.div 
             key={liveStats.friendshipsFormed}
@@ -218,8 +326,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             animate={{ x: 0, opacity: 1 }}
             className="flex items-center justify-between gap-4"
           >
-            <span className="text-xs text-white/70">New friends</span>
-            <span className="text-sm text-pink-400">+{liveStats.friendshipsFormed}</span>
+            <span className="text-sm font-medium text-white">New friends</span>
+            <span className="text-base font-bold text-pink-400">+{liveStats.friendshipsFormed}</span>
           </motion.div>
         </div>
       </motion.div>
@@ -305,6 +413,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             transition={{ type: "spring", damping: 15, delay: 0.1 }}
             whileHover={{ scale: 1.05 }}
           >
+          
             <motion.div 
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -442,28 +551,28 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   {/* Animated Stats Overlay */}
                   <div className="absolute bottom-6 left-6 right-6 flex justify-between">
                     <motion.div 
-                      className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20"
+                      className="bg-black/70 backdrop-blur-md px-4 py-2 rounded-xl border border-white/30"
                       animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0 }}
                     >
-                      <div className="text-white text-xs">Trust Score</div>
-                      <div className="text-green-400">92/100</div>
+                      <div className="text-white text-sm font-semibold">Trust Score</div>
+                      <div className="text-green-400 text-base font-bold">92/100</div>
                     </motion.div>
                     <motion.div 
-                      className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20"
+                      className="bg-black/70 backdrop-blur-md px-4 py-2 rounded-xl border border-white/30"
                       animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
                     >
-                      <div className="text-white text-xs">Streak</div>
-                      <div className="text-orange-400">🔥 12 days</div>
+                      <div className="text-white text-sm font-semibold">Streak</div>
+                      <div className="text-orange-400 text-base font-bold">🔥 12 days</div>
                     </motion.div>
                     <motion.div 
-                      className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20"
+                      className="bg-black/70 backdrop-blur-md px-4 py-2 rounded-xl border border-white/30"
                       animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
                     >
-                      <div className="text-white text-xs">Connections</div>
-                      <div className="text-purple-400">47 friends</div>
+                      <div className="text-white text-sm font-semibold">Connections</div>
+                      <div className="text-purple-400 text-base font-bold">47 friends</div>
                     </motion.div>
                   </div>
                 </div>
@@ -523,18 +632,24 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-cyan-400/40 cursor-pointer hover:border-cyan-400/70 transition-all bg-white flex flex-col h-full"
             >
               {/* Background Image */}
-              <div className="relative h-[200px] w-flex-shrink-0 overflow-hidden">
-                <ImageWithFallback 
+              <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+                <ImageWithFallback
                   src="https://images.unsplash.com/photo-1630420598771-dd52ab08c8cb?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
                   alt="Sports and Turf"
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/30 z-10"></div>
-                  <div className="absolute bottom-4 left-4 z-20 text-white">
+
+                {/* Overlay Text */}
+                <div className="absolute bottom-4 left-4 z-20 text-white max-w-[250px]">
                   <h3 className="text-lg font-semibold">Sports & Turf</h3>
-                  <p className="text-sm mt-1 max-w-[250px]">Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks.</p>
-                  <button className="mt-3 px-4 py-2 bg-white text-black rounded-md text-sm font-medium hover:bg-gray-200 transition">Get Started</button>
-                  </div>
+                  <p className="text-sm mt-1">
+                    Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks.
+                  </p>
+                  <button className="mt-3 px-4 py-2 bg-white text-black rounded-md text-sm font-medium hover:bg-gray-200 transition">
+                    Get Started
+                  </button>
+                </div>
 
                 {/* Icon */}
                 <div className="absolute top-6 left-6">
@@ -546,12 +661,14 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
 
               {/* Content */}
               <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 flex flex-col flex-1">
-                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Sports & Turf</h3>
+                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                  Sports & Turf
+                </h3>
                 <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
                   Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks
                 </p>
-                <Button 
-                  className="w-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-600 hover:via-cyan-500 hover:to-blue-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
+                <Button
+                  className="w-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-600 hover:via-cyan-500 hover:to-blue-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4"
                 >
                   Get Started
                   <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
@@ -569,185 +686,132 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               transition={{ delay: 1.1 }}
               className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-purple-400/40 cursor-pointer hover:border-purple-400/70 transition-all bg-white flex flex-col h-full"
             >
-              {/* Background Image */}
-              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1735748917428-be035e873f97?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
-                  alt="Cultural Events"
-                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                />
-                
-                {/* Icon */}
-                <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                    <Music className="w-7 h-7 text-purple-600" />
-                  </div>
-                </div>
-              </div>
+  {/* Background Image */}
+  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+    <ImageWithFallback
+      src="https://images.unsplash.com/photo-1735748917428-be035e873f97?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
+      alt="Cultural Events"
+      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+    />
+    <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-              {/* Content */}
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 flex flex-col flex-1">
-                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Cultural Events</h3>
-                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
-                  Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity.
-                </p>
-                <Button 
-                  className="w-full bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 hover:from-purple-600 hover:via-purple-500 hover:to-pink-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
-                >
-                  Explore Events
-                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-            </motion.div>
+    {/* Icon */}
+    <div className="absolute top-6 left-6">
+      <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+        <Music className="w-7 h-7 text-purple-600" />
+      </div>
+    </div>
+  </div>
+
+  {/* Content */}
+  <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 flex flex-col flex-1">
+    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+      Cultural Events
+    </h3>
+    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
+      Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity.
+    </p>
+    <Button
+      className="w-full bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 hover:from-purple-600 hover:via-purple-500 hover:to-pink-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4" // consistent button size
+    >
+      Explore Events
+      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+    </Button>
+  </div>
+</motion.div>
 
             {/* Parties Card */}
-            <motion.div
-              onClick={() => onCategorySelect?.('parties')}
-              whileHover={{ scale: 1.05, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 }}
-              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-pink-400/40 cursor-pointer hover:border-pink-400/70 transition-all bg-white flex flex-col h-full"
-            >
-              {/* Background Image */}
-              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1739734963154-7a8b3c8e5944?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
-                  alt="Parties and Celebrations"
-                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                />
-                
-                {/* Icon */}
-                <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                    <PartyPopper className="w-7 h-7 text-pink-600" />
-                  </div>
-                </div>
-              </div>
+<motion.div
+  onClick={() => onCategorySelect?.('parties')}
+  whileHover={{ scale: 1.05, y: -8 }}
+  whileTap={{ scale: 0.98 }}
+  initial={{ opacity: 0, y: 50 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 1.2 }}
+  className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-pink-400/40 cursor-pointer hover:border-pink-400/70 transition-all bg-white flex flex-col h-full" // fixed height
+>
+  {/* Background Image */}
+  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+    <ImageWithFallback
+      src="https://images.unsplash.com/photo-1739734963154-7a8b3c8e5944?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
+      alt="Parties and Celebrations"
+      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+    />
+    <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-              {/* Content */}
-              <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-5 flex flex-col flex-1">
-                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">Parties & Celebrations</h3>
-                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
-                  Create unforgettable nights, meet new people, and celebrate life's special moments together.
-                </p>
-                <Button 
-                  className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 hover:from-pink-600 hover:via-rose-500 hover:to-red-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
-                >
-                  Join Parties
-                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-            </motion.div>
+    {/* Icon */}
+    <div className="absolute top-6 left-6">
+      <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+        <PartyPopper className="w-7 h-7 text-pink-600" />
+      </div>
+    </div>
+  </div>
 
-            {/* Gaming Hub Card - NEW! */}
-            <motion.div
-              onClick={() => onCategorySelect?.('gaming')}
-              whileHover={{ scale: 1.05, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.3 }}
-              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-indigo-400/40 cursor-pointer hover:border-indigo-400/70 transition-all bg-white flex flex-col h-full"
-            >
-              {/* Background Image */}
-              <div className="relative h-[200px] flex-shrink-0 overflow-hidden">
-                <ImageWithFallback 
-                  src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
-                  alt="Gaming Hub"
-                  className="w-full h-[200px] object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                />
-                
-                {/* Icon */}
-                <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                    <Gamepad2 className="w-7 h-7 text-indigo-600" />
-                  </div>
-                </div>
-              </div>
+  {/* Content */}
+  <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-5 flex flex-col flex-1">
+    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+      Parties & Celebrations
+    </h3>
+    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 line-clamp-3">
+      Create unforgettable nights, meet new people, and celebrate life's special moments together.
+    </p>
 
-              {/* Content */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 flex flex-col flex-1">
-                <h3 className="mb-3 text-2xl md:text-3xl font-black tracking-tight leading-tight bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent">Gaming Hub</h3>
-                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
-                  Join gaming clubs, play PS5/Xbox/PC, compete in tournaments, and level up your friendships.
-                </p>
-                <Button 
-                  className="w-full bg-gradient-to-r from-indigo-500 via-blue-400 to-violet-500 hover:from-indigo-600 hover:via-blue-500 hover:to-violet-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6"
-                >
-                  Start Gaming
-                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-            </motion.div>
+    <Button
+      className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 hover:from-pink-600 hover:via-rose-500 hover:to-red-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4" // consistent button size
+    >
+      Join Parties
+      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+    </Button>
+  </div>
+</motion.div>
+
+            {/* Gaming Hub Card */}
+<motion.div
+  onClick={() => onCategorySelect?.('gaming')}
+  whileHover={{ scale: 1.05, y: -8 }}
+  whileTap={{ scale: 0.98 }}
+  initial={{ opacity: 0, y: 50 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 1.3 }}
+  className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-indigo-400/40 cursor-pointer hover:border-indigo-400/70 transition-all bg-white flex flex-col h-full"
+>
+  {/* Background Image */}
+  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+    <ImageWithFallback
+      src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
+      alt="Gaming Hub"
+      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+    />
+    <div className="absolute inset-0 bg-black/30 z-10"></div>
+
+    {/* Icon */}
+    <div className="absolute top-6 left-6">
+      <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+        <Gamepad2 className="w-7 h-7 text-indigo-600" />
+      </div>
+    </div>
+  </div>
+
+  {/* Content */}
+  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 flex flex-col flex-1">
+    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent">
+      Gaming Hub
+    </h3>
+    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 line-clamp-3">
+      Join gaming clubs, play PS5/Xbox/PC, compete in tournaments, and level up your friendships.
+    </p>
+
+    <Button
+      className="w-full bg-gradient-to-r from-indigo-500 via-blue-400 to-violet-500 hover:from-indigo-600 hover:via-blue-500 hover:to-violet-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4"
+    >
+      Start Gaming
+      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+    </Button>
+  </div>
+</motion.div>
           </div>
-        </motion.div>
-      </section>
 
-      {/* Trust Badge Showcase */}
-      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/30 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-16 bg-black/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/40 shadow-2xl"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            style={getParallaxStyle(50)}
-          >
-            <h2 className="mb-4 text-white text-3xl md:text-5xl font-black tracking-tight">Build Your <span className="text-cyan-300">Reputation</span></h2>
-            <p className="text-white/90 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
-              Earn badges, build trust, and unlock exclusive perks as you connect with your community.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {/* Trust Score Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-md p-8 rounded-3xl border border-green-500/20"
-            >
-              <div className="relative mb-6">
-                <motion.div 
-                  className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                >
-                  <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center">
-                    <span className="text-2xl text-green-400">92</span>
-                  </div>
-                </motion.div>
-                <motion.div 
-                  className="absolute -top-2 -right-2 bg-yellow-500 rounded-full p-2"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Star className="w-5 h-5 text-white" fill="currentColor" />
-                </motion.div>
-              </div>
-              <h3 className="text-white text-center mb-2">Trust Score</h3>
-              <p className="text-slate-300 text-center text-sm mb-4">
-                Built through reliability, respect, and positive vibes.
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Reliability</span>
-                  <span className="text-green-400">95%</span>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <motion.div 
-                    className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full"
-                    initial={{ width: 0 }}
-                    whileInView={{ width: "95%" }}
-                    viewport={{ once: true }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto mt-12">
             {/* Friendship Streak Card */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -766,8 +830,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   <span className="text-4xl">🔥</span>
                 </motion.div>
               </div>
-              <h3 className="text-white text-center mb-2">12 Day Streak</h3>
-              <p className="text-slate-300 text-center text-sm mb-4">
+              <h3 className="text-white text-center text-xl font-bold mb-2">12 Day Streak</h3>
+              <p className="text-white text-center text-base font-medium mb-4">
                 Consistency builds deeper connections.
               </p>
               <div className="flex justify-center gap-1">
@@ -806,8 +870,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   </motion.div>
                 </div>
               </div>
-              <h3 className="text-white text-center mb-2">Your Badges</h3>
-              <p className="text-slate-300 text-center text-sm mb-4">
+              <h3 className="text-white text-center text-xl font-bold mb-2">Your Badges</h3>
+              <p className="text-white text-center text-base font-medium mb-4">
                 Earned through exceptional behavior.
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -818,7 +882,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 ].map((badge, i) => (
                   <motion.div
                     key={i}
-                    className="bg-white/5 rounded-xl p-2 text-center"
+                    className="bg-white/10 rounded-xl p-3 text-center border border-white/20"
                     whileHover={{ scale: 1.1 }}
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -826,17 +890,18 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                     transition={{ delay: i * 0.1 }}
                   >
                     <div className="text-2xl mb-1">{badge.icon}</div>
-                    <div className="text-[10px] text-slate-300">{badge.label}</div>
+                    <div className="text-xs font-semibold text-white">{badge.label}</div>
                   </motion.div>
-                ))}
+                ))})
               </div>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
+
       </section>
 
       {/* How It Works - 5 Stage Payment Flow */}
-      <section className="relative py-20 bg-gradient-to-b from-black/40 via-black/60 to-black/40 backdrop-blur-sm">
+      <section className="relative py-24 bg-gradient-to-b from-black/40 via-black/60 to-black/40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
@@ -846,104 +911,140 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             style={getParallaxStyle(50)}
           >
             <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">How <span className="text-orange-600">Payment</span> Works</h2>
-            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
-              Our unique 5-stage flow ensures fairness, transparency, and commitment.
+            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-3xl mx-auto">
+              A 5-step visual flow: short cards, clear timers, and zero surprise charges.
             </p>
           </motion.div>
 
+          <div className="grid lg:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {paymentStages.map((item, i) => (
+              <motion.div
+                key={item.stage}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="relative h-full rounded-2xl border border-white/10 bg-black/85 p-5 shadow-2xl hover:-translate-y-1 hover:border-white/30 transition-all"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-amber-400 flex items-center justify-center">
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div className="text-sm font-bold text-white/80">Step {item.stage}</div>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                <span className="inline-flex items-center text-sm font-semibold px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white mb-3">
+                  {item.pill}
+                </span>
+                <ul className="space-y-2 text-base text-white font-medium">
+                  {item.points.map((point, idx) => (
+                    <li key={idx} className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-400" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 grid md:grid-cols-3 gap-4">
+            {[
+              { label: "No-shows drop", value: "-37%", desc: "after soft lock alerts" },
+              { label: "Timer clarity", value: "< 5s", desc: "to see your pay window" },
+              { label: "Payout speed", value: "T+1", desc: "fast settlement with Stripe" },
+            ].map((fact, idx) => (
+              <div key={idx} className="rounded-xl border border-white/20 bg-black/60 px-5 py-4 flex items-center justify-between">
+                <div className="text-white font-semibold text-base">{fact.label}</div>
+                <div className="text-right">
+                  <div className="text-xl font-bold text-white">{fact.value}</div>
+                  <div className="text-white text-sm font-medium">{fact.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Score Pulse */}
+      <section className="relative py-20 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-40" aria-hidden>
+          <div className="absolute left-10 top-10 h-56 w-56 rounded-full bg-green-400/25 blur-3xl" />
+          <div className="absolute right-6 bottom-6 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
+        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid md:grid-cols-[1.1fr,0.9fr] gap-8 items-center rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
+            <div className="flex items-start gap-4">
+              <div className="relative h-32 w-32 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-400 via-cyan-400 to-amber-300 opacity-70 blur" aria-hidden />
+                <div className="relative h-28 w-28 rounded-full bg-slate-900/80 border border-white/20 flex items-center justify-center">
+                  <div className="h-24 w-24 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 p-3 flex items-center justify-center">
+                    <div className="h-full w-full rounded-full bg-slate-950 flex items-center justify-center text-white text-3xl font-black">92</div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/30 text-sm font-semibold text-white">Live Trust Score</div>
+                <h3 className="text-white text-2xl font-bold leading-tight">High trust keeps matches clean and drop-offs low.</h3>
+                <p className="text-white text-base font-medium leading-relaxed">Transparent payment stages, attendance streaks, and dispute resolution all feed into your score. Push + SMS reminders keep the window moving.</p>
+                <div className="flex flex-wrap gap-3 text-base text-white">
+                  <div className="px-4 py-2 rounded-xl bg-white/15 border border-white/30 font-semibold">No-shows down 37%</div>
+                  <div className="px-4 py-2 rounded-xl bg-white/15 border border-white/30 font-semibold">UPI + Stripe ready</div>
+                  <div className="px-4 py-2 rounded-xl bg-white/15 border border-white/30 font-semibold">Fair-play nudges</div>
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-3">
+              {["Soft lock alerts go out instantly to keep momentum.", "Dynamic pay window reminders prevent last-minute churn.", "Trust-impact visibility before you cancel reduces disputes."].map((line, idx) => (
+                <div key={idx} className="rounded-2xl border border-white/20 bg-black/60 px-4 py-3 flex items-start gap-3">
+                  <div className="mt-1 h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="text-white text-base font-medium">{line}</span>
+                </div>
+              ))}
+              <Button className="justify-center gap-2 bg-gradient-to-r from-emerald-400 via-cyan-400 to-amber-300 text-slate-900 font-semibold shadow-lg hover:scale-[1.01] transition">
+                View trust profile
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Carousel */}
+      <section className="relative py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-10 bg-white/60 rounded-3xl p-8 mx-auto max-w-3xl border-2 border-white/80 shadow-2xl"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            style={getParallaxStyle(40)}
+          >
+            <h2 className="mb-3 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Real people, quick hits</h2>
+            <p className="text-slate-800 text-lg md:text-xl font-semibold max-w-2xl mx-auto">Short quotes you can skim, not essays to scroll.</p>
+          </motion.div>
+
           <div className="relative">
-            {/* Connection Line */}
-            <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500 via-cyan-400 to-amber-400 transform -translate-x-1/2 rounded-full" />
-
-            {/* Stages */}
-            <div className="space-y-12">
-              {[
-                {
-                  stage: "1",
-                  title: "Free Joining",
-                  description: "Join any match completely free. Browse, explore, and commit only when you're ready.",
-                  icon: UserPlus,
-                  color: "from-cyan-500 to-amber-400",
-                  badge: "No commitment"
-                },
-                {
-                  stage: "2",
-                  title: "Soft Lock",
-                  description: "When the minimum number of players join, the match is soft-locked. You're in, but the payment window hasn't started yet.",
-                  icon: Users,
-                  color: "from-cyan-500 to-amber-400",
-                  badge: "Min players reached"
-                },
-                {
-                  stage: "3",
-                  title: "Dynamic Payment Window",
-                  description: "Get 30-90 minutes to pay based on match timing. Plenty of time to complete your payment hassle-free.",
-                  icon: Clock,
-                  color: "from-cyan-500 to-amber-400",
-                  badge: "30-90 minutes"
-                },
-                {
-                  stage: "4",
-                  title: "Hard Lock",
-                  description: "Payment window closes. Unpaid players are automatically removed to ensure committed teams.",
-                  icon: Shield,
-                  color: "from-cyan-500 to-amber-400",
-                  badge: "Commitment confirmed"
-                },
-                {
-                  stage: "5",
-                  title: "Final Confirmation",
-                  description: "See your exact share amount with the final confirmed team. No surprises, complete transparency.",
-                  icon: CheckCircle,
-                  color: "from-cyan-500 to-amber-400",
-                  badge: "All set!"
-                },
-              ].map((item, i) => (
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-2 px-2">
+              {testimonials.map((item, idx) => (
                 <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: i % 2 === 0 ? -100 : 100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  key={item.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`relative flex items-center ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} flex-col gap-8`}
+                  transition={{ delay: idx * 0.05 }}
+                  className="min-w-[260px] max-w-[280px] snap-start rounded-2xl border border-white/15 bg-white/80 p-5 shadow-xl flex flex-col gap-3"
                 >
-                  {/* Content Card */}
-                  <div className="flex-1 lg:w-1/2">
-                    <motion.div 
-                      className="bg-black/90 backdrop-blur-md p-8 rounded-3xl border-2 border-white/50 hover:border-white/70 transition-all shadow-xl"
-                      whileHover={{ scale: 1.02, y: -5 }}
-                      style={getParallaxStyle(80)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center flex-shrink-0`}>
-                          <item.icon className="w-8 h-8 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-white text-xl font-bold">{item.title}</h3>
-                            <span className={`text-xs px-3 py-1 rounded-full bg-gradient-to-r ${item.color} text-white`}>
-                              {item.badge}
-                            </span>
-                          </div>
-                          <p className="text-white/85 font-medium">{item.description}</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/40">
+                      <ImageWithFallback src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div className="text-slate-900 font-semibold text-sm">{item.name}</div>
+                      <div className="text-slate-600 text-xs">{item.role}</div>
+                    </div>
                   </div>
-
-                  {/* Stage Number Circle */}
-                  <div className="flex-shrink-0 lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2 z-10">
-                    <motion.div 
-                      className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-full flex items-center justify-center shadow-2xl border-4 border-slate-900`}
-                      whileHover={{ scale: 1.2, rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <span className="text-white text-xl">{item.stage}</span>
-                    </motion.div>
-                  </div>
-
-                  {/* Empty space for alternating layout */}
-                  <div className="flex-1 lg:w-1/2 hidden lg:block" />
+                  <p className="text-slate-800 text-sm leading-relaxed">“{item.quote}”</p>
                 </motion.div>
               ))}
             </div>
@@ -951,100 +1052,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
         </div>
       </section>
 
-      {/* Social Proof - Instagram Style Feed */}
-      <section className="relative py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            style={getParallaxStyle(50)}
-          >
-            <h2 className="mb-4 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Real Stories, Real <span className="text-cyan-600">Connections</span></h2>
-            <p className="text-slate-800 text-xl md:text-2xl font-semibold max-w-2xl mx-auto">
-              See what our community is experiencing every day.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                user: "Priya Sharma",
-                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
-                image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600",
-                caption: "Found my weekend football crew! 3 months in and we're more like family now ⚽❤️ #AventoFam",
-                likes: 124,
-                time: "2h ago"
-              },
-              {
-                user: "Rahul Patel",
-                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
-                image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600",
-                caption: "Trust score 95! When you show up consistently, magic happens 🌟 12 game streak and counting!",
-                likes: 89,
-                time: "5h ago"
-              },
-              {
-                user: "Ananya Desai",
-                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100",
-                image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600",
-                caption: "From strangers to celebration partners 🎉 Avento makes every party feel like home!",
-                likes: 156,
-                time: "1d ago"
-              },
-            ].map((post, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="bg-white backdrop-blur-md rounded-3xl overflow-hidden border-2 border-slate-300 shadow-xl"
-                style={getParallaxStyle(70 + i * 10)}
-              >
-                {/* Post Header */}
-                <div className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300">
-                    <ImageWithFallback src={post.avatar} alt={post.user} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-slate-900 text-sm font-semibold">{post.user}</div>
-                    <div className="text-slate-500 text-xs">{post.time}</div>
-                  </div>
-                </div>
-
-                {/* Post Image */}
-                <div className="relative h-64 overflow-hidden">
-                  <ImageWithFallback src={post.image} alt="Post" className="w-full h-full object-cover" />
-                </div>
-
-                {/* Post Actions */}
-                <div className="p-4">
-                  <div className="flex items-center gap-4 mb-3">
-                    <motion.button 
-                      className="flex items-center gap-2 text-pink-500"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <Heart className="w-5 h-5" fill="currentColor" />
-                      <span className="text-sm font-semibold">{post.likes}</span>
-                    </motion.button>
-                  </div>
-                  <p className="text-slate-700 text-sm leading-relaxed">
-                    <span className="text-slate-900 font-bold mr-2">{post.user.split(' ')[0]}</span>
-                    {post.caption}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
-      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/40 to-black/60 backdrop-blur-sm">
+      <section className="relative py-24 bg-gradient-to-b from-transparent via-black/40 to-black/60 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
@@ -1083,63 +1092,16 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 >
                   <feature.icon className="w-7 h-7 text-white" />
                 </motion.div>
-                <h3 className="mb-3 text-white">{feature.title}</h3>
-                <p className="text-slate-200">{feature.desc}</p>
+                <h3 className="mb-3 text-white text-xl font-bold">{feature.title}</h3>
+                <p className="text-white text-base font-medium leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Avento is Different */}
-      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/30 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-8 rounded-3xl p-8 mx-auto max-w-4xl border border-white/10 shadow-2xl bg-gradient-to-br from-pink-50/30 via-rose-50/20 to-white/10 backdrop-blur-lg"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="mb-4 text-white text-3xl md:text-5xl font-black tracking-tight">Why Avento is <span className="text-cyan-300">Different</span></h2>
-            <p className="text-white text-lg md:text-xl max-w-2xl mx-auto">A quick comparison showing how Avento focuses on community, safety, and lasting connections.</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-6 rounded-2xl shadow-2xl border border-white/8 bg-gradient-to-br from-rose-50/60 via-rose-100/40 to-amber-50/40 backdrop-blur-md"
-            >
-              <h3 className="text-white font-bold mb-3">Typical Competitors</h3>
-                <ul className="text-white/90 list-disc list-inside space-y-2">
-                <li><strong>Booking-only apps</strong>: Transaction-first, little social context or reputation.</li>
-                <li><strong>Matchmaking services</strong>: Algorithm-heavy matchmaking, weak on emotional safety and rituals.</li>
-                <li><strong>Event listings</strong>: Broad discovery but high cancellation and low accountability.</li>
-              </ul>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-6 rounded-2xl shadow-2xl border border-white/8 bg-gradient-to-br from-emerald-50/60 via-slate-50/30 to-green-50/30 backdrop-blur-md"
-            >
-              <h3 className="text-white font-bold mb-3">How Avento Stands Out</h3>
-                <ul className="text-white/90 list-disc list-inside space-y-2">
-                <li><strong>Trust Scores</strong>: Reputation-based matching for safer, more reliable meetups.</li>
-                <li><strong>5-stage payment flow</strong>: Reduces no-shows with fair, transparent commitment stages.</li>
-                <li><strong>Friendship Streaks & Rituals</strong>: Encourages repeated, meaningful interactions—not one-off bookings.</li>
-                <li><strong>Post-match reflections</strong>: Emotional-safety features that strengthen community norms.</li>
-                <li><strong>Privacy & Controls</strong>: Private matches and invite-only groups to protect your circle.</li>
-              </ul>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* Business Model & Refund Policy */}
-      <section className="relative py-20 bg-gradient-to-b from-[#0b1021]/85 via-[#12172d]/65 to-[#0b1021]/85">
+      <section className="relative py-24 bg-gradient-to-b from-[#0b1021]/85 via-[#12172d]/65 to-[#0b1021]/85">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-8 bg-gradient-to-r from-[#111827]/90 via-[#0f172a]/90 to-[#0b1021]/90 rounded-3xl p-8 mx-auto max-w-4xl border border-cyan-200/15 shadow-[0_25px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl"
@@ -1148,64 +1110,67 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             viewport={{ once: true }}
           >
             <h2 className="mb-4 text-3xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-cyan-200 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">Business Model & Refund Policy</h2>
-            <p className="text-slate-100 text-lg md:text-xl max-w-2xl mx-auto">Clear, fair, and built to encourage lasting community participation.</p>
+            <p className="text-slate-100 text-lg md:text-xl max-w-3xl mx-auto">Flash cards instead of paragraphs: how we earn, what you unlock, and how refunds behave at each step.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-7 rounded-2xl shadow-[0_20px_70px_rgba(0,0,0,0.35)] border border-amber-200/20 bg-gradient-to-br from-amber-900/70 via-rose-900/55 to-fuchsia-900/55 backdrop-blur-xl"
-            >
-              <h3 className="text-amber-50 font-extrabold mb-3 drop-shadow">Business Model Clarity</h3>
-              <ul className="text-amber-50/90 list-disc list-inside space-y-2 leading-relaxed">
-                <li><span className="font-semibold text-amber-100">Freemium</span>: Core features (browsing, joining, basic messaging) are free so everyone can start building connections.</li>
-                <li><span className="font-semibold text-amber-100">Premium Perks</span>: Subscription adds perks like priority booking, advanced match filters, exclusive events, and enhanced profile visibility.</li>
-                <li><span className="font-semibold text-amber-100">Venue & Brand Partnerships</span>: Strategic partnerships with venues and brands provide discounts, sponsored events, and co-hosted community experiences.</li>
-              </ul>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="p-7 rounded-2xl shadow-[0_20px_70px_rgba(0,0,0,0.35)] border border-cyan-200/20 bg-gradient-to-br from-[#0b1224]/90 via-[#12233f]/80 to-[#1e2b4f]/80 backdrop-blur-xl"
-            >
-              <h3 className="text-cyan-50 font-extrabold mb-3 drop-shadow">Refund Policy (Short)</h3>
-              <ul className="text-cyan-50/90 list-disc list-inside space-y-2 leading-relaxed">
-                <li><span className="font-semibold text-cyan-100">Before Soft Lock</span>: Full cancellation and refund available at no charge.</li>
-                <li><span className="font-semibold text-cyan-100">During Payment Window</span>: Partial refunds possible depending on timing; automated rules apply to keep matches fair.</li>
-                <li><span className="font-semibold text-cyan-100">After Hard Lock / Post-Payment</span>: Refunds are limited—cancellations may affect your Trust Score unless a verified reason is provided.</li>
-                <li><span className="font-semibold text-cyan-100">Disputes & Support</span>: Contact support for exceptional cases; we aim to resolve refunds within 5–10 business days.</li>
-              </ul>
-              <p className="text-indigo-100/80 text-sm mt-3">Full policy details and eligibility rules are available in Settings → Payments or by contacting Support.</p>
-            </motion.div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {businessPillars.map((item, idx) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="h-full rounded-2xl p-6 border border-white/10 bg-[#0f162e]/70 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center mb-4`}>
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-white text-xl font-bold mb-3">{item.title}</h3>
+                <ul className="space-y-2 text-base text-white font-medium">
+                  {item.points.map((point, i) => (
+                    <li key={i} className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-300" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </section>
 
-      {/* Technical Highlights */}
-      <section className="relative py-20 bg-gradient-to-b from-transparent via-black/20 to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div className="text-center mb-8 bg-white/5 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/10 shadow-lg" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-            <h2 className="mb-3 text-white text-3xl md:text-4xl font-black">Technical Highlights</h2>
-            <p className="text-slate-300 max-w-2xl mx-auto">Scalable serverless-first architecture, Postgres-backed analytics, staged payments, and privacy-first controls — designed for rapid growth and reliability.</p>
-          </motion.div>
+          <div className="mt-6 grid md:grid-cols-3 gap-4">
+            {[{ label: "Platform fee", value: "6-9%", note: "only on paid slots" }, { label: "Premium", value: "$6/mo", note: "cancel anytime" }, { label: "Partner take", value: "Instant", note: "auto-routed to venues" }].map((item, idx) => (
+              <div key={idx} className="rounded-xl border border-white/20 bg-black/60 px-5 py-4 flex items-center justify-between">
+                <div className="text-white text-base font-semibold">{item.label}</div>
+                <div className="text-right">
+                  <div className="text-white font-bold text-lg">{item.value}</div>
+                  <div className="text-white text-sm font-medium">{item.note}</div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <h4 className="text-white font-bold mb-2">Architecture</h4>
-              <p className="text-slate-300 text-sm">Serverless functions + managed Postgres (Supabase), CDN-hosted frontend, background workers for payments & notifications.</p>
-            </motion.div>
-            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <h4 className="text-white font-bold mb-2">Tech Stack</h4>
-              <p className="text-slate-300 text-sm">TypeScript, React + Vite, TailwindCSS, Supabase (Auth + Postgres), Stripe for payments, infra-as-code for reproducibility.</p>
-            </motion.div>
-            <motion.div className="bg-black/85 p-6 rounded-2xl border border-white/10 shadow-lg" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <h4 className="text-white font-bold mb-2">Scalability</h4>
-              <p className="text-slate-300 text-sm">Horizontal scaling via serverless, read replicas for analytics, queue-based rate-limiting for payments and invites.</p>
-            </motion.div>
+          <div className="mt-10 grid md:grid-cols-3 gap-5">
+            {refundMoments.map((item, idx) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="h-full rounded-2xl p-6 border border-white/10 bg-[#0c1326]/80 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center`}>
+                    <item.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-sm font-semibold px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white">Refund moment</span>
+                </div>
+                <h4 className="text-white text-xl font-bold mb-2">{item.title}</h4>
+                <p className="text-white text-base font-medium leading-relaxed">{item.copy}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -1214,7 +1179,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       <Traction />
 
       {/* Stats Section */}
-      <section className="relative py-20">
+      <section className="relative py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="bg-white/60 backdrop-blur-xl rounded-3xl p-12 text-center border-2 border-white/80 shadow-2xl"
@@ -1232,8 +1197,8 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { value: "25K+", label: "Meaningful Connections" },
-                { value: "1,500+", label: "Events & Experiences" },
+                { value: "25,000", label: "Monthly Active Users" },
+                { value: "42,000", label: "Matches Played" },
                 { value: "97%", label: "Feel More Connected" }
               ].map((stat, i) => (
                 <motion.div
@@ -1253,7 +1218,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   >
                     {stat.value}
                   </motion.div>
-                  <p className="text-white text-lg md:text-xl font-semibold mt-2">{stat.label}</p>
+                  <p className="text-slate-900 text-xl md:text-2xl font-bold mt-2">{stat.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -1262,7 +1227,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
       </section>
 
       {/* FAQ Section */}
-      <section className="relative py-20 bg-gradient-to-b from-black/40 to-transparent">
+      <section className="relative py-24 bg-gradient-to-b from-black/40 to-transparent">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16 bg-white/60 rounded-3xl p-8 mx-auto max-w-4xl border-2 border-white/80 shadow-2xl"
@@ -1292,7 +1257,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
                   className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-white/10 transition-colors"
                 >
-                  <span className="text-white pr-4">{faq.question}</span>
+                  <span className="text-white text-lg font-semibold pr-4">{faq.question}</span>
                   <motion.div
                     animate={{ rotate: openFaqIndex === i ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -1309,7 +1274,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-6 pb-5 text-white/85 font-medium">
+                  <div className="px-6 pb-5 text-white text-base font-medium leading-relaxed">
                     {faq.answer}
                   </div>
                 </motion.div>
@@ -1357,12 +1322,12 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-amber-400 rounded-lg flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="bg-gradient-to-r from-cyan-300 to-amber-200 bg-clip-text text-transparent">Avento</span>
+            <span className="bg-gradient-to-r from-cyan-300 to-amber-200 bg-clip-text text-transparent text-2xl font-bold">Avento</span>
           </div>
-          <p className="text-center text-slate-300">
+          <p className="text-center text-white text-lg font-semibold">
             Where Every Moment Becomes a Memory.
           </p>
-          <p className="text-center text-slate-400 mt-2">
+          <p className="text-center text-white text-base font-medium mt-2">
             Sports • Cultural Events • Parties
           </p>
         </div>

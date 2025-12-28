@@ -11,6 +11,10 @@ interface User {
   id: string;
   email: string;
   name: string;
+  age?: string;
+  phone?: string;
+  profession?: string;
+  onboarding_completed?: boolean;
 }
 
 interface AuthContextType {
@@ -39,6 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: session.user.id,
           email: session.user.email || '',
           name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+          age: session.user.user_metadata?.age,
+          phone: session.user.user_metadata?.phone,
+          profession: session.user.user_metadata?.profession,
+          onboarding_completed: session.user.user_metadata?.onboarding_completed || false,
         });
       } else {
         setUser(null);
@@ -66,6 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: data.user.id,
         email: data.user.email || '',
         name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || email.split('@')[0],
+        age: data.user.user_metadata?.age,
+        phone: data.user.user_metadata?.phone,
+        profession: data.user.user_metadata?.profession,
+        onboarding_completed: data.user.user_metadata?.onboarding_completed || false,
       };
       setUser(newUser);
       setLoading(false);
@@ -85,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           full_name: userData.name,
           name: userData.name,
+          onboarding_completed: false,
         },
       },
     });
@@ -94,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: data.user.id,
         email: data.user.email || '',
         name: userData.name,
+        onboarding_completed: false,
       };
       setUser(newUser);
       setLoading(false);
