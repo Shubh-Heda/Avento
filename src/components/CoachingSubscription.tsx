@@ -1,9 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Award, Calendar, Clock, Users, Star, CheckCircle, TrendingUp, Target } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { toast } from 'sonner';
+import {
+  getAvailableTimeSlots,
+  bookCoachingSlot,
+  createCoachingSubscription,
+  getNext7Days,
+  type Coach as CoachType
+} from '../services/coachingService';
 
 interface Coach {
   id: string;
@@ -109,9 +116,79 @@ export function CoachingSubscription({
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [step, setStep] = useState<'coaches' | 'plans' | 'slots' | 'confirm'>('coaches');
+  
+  // Calendar integration state
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [availableDates, setAvailableDates] = useState<Date[]>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<any[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const coach = coaches.find(c => c.id === selectedCoach);
   const plan = subscriptionPlans.find(p => p.id === selectedPlan);
+
+  // Initialize available dates (next 7 days)
+  useEffect(() => {
+    setAvailableDates(getNext7Days());
+  }, []);
+
+  // Load available time slots when coach and date change
+  useEffect(() => {
+    if (selectedCoach && selectedDate) {
+      loadAvailableTimeSlots();
+    }
+  }, [selectedCoach, selectedDate]);
+
+  const loadAvailableTimeSlots = async () => {
+    if (!selectedCoach) return;
+
+    setIsLoadingSlots(true);
+    try {
+      const slots = await getAvailableTimeSlots(selectedCoach, selectedDate);
+      setAvailableTimeSlots(slots);
+    } catch (error) {
+      console.error('Error loading time slots:', error);
+      // Fallback to mock data if backend is not available
+      const mockSlots = [
+        {
+          id: 'mock-1',
+          coach_id: selectedCoach,
+          day_of_week: selectedDate.getDay(),
+          start_time: '06:00',
+          end_time: '07:30',
+          duration_minutes: 90,
+          spots_left: 4,
+          is_available: true,
+          sport: sport,
+        },
+        {
+          id: 'mock-2',
+          coach_id: selectedCoach,
+          day_of_week: selectedDate.getDay(),
+          start_time: '17:00',
+          end_time: '18:30',
+          duration_minutes: 90,
+          spots_left: 2,
+          is_available: true,
+          sport: sport,
+        },
+        {
+          id: 'mock-3',
+          coach_id: selectedCoach,
+          day_of_week: selectedDate.getDay(),
+          start_time: '18:30',
+          end_time: '20:00',
+          duration_minutes: 90,
+          spots_left: 6,
+          is_available: true,
+          sport: sport,
+        },
+      ];
+      setAvailableTimeSlots(mockSlots);
+      console.log('Using mock time slots (backend not available)');
+    } finally {
+      setIsLoadingSlots(false);
+    }
+  };
 
   const toggleSlot = (slotId: string) => {
     setSelectedSlots(prev =>
@@ -119,16 +196,39 @@ export function CoachingSubscription({
     );
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!selectedCoach || !selectedPlan || selectedSlots.length === 0) {
       toast.error('Please complete all selections');
       return;
     }
 
-    toast.success(`Successfully subscribed to ${plan?.name} coaching plan! 🎉`, {
-      description: `Your ${sport} coaching journey begins now!`,
-    });
-    onClose();
+    try {
+      // Create subscription
+      const subscription = await createCoachingSubscription(
+        selectedCoach,
+        selectedPlan,
+        new Date()
+      );
+
+      // Book initial slots
+      for (const slotId of selectedSlots) {
+        await bookCoachingSlot(
+          selectedCoach,
+          slotId,
+          selectedDate,
+          subscription.id,
+          0 // Included in subscription
+        );
+      }
+
+      toast.success(`Successfully subscribed to ${plan?.name} coaching plan! 🎉`, {
+        description: `Your ${sport} coaching journey begins now!`,
+      });
+      onClose();
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      toast.error('Failed to create subscription. Please try again.');
+    }
   };
 
   return (
@@ -322,62 +422,121 @@ export function CoachingSubscription({
               <div className="mb-6">
                 <h3 className="mb-2">Choose Your Training Schedule</h3>
                 <p className="text-slate-600">
-                  Select your preferred time slots (you can select multiple)
+                  Select date and preferred time slots (you can select multiple)
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {slots.map(slot => (
-                  <button
-                    key={slot.id}
-                    onClick={() => slot.available && toggleSlot(slot.id)}
-                    disabled={!slot.available}
-                    className={`p-4 rounded-xl border-2 transition-all text-left ${
-                      selectedSlots.includes(slot.id)
-                        ? 'border-cyan-500 bg-cyan-50 shadow-md'
-                        : slot.available
-                        ? 'border-slate-200 hover:border-slate-300'
-                        : 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-cyan-600" />
-                        <span>{slot.day}</span>
-                      </div>
-                      {selectedSlots.includes(slot.id) && (
-                        <div className="w-5 h-5 bg-cyan-500 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
+              {/* Date Selector */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold mb-3">Select Date</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {availableDates.map((date, index) => {
+                    const isSelected = selectedDate.toDateString() === date.toDateString();
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    const dayNumber = date.getDate();
+                    const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+                    const isToday = new Date().toDateString() === date.toDateString();
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedDate(date)}
+                        className={`p-4 rounded-xl border-2 transition-all text-center ${
+                          isSelected
+                            ? 'border-cyan-500 bg-cyan-50 shadow-md'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="text-sm text-slate-600 mb-1">{dayName}</div>
+                        <div className="text-2xl font-bold text-slate-900">{dayNumber}</div>
+                        <div className="text-xs text-slate-600 mt-1">{monthName}</div>
+                        {isToday && (
+                          <Badge variant="secondary" className="text-xs mt-2">
+                            Today
+                          </Badge>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-                    <div className="flex items-center gap-4 text-sm text-slate-600 mb-2">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{slot.time}</span>
-                      </div>
-                      <span>• {slot.duration}</span>
-                    </div>
+              {/* Available Time Slots */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold mb-3">Available Time Slots</h4>
+                
+                {isLoadingSlots ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto mb-2"></div>
+                    <p className="text-sm text-slate-600">Loading available slots...</p>
+                  </div>
+                ) : availableTimeSlots.length === 0 ? (
+                  <div className="text-center py-8 bg-slate-50 rounded-xl">
+                    <Calendar className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-slate-600">No available slots for this date</p>
+                    <p className="text-sm text-slate-500 mt-1">Try selecting another date</p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {availableTimeSlots.map((timeSlot, index) => {
+                      // Handle both old format (time, spotsLeft, available) and new format (start_time, end_time, spots_left, is_available)
+                      const displayTime = timeSlot.time || `${timeSlot.start_time} - ${timeSlot.end_time}`;
+                      const spotsAvailable = timeSlot.spotsLeft !== undefined ? timeSlot.spotsLeft : timeSlot.spots_left;
+                      const isSlotAvailable = timeSlot.available !== undefined ? timeSlot.available : timeSlot.is_available;
+                      const slotId = timeSlot.id || `${selectedDate.toISOString()}-${timeSlot.start_time || timeSlot.time}`;
+                      const isSelected = selectedSlots.includes(slotId);
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => isSlotAvailable && toggleSlot(slotId)}
+                          disabled={!isSlotAvailable}
+                          className={`p-4 rounded-xl border-2 transition-all text-left ${
+                            isSelected
+                              ? 'border-cyan-500 bg-cyan-50 shadow-md'
+                              : isSlotAvailable
+                              ? 'border-slate-200 hover:border-slate-300'
+                              : 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-cyan-600" />
+                              <span className="font-semibold">{displayTime}</span>
+                            </div>
+                            {isSelected && (
+                              <div className="w-5 h-5 bg-cyan-500 rounded-full flex items-center justify-center">
+                                <CheckCircle className="w-4 h-4 text-white" />
+                              </div>
+                            )}
+                          </div>
 
-                    {slot.available ? (
-                      <div className="flex items-center gap-1 text-xs text-emerald-600">
-                        <Users className="w-3 h-3" />
-                        <span>{slot.spotsLeft} spots left</span>
-                      </div>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        Fully Booked
-                      </Badge>
-                    )}
-                  </button>
-                ))}
+                          {isSlotAvailable ? (
+                            <div className="flex items-center gap-1 text-xs text-emerald-600">
+                              <Users className="w-3 h-3" />
+                              <span>{spotsAvailable} spots available</span>
+                            </div>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              Fully Booked
+                            </Badge>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {selectedSlots.length > 0 && (
                 <div className="mt-6 p-4 bg-cyan-50 rounded-lg">
                   <p className="text-sm text-cyan-700">
-                    {selectedSlots.length} slot{selectedSlots.length > 1 ? 's' : ''} selected
+                    {selectedSlots.length} time slot{selectedSlots.length > 1 ? 's' : ''} selected for{' '}
+                    {selectedDate.toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
                   </p>
                 </div>
               )}
@@ -466,22 +625,36 @@ export function CoachingSubscription({
                     <Calendar className="w-5 h-5" />
                     Your Training Schedule
                   </h3>
+                  <div className="mb-3 p-3 bg-white rounded-lg">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-orange-600" />
+                      <span className="font-semibold">
+                        {selectedDate.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          month: 'long', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    {selectedSlots.map(slotId => {
-                      const slot = slots.find(s => s.id === slotId);
-                      return slot ? (
+                    {selectedSlots.map((slotId, index) => {
+                      const timeSlot = availableTimeSlots.find(
+                        ts => `${selectedDate.toISOString()}-${ts.time}` === slotId
+                      );
+                      return timeSlot ? (
                         <div
-                          key={slot.id}
+                          key={index}
                           className="flex items-center justify-between p-3 bg-white rounded-lg"
                         >
                           <div className="flex items-center gap-3">
-                            <Calendar className="w-4 h-4 text-orange-600" />
-                            <span>{slot.day}</span>
+                            <Clock className="w-4 h-4 text-orange-600" />
+                            <span>{timeSlot.time}</span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-slate-600">
-                            <Clock className="w-4 h-4" />
-                            <span>{slot.time}</span>
-                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {timeSlot.spotsLeft} spots left
+                          </Badge>
                         </div>
                       ) : null;
                     })}

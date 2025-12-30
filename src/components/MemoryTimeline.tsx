@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft, Calendar, MapPin, Users, Heart, MessageCircle, Share2,
-  Image, Clock, Sparkles, ChevronRight, Filter
+  Image, Clock, Sparkles, ChevronRight, Filter, Send, X
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { toast } from 'sonner';
 import { photosService, MemoryEntry } from '../services/photosService';
+import memoryService, { MemoryStats, MemoryComment } from '../services/memoryService';
 
 interface MemoryTimelineProps {
   category: 'sports' | 'events' | 'parties' | 'gaming';
@@ -17,11 +18,91 @@ interface MemoryTimelineProps {
 export function MemoryTimeline({ category, onNavigate }: MemoryTimelineProps) {
   const [selectedMemory, setSelectedMemory] = useState<MemoryEntry | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'oldest'>('recent');
+  const [memoryStats, setMemoryStats] = useState<Map<string, MemoryStats>>(new Map());
+  const [comments, setComments] = useState<MemoryComment[]>([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
 
   const memories = photosService.getMemoriesByCategory(category);
   const sortedMemories = sortBy === 'recent' 
     ? memories 
     : [...memories].reverse();
+
+  // Load stats for all memories
+  useEffect(() => {
+    const loadStats = async () => {
+      const memoryIds = memories.map(m => m.id);
+      const stats = await memoryService.getMultipleMemoryStats(memoryIds);
+      setMemoryStats(stats);
+    };
+    if (memories.length > 0) {
+      loadStats();
+    }
+  }, [memories]);
+
+  // Load comments when memory is selected
+  useEffect(() => {
+    if (selectedMemory) {
+      loadComments();
+      // Subscribe to real-time updates
+      const unsubscribe = memoryService.subscribeToMemoryUpdates(
+        selectedMemory.id,
+        () => loadStats(),
+        (newComment) => setComments(prev => [newComment, ...prev])
+      );
+      return () => unsubscribe();
+    }
+  }, [selectedMemory]);
+
+  const loadStats = async () => {
+    if (!selectedMemory) return;
+    const stats = await memoryService.getMemoryStats(selectedMemory.id);
+    setMemoryStats(prev => new Map(prev).set(selectedMemory.id, stats));
+  };
+
+  const loadComments = async () => {
+    if (!selectedMemory) return;
+    setLoadingComments(true);
+    const memoryComments = await memoryService.getComments(selectedMemory.id);
+    setComments(memoryComments);
+    setLoadingComments(false);
+  };
+
+  const handleLike = async (memoryId: string) => {
+    const stats = memoryStats.get(memoryId);
+    const isLiked = stats?.is_liked;
+
+    if (isLiked) {
+      await memoryService.unlikeMemory(memoryId);
+      toast.success('Removed like');
+    } else {
+      await memoryService.likeMemory(memoryId);
+      toast.success('Liked! ❤️');
+    }
+    
+    // Refresh stats
+    const newStats = await memoryService.getMemoryStats(memoryId);
+    setMemoryStats(prev => new Map(prev).set(memoryId, newStats));
+  };
+
+  const handleComment = async () => {
+    if (!selectedMemory || !commentInput.trim()) return;
+    
+    const comment = await memoryService.addComment(selectedMemory.id, commentInput);
+    if (comment) {
+      setComments(prev => [comment, ...prev]);
+      setCommentInput('');
+      toast.success('Comment added! 💬');
+      await loadStats();
+    }
+  };
+
+  const handleShare = async (memoryId: string) => {
+    await memoryService.shareMemory(memoryId, 'community');
+    toast.success('Memory shared! 🎉');
+    const newStats = await memoryService.getMemoryStats(memoryId);
+    setMemoryStats(prev => new Map(prev).set(memoryId, newStats));
+  };
 
   const moodEmojis: Record<string, string> = {
     '🥳 Excited': '🥳',
@@ -289,19 +370,75 @@ export function MemoryTimeline({ category, onNavigate }: MemoryTimelineProps) {
                   </div>
                 )}
 
+                {/* Comments Section */}
+                <div>
+                  <h3 className="font-semibold text-slate-900 mb-3">Comments ({memoryStats.get(selectedMemory.id)?.comment_count || 0})</h3>
+                  <div className="space-y-3 max-h-64 overflow-y-auto mb-4">
+                    {loadingComments ? (
+                      <p className="text-sm text-slate-500 text-center py-4">Loading comments...</p>
+                    ) : comments.length === 0 ? (
+                      <p className="text-sm text-slate-500 text-center py-4">No comments yet. Be the first!</p>
+                    ) : (
+                      comments.map((comment) => (
+                        <div key={comment.id} className="flex gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                            {comment.author?.display_name?.charAt(0) || 'U'}
+                          </div>
+                          <div className="flex-1 bg-slate-50 rounded-lg p-3">
+                            <p className="font-semibold text-sm text-slate-900 mb-1">
+                              {comment.author?.display_name || 'User'}
+                            </p>
+                            <p className="text-sm text-slate-700">{comment.content}</p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {new Date(comment.created_at).toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={commentInput}
+                      onChange={(e) => setCommentInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleComment()}
+                      placeholder="Write a comment..."
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                    />
+                    <Button
+                      onClick={handleComment}
+                      disabled={!commentInput.trim()}
+                      className="bg-slate-600 hover:bg-slate-700 text-white"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Actions */}
                 <div className="flex gap-3 pt-4 border-t border-slate-200">
-                  <Button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 flex items-center justify-center gap-2">
-                    <Heart className="w-4 h-4" />
-                    <span>Like</span>
+                  <Button
+                    onClick={() => handleLike(selectedMemory.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 transition-all ${
+                      memoryStats.get(selectedMemory.id)?.is_liked
+                        ? 'bg-rose-100 hover:bg-rose-200 text-rose-700'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
+                    }`}
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        memoryStats.get(selectedMemory.id)?.is_liked ? 'fill-rose-500' : ''
+                      }`}
+                    />
+                    <span>Like ({memoryStats.get(selectedMemory.id)?.like_count || 0})</span>
                   </Button>
-                  <Button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 flex items-center justify-center gap-2">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Comment</span>
-                  </Button>
-                  <Button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 flex items-center justify-center gap-2">
+                  <Button
+                    onClick={() => handleShare(selectedMemory.id)}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-900 flex items-center justify-center gap-2"
+                  >
                     <Share2 className="w-4 h-4" />
-                    <span>Share</span>
+                    <span>Share ({memoryStats.get(selectedMemory.id)?.share_count || 0})</span>
                   </Button>
                 </div>
               </div>

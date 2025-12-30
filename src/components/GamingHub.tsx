@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Gamepad2, MapPin, Star, Clock, Users, Filter, Search, Plus,
+  Gamepad2, ArrowLeft, MapPin, Star, Clock, Users, Filter, Search, Plus,
   Zap, Trophy, Target, Wifi, UtensilsCrossed, Video, DoorOpen,
   TrendingUp, Shield, Heart, MessageCircle, ChevronRight, X,
   Calendar, Timer, Joystick, Monitor, Headphones, Sparkles,
@@ -129,57 +129,8 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-20">
-      {/* Animated Background - Purple/Pink Gradient for Gaming */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-pink-800 to-cyan-900" />
+    <div className="min-h-screen relative overflow-hidden pb-20 bg-white">
       
-      <motion.div
-        className="fixed inset-0 bg-gradient-to-tr from-pink-500/30 via-purple-500/30 to-cyan-500/30"
-        animate={{
-          background: [
-            'linear-gradient(to top right, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.3))',
-            'linear-gradient(to top right, rgba(6, 182, 212, 0.3), rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3))',
-            'linear-gradient(to top right, rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.3), rgba(236, 72, 153, 0.3))',
-            'linear-gradient(to top right, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.3))',
-          ]
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-      />
-      
-      {/* Floating Gaming Orbs */}
-      <motion.div
-        className="fixed w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
-        animate={{
-          x: [0, 100, -100, 0],
-          y: [0, -100, 100, 0],
-          scale: [1, 1.2, 0.8, 1],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        style={{ top: '10%', left: '10%' }}
-      />
-      
-      <motion.div
-        className="fixed w-80 h-80 bg-pink-500/20 rounded-full blur-3xl"
-        animate={{
-          x: [0, -150, 150, 0],
-          y: [0, 150, -150, 0],
-          scale: [1, 0.8, 1.3, 1],
-        }}
-        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        style={{ top: '50%', right: '10%' }}
-      />
-      
-      <motion.div
-        className="fixed w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl"
-        animate={{
-          x: [0, 120, -80, 0],
-          y: [0, -120, 80, 0],
-          scale: [1, 1.1, 0.9, 1],
-        }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        style={{ bottom: '10%', left: '30%' }}
-      />
-
       {/* Content Wrapper */}
       <div className="relative z-10">
         {/* Top Navigation Bar */}
@@ -192,7 +143,7 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 onClick={() => onNavigate('landing')}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors group" title="Back to Home"
               >
-                <MapPin className="w-5 h-5 text-slate-700 group-hover:text-purple-600 transition-colors" />
+                <ArrowLeft className="w-5 h-5 text-slate-700 group-hover:text-purple-600 transition-colors" />
               </button>
               <AventoLogo size="md" variant="with-text" />
             </div>
@@ -353,81 +304,94 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 {/* Trust Score */}
                 <motion.div
                   whileHover={{ scale: 1.05, y: -5 }}
-                  className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-4 border border-cyan-200 cursor-pointer shadow-md hover:shadow-xl transition-all"
+                  className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-4 border border-cyan-200 cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden"
                 >
+                  {/* Decorative Background Element */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-cyan-400/10 to-blue-400/10 rounded-full -mr-10 -mt-10" />
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-cyan-300/5 to-blue-300/5 rounded-full -ml-8 -mb-8" />
                   <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
                       <Shield className="w-5 h-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-cyan-700 text-sm mb-1">Trust Score</p>
+                  <p className="text-cyan-700 text-sm mb-1 font-semibold">Trust Score</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-slate-800">{userStats.trustScore}</span>
+                    <span className="text-slate-800 text-xl font-bold">{userStats.trustScore}</span>
                     <span className="text-cyan-600 text-sm">/5.0</span>
                   </div>
                   <div className="mt-2 h-1.5 bg-cyan-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                      className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/50"
                       style={{ width: `${(userStats.trustScore / 5) * 100}%` }}
                     />
                   </div>
+                  <p className="text-xs text-cyan-600 mt-2">⭐ Excellent Standing</p>
                 </motion.div>
 
                 {/* Friendship Streak */}
                 <motion.div
                   whileHover={{ scale: 1.05, y: -5 }}
-                  className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-4 border border-orange-200 cursor-pointer shadow-md hover:shadow-xl transition-all"
+                  className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-4 border border-orange-200 cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  {/* Decorative Background Element */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-400/10 to-red-400/10 rounded-full -mr-10 -mt-10" />
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-orange-300/5 to-red-300/5 rounded-full -ml-8 -mb-8" />
+                  <div className="flex items-center gap-3 mb-2 relative z-10">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
                       <Flame className="w-5 h-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-orange-700 text-sm mb-1">Friendship Streak</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-slate-800">{userStats.friendshipStreak}</span>
+                  <p className="text-orange-700 text-sm mb-1 font-semibold relative z-10">Friendship Streak</p>
+                  <div className="flex items-baseline gap-2 relative z-10">
+                    <span className="text-slate-800 text-xl font-bold">{userStats.friendshipStreak}</span>
                     <span className="text-orange-600 text-sm">sessions</span>
                   </div>
-                  <p className="text-emerald-600 text-xs mt-1 flex items-center gap-1">
+                  <p className="text-emerald-600 text-xs mt-2 flex items-center gap-1 relative z-10">
                     <TrendingUp className="w-3 h-3" />
-                    Keep it up!
+                    🔥 On Fire!
                   </p>
                 </motion.div>
 
                 {/* Win Rate */}
                 <motion.div
                   whileHover={{ scale: 1.05, y: -5 }}
-                  className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200 cursor-pointer shadow-md hover:shadow-xl transition-all"
+                  className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200 cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  {/* Decorative Background Element */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full -mr-10 -mt-10" />
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-green-300/5 to-emerald-300/5 rounded-full -ml-8 -mb-8" />
+                  <div className="flex items-center gap-3 mb-2 relative z-10">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
                       <Trophy className="w-5 h-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-green-700 text-sm mb-1">Win Rate</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-slate-800">{Math.round((userStats.wins / userStats.totalGames) * 100)}%</span>
+                  <p className="text-green-700 text-sm mb-1 font-semibold relative z-10">Win Rate</p>
+                  <div className="flex items-baseline gap-2 relative z-10">
+                    <span className="text-slate-800 text-xl font-bold">{Math.round((userStats.wins / userStats.totalGames) * 100)}%</span>
                   </div>
-                  <p className="text-slate-600 text-xs mt-1">{userStats.wins}/{userStats.totalGames} games</p>
+                  <p className="text-slate-600 text-xs mt-2 relative z-10">📊 {userStats.wins}/{userStats.totalGames} games</p>
                 </motion.div>
 
                 {/* Achievements */}
                 <motion.div
                   whileHover={{ scale: 1.05, y: -5 }}
                   onClick={() => setActiveTab('profile')}
-                  className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 border border-yellow-200 cursor-pointer shadow-md hover:shadow-xl transition-all"
+                  className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 border border-yellow-200 cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-3 mb-2">
+                  {/* Decorative Background Element */}
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-400/10 rounded-full -mr-10 -mt-10" />
+                  <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-yellow-300/5 to-orange-300/5 rounded-full -ml-8 -mb-8" />
+                  <div className="flex items-center gap-3 mb-2 relative z-10">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg">
                       <Award className="w-5 h-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-yellow-700 text-sm mb-1">Achievements</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-slate-800">{userStats.achievements}</span>
+                  <p className="text-yellow-700 text-sm mb-1 font-semibold relative z-10">Achievements</p>
+                  <div className="flex items-baseline gap-2 relative z-10">
+                    <span className="text-slate-800 text-xl font-bold">{userStats.achievements}</span>
                     <span className="text-yellow-600 text-sm">unlocked</span>
                   </div>
-                  <p className="text-slate-600 text-xs mt-1">Click to view all</p>
+                  <p className="text-slate-600 text-xs mt-2 relative z-10">✨ Click to view all</p>
                 </motion.div>
               </div>
             </motion.div>
@@ -439,10 +403,11 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('gaming-profile')}
-                className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-purple-400/50 transition-all"
+                className="relative group bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-purple-400/50 transition-all overflow-hidden"
               >
-                <UserIcon className="w-8 h-8" />
-                <span className="font-semibold text-center">My Profile</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-white/20 to-purple-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <UserIcon className="w-8 h-8 relative z-10" />
+                <span className="font-semibold text-center relative z-10">My Profile</span>
               </motion.button>
 
               {/* Community Feed Button */}
@@ -450,10 +415,11 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('gaming-community')}
-                className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-pink-400/50 transition-all"
+                className="relative group bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-pink-400/50 transition-all overflow-hidden"
               >
-                <Users className="w-8 h-8" />
-                <span className="font-semibold text-center">Community</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-400/0 via-white/20 to-pink-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Users className="w-8 h-8 relative z-10" />
+                <span className="font-semibold text-center relative z-10">Community</span>
               </motion.button>
 
               {/* Squad Chat Button */}
@@ -461,10 +427,11 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('gaming-chat')}
-                className="bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-cyan-400/50 transition-all"
+                className="relative group bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-cyan-400/50 transition-all overflow-hidden"
               >
-                <MessageSquare className="w-8 h-8" />
-                <span className="font-semibold text-center">Squad Chat</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-white/20 to-cyan-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <MessageSquare className="w-8 h-8 relative z-10" />
+                <span className="font-semibold text-center relative z-10">Squad Chat</span>
               </motion.button>
 
               {/* Gaming Cafes Button */}
@@ -472,10 +439,11 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('gaming-map')}
-                className="bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-indigo-400/50 transition-all"
+                className="relative group bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-indigo-400/50 transition-all overflow-hidden"
               >
-                <MapPin className="w-8 h-8" />
-                <span className="font-semibold text-center">Gaming Cafes</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/0 via-white/20 to-indigo-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <MapPin className="w-8 h-8 relative z-10" />
+                <span className="font-semibold text-center relative z-10">Gaming Cafes</span>
               </motion.button>
 
               {/* Community Events Button */}
@@ -483,10 +451,11 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onNavigate('gaming-events')}
-                className="bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-yellow-400/50 transition-all"
+                className="relative group bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-2xl p-6 shadow-lg text-white flex flex-col items-center justify-center gap-3 border border-yellow-400/50 transition-all overflow-hidden"
               >
-                <Trophy className="w-8 h-8" />
-                <span className="font-semibold text-center">Events</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/0 via-white/20 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Trophy className="w-8 h-8 relative z-10" />
+                <span className="font-semibold text-center relative z-10">Events</span>
               </motion.button>
             </div>
 
@@ -499,38 +468,48 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/50"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-slate-800">Recent Matches</h3>
+                  <h3 className="text-slate-800 flex items-center gap-2">
+                    <span className="text-2xl">🎯</span>
+                    Recent Matches
+                  </h3>
                   <ChevronRight className="w-5 h-5 text-slate-400" />
                 </div>
                 <div className="space-y-3">
                   {recentMatches.map((match, i) => (
-                    <div key={i} className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-2">
+                    <motion.div
+                      key={i}
+                      whileHover={{ scale: 1.02, x: 5 }}
+                      className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200 hover:shadow-md transition-all cursor-pointer relative overflow-hidden group"
+                    >
+                      {/* Shine effect on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transform -translate-x-full group-hover:translate-x-full transition-all duration-700" />
+                      
+                      <div className="flex items-center justify-between mb-2 relative z-10">
                         <div className="flex items-center gap-3">
-                          <div className={`px-3 py-1 rounded-full text-xs ${
+                          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             match.result === 'Win' 
                               ? 'bg-green-500/20 text-green-700 border border-green-500/30' 
                               : 'bg-red-500/20 text-red-700 border border-red-500/30'
                           }`}>
-                            {match.result}
+                            {match.result === 'Win' ? '✓ ' : '✕ '}{match.result}
                           </div>
-                          <span className="text-slate-800">{match.game}</span>
+                          <span className="text-slate-800 font-medium">{match.game}</span>
                         </div>
-                        <span className="text-slate-800">{match.score}</span>
+                        <span className="text-slate-800 font-bold text-lg">{match.score}</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-sm relative z-10">
                         <span className="text-slate-600">vs {match.opponent}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-slate-500">{match.date}</span>
                           {match.coins > 0 && (
-                            <span className="text-yellow-600 flex items-center gap-1">
+                            <span className="text-yellow-600 flex items-center gap-1 font-semibold">
                               <Wallet className="w-3 h-3" />
                               +{match.coins}
                             </span>
                           )}
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
@@ -542,7 +521,10 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/50"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-slate-800">Achievements</h3>
+                  <h3 className="text-slate-800 flex items-center gap-2">
+                    <span className="text-2xl">✨</span>
+                    Achievements
+                  </h3>
                   <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/30">
                     {achievements.filter(a => a.unlocked).length}/{achievements.length}
                   </Badge>
@@ -551,23 +533,26 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                   {achievements.map((achievement) => (
                     <motion.div
                       key={achievement.id}
-                      whileHover={{ scale: 1.05 }}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center p-3 border cursor-pointer ${
+                      whileHover={{ scale: 1.08, rotate: 2 }}
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center p-3 border cursor-pointer relative overflow-hidden transition-all ${
                         achievement.unlocked
-                          ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
+                          ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500/30 shadow-md'
                           : 'bg-slate-100 border-slate-300 opacity-50'
                       }`}
                     >
-                      <span className="text-3xl mb-1">{achievement.icon}</span>
-                      <p className="text-xs text-slate-800 text-center line-clamp-1">{achievement.title}</p>
+                      {achievement.unlocked && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/0 via-white/20 to-yellow-400/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                      <span className="text-3xl mb-1 relative z-10 drop-shadow-lg">{achievement.icon}</span>
+                      <p className="text-xs text-slate-800 text-center line-clamp-1 relative z-10 font-semibold">{achievement.title}</p>
                     </motion.div>
                   ))}
                 </div>
                 <Button 
                   onClick={() => setActiveTab('profile')}
-                  className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
+                  className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
                 >
-                  View All Achievements
+                  View All Achievements ➜
                 </Button>
               </motion.div>
             </div>
@@ -580,7 +565,9 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-slate-800 flex items-center gap-2">
-                  <Trophy className="w-6 h-6 text-yellow-500" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-white" />
+                  </div>
                   Active Tournaments
                 </h3>
                 <Button 
@@ -591,29 +578,34 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {gamingService.getTournaments().slice(0, 2).map((tournament) => (
-                  <div
+                {gamingService.getTournaments().slice(0, 2).map((tournament, idx) => (
+                  <motion.div
                     key={tournament.id}
-                    className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200 hover:border-purple-400 transition-all cursor-pointer hover:shadow-lg"
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    className="bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 rounded-xl p-4 border border-purple-200 hover:border-purple-400 transition-all cursor-pointer hover:shadow-lg relative overflow-hidden"
                   >
-                    <div className="flex items-center justify-between mb-3">
+                    {/* Decorative corner element */}
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-400/10 to-orange-400/10 rounded-full -mr-12 -mt-12" />
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-br from-pink-400/5 to-purple-400/5 rounded-full -ml-10 -mb-10" />
+                    
+                    <div className="flex items-center justify-between mb-3 relative z-10">
                       <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/30">
                         {tournament.game}
                       </Badge>
-                      <span className="text-green-600">₹{tournament.prizePool.toLocaleString()}</span>
+                      <span className="text-green-600 font-semibold">₹{tournament.prizePool.toLocaleString()}</span>
                     </div>
-                    <h4 className="text-slate-800 mb-2">{tournament.name}</h4>
-                    <div className="flex items-center justify-between text-sm">
+                    <h4 className="text-slate-800 mb-2 font-semibold relative z-10">{tournament.name}</h4>
+                    <div className="flex items-center justify-between text-sm relative z-10">
                       <span className="text-slate-600">{tournament.currentTeams}/{tournament.maxTeams} teams</span>
-                      <span className="text-cyan-600">₹{tournament.registrationFee}</span>
+                      <span className="text-cyan-600 font-medium">₹{tournament.registrationFee}</span>
                     </div>
-                    <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden relative z-10">
                       <div 
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                        className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 shadow-lg shadow-purple-500/50"
                         style={{ width: `${(tournament.currentTeams / tournament.maxTeams) * 100}%` }}
                       />
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -624,18 +616,23 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/50"
             >
-              <h3 className="text-slate-800 mb-4">Popular Games</h3>
+              <h3 className="text-slate-800 mb-4 flex items-center gap-2">
+                <span className="text-2xl">🎮</span>
+                Popular Games
+              </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {popularGames.map((game, i) => (
                   <motion.button
                     key={i}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.08, y: -8, rotate: 2 }}
+                    whileTap={{ scale: 0.92 }}
                     onClick={() => setActiveTab('clubs')}
-                    className={`aspect-square rounded-xl bg-gradient-to-r ${game.color} p-4 flex flex-col items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow`}
+                    className={`aspect-square rounded-xl bg-gradient-to-r ${game.color} p-4 flex flex-col items-center justify-center gap-2 shadow-lg hover:shadow-2xl transition-all relative overflow-hidden group`}
                   >
-                    <span className="text-4xl">{game.icon}</span>
-                    <span className="text-white text-sm text-center">{game.name}</span>
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transform -translate-x-full group-hover:translate-x-full transition-all duration-700" />
+                    <span className="text-4xl drop-shadow-lg relative z-10">{game.icon}</span>
+                    <span className="text-white text-xs text-center font-semibold relative z-10">{game.name}</span>
                   </motion.button>
                 ))}
               </div>
@@ -836,56 +833,68 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 border border-white/50 hover:border-yellow-300 transition-all shadow-lg hover:shadow-2xl"
+                  whileHover={{ scale: 1.02, y: -8 }}
+                  className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 border border-white/50 hover:border-yellow-300 transition-all shadow-lg hover:shadow-2xl relative overflow-hidden group"
                 >
-                  <div className="flex items-start justify-between mb-4">
+                  {/* Decorative background elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/10 to-orange-400/10 rounded-full -mr-16 -mt-16" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-purple-400/5 to-pink-400/5 rounded-full -ml-12 -mb-12" />
+                  
+                  <div className="flex items-start justify-between mb-4 relative z-10">
                     <div>
-                      <h3 className="text-slate-800 mb-2">{tournament.name}</h3>
+                      <h3 className="text-slate-800 mb-2 font-bold text-lg">{tournament.name}</h3>
                       <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/30">
                         {tournament.game}
                       </Badge>
                     </div>
-                    <Trophy className="w-8 h-8 text-yellow-500" />
+                    <motion.div
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                      className="text-4xl"
+                    >
+                      🏆
+                    </motion.div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-slate-500">Prize Pool</p>
-                      <p className="text-xl text-green-600">₹{tournament.prizePool.toLocaleString()}</p>
+                  <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                      <p className="text-xs text-slate-500 mb-1">Prize Pool</p>
+                      <p className="text-xl text-green-600 font-bold">₹{tournament.prizePool.toLocaleString()}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-slate-500">Entry Fee</p>
-                      <p className="text-xl text-slate-800">₹{tournament.registrationFee}</p>
+                    <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg p-3 border border-cyan-200">
+                      <p className="text-xs text-slate-500 mb-1">Entry Fee</p>
+                      <p className="text-xl text-slate-800 font-bold">₹{tournament.registrationFee}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2 mb-4">
+                  <div className="space-y-2 mb-4 relative z-10">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Teams Registered</span>
-                      <span className="text-slate-800">{tournament.currentTeams} / {tournament.maxTeams}</span>
+                      <span className="text-slate-500 font-medium">Teams Registered</span>
+                      <span className="text-slate-800 font-bold">{tournament.currentTeams} / {tournament.maxTeams}</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                        style={{ width: `${(tournament.currentTeams / tournament.maxTeams) * 100}%` }}
+                    <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                      <motion.div 
+                        className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 shadow-lg shadow-purple-500/50"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(tournament.currentTeams / tournament.maxTeams) * 100}%` }}
+                        transition={{ duration: 1.5, delay: i * 0.2 }}
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-slate-600 mb-4">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-4 text-sm text-slate-600 mb-4 relative z-10">
+                    <div className="flex items-center gap-1 bg-slate-100 px-3 py-1 rounded-lg">
                       <Calendar className="w-4 h-4" />
                       <span>{new Date(tournament.startDate).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 bg-slate-100 px-3 py-1 rounded-lg">
                       <Users className="w-4 h-4" />
                       <span>{tournament.teamSize}v{tournament.teamSize}</span>
                     </div>
                   </div>
 
-                  <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg">
-                    Register Now
+                  <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg font-semibold relative z-10">
+                    Register Now ⚡
                   </Button>
                 </motion.div>
               ))}
@@ -900,18 +909,30 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
             <motion.div 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50"
+              className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/50 relative overflow-hidden"
             >
-              <div className="flex items-start gap-6">
+              {/* Decorative background */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full -mr-24 -mt-24" />
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-br from-cyan-400/5 to-blue-400/5 rounded-full -ml-20 -mb-20" />
+              
+              <div className="flex items-start gap-6 relative z-10">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl shadow-lg">
+                  <motion.div
+                    animate={{ scale: [1, 1.02, 1] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-500 flex items-center justify-center text-white text-3xl shadow-lg border-4 border-white"
+                  >
                     AT
-                  </div>
-                  <button className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-purple-500">
+                  </motion.div>
+                  <motion.button
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-purple-500 hover:bg-purple-50 transition-colors"
+                  >
                     <Camera className="w-4 h-4 text-purple-600" />
-                  </button>
+                  </motion.button>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 relative z-10">
                   {isEditingProfile ? (
                     <div className="space-y-3">
                       <Input
@@ -927,27 +948,27 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
                         placeholder="Your Bio"
                       />
                       <div className="flex gap-2">
-                        <Button onClick={handleProfileSave} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          Save Changes
+                        <Button onClick={handleProfileSave} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
+                          💾 Save Changes
                         </Button>
                         <Button onClick={() => setIsEditingProfile(false)} className="bg-slate-200 text-slate-800">
-                          Cancel
+                          ✕ Cancel
                         </Button>
                       </div>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-slate-800">{userName}</h1>
-                        <Badge className="bg-purple-500/20 text-purple-700 border-purple-500/30">
-                          Level {userStats.level}
+                        <h1 className="text-slate-800 text-2xl font-bold">{userName}</h1>
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none">
+                          ⭐ Level {userStats.level}
                         </Badge>
                       </div>
                       <p className="text-slate-600 mb-3">{userBio}</p>
                       <div className="flex flex-wrap gap-2 mb-4">
                         {favoriteGames.map((game, i) => (
                           <Badge key={i} className="bg-slate-200 text-slate-700 border-slate-300">
-                            {game}
+                            🎮 {game}
                           </Badge>
                         ))}
                       </div>
@@ -966,23 +987,35 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200">
-                <div className="text-center">
-                  <p className="text-2xl text-slate-800 mb-1">{userStats.totalGames}</p>
-                  <p className="text-sm text-slate-600">Games Played</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl text-slate-800 mb-1">{userStats.hoursPlayed}</p>
-                  <p className="text-sm text-slate-600">Hours</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl text-slate-800 mb-1">{userStats.friendsMade}</p>
-                  <p className="text-sm text-slate-600">Friends</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl text-slate-800 mb-1">{userStats.coins}</p>
-                  <p className="text-sm text-slate-600">Coins</p>
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200 relative z-10">
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="text-center bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200"
+                >
+                  <p className="text-3xl text-slate-800 mb-1 font-bold">{userStats.totalGames}</p>
+                  <p className="text-sm text-slate-600">🎮 Games Played</p>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="text-center bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border border-orange-200"
+                >
+                  <p className="text-3xl text-slate-800 mb-1 font-bold">{userStats.hoursPlayed}</p>
+                  <p className="text-sm text-slate-600">⏱️ Hours</p>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="text-center bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200"
+                >
+                  <p className="text-3xl text-slate-800 mb-1 font-bold">{userStats.friendsMade}</p>
+                  <p className="text-sm text-slate-600">👥 Friends</p>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="text-center bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-200"
+                >
+                  <p className="text-3xl text-slate-800 mb-1 font-bold">{userStats.coins}</p>
+                  <p className="text-sm text-slate-600">💰 Coins</p>
+                </motion.div>
               </div>
             </motion.div>
 
@@ -992,35 +1025,39 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/50"
             >
-              <h3 className="text-slate-800 mb-4">All Achievements</h3>
+              <h3 className="text-slate-800 mb-4 text-lg font-bold flex items-center gap-2">
+                <span className="text-2xl">🏆</span>
+                All Achievements
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {achievements.map((achievement) => (
-                  <div
+                  <motion.div
                     key={achievement.id}
-                    className={`rounded-xl p-4 border flex items-start gap-4 ${
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    className={`rounded-xl p-4 border flex items-start gap-4 transition-all ${
                       achievement.unlocked
-                        ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300'
+                        ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300 shadow-md hover:shadow-lg'
                         : 'bg-slate-50 border-slate-300 opacity-50'
                     }`}
                   >
-                    <span className="text-4xl">{achievement.icon}</span>
+                    <span className="text-5xl drop-shadow-lg">{achievement.icon}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-slate-800">{achievement.title}</h4>
+                        <h4 className="text-slate-800 font-bold">{achievement.title}</h4>
                         {achievement.unlocked && <CheckCircle className="w-4 h-4 text-green-600" />}
                       </div>
                       <p className="text-sm text-slate-600 mb-2">{achievement.description}</p>
                       <div className="flex items-center justify-between">
                         {achievement.unlocked && achievement.date && (
-                          <p className="text-xs text-slate-500">Unlocked: {achievement.date}</p>
+                          <p className="text-xs text-slate-500">✓ Unlocked: {achievement.date}</p>
                         )}
-                        <p className="text-xs text-yellow-600 flex items-center gap-1">
+                        <p className="text-xs text-yellow-600 flex items-center gap-1 font-semibold">
                           <Wallet className="w-3 h-3" />
                           {achievement.coins} coins
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -1031,26 +1068,48 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/50"
             >
-              <h3 className="text-slate-800 mb-4">Trust Score Breakdown</h3>
-              <div className="space-y-4">
+              <h3 className="text-slate-800 mb-4 text-lg font-bold flex items-center gap-2">
+                <span className="text-2xl">📊</span>
+                Trust Score Breakdown
+              </h3>
+              <div className="space-y-5">
                 {[
-                  { label: 'Match Completion', value: 95, color: 'from-green-500 to-emerald-500' },
-                  { label: 'Punctuality', value: 88, color: 'from-blue-500 to-cyan-500' },
-                  { label: 'Team Spirit', value: 92, color: 'from-purple-500 to-pink-500' },
-                  { label: 'Sportsmanship', value: 90, color: 'from-orange-500 to-yellow-500' }
+                  { label: 'Match Completion', value: 95, color: 'from-green-500 to-emerald-500', icon: '✓' },
+                  { label: 'Punctuality', value: 88, color: 'from-blue-500 to-cyan-500', icon: '⏱️' },
+                  { label: 'Team Spirit', value: 92, color: 'from-purple-500 to-pink-500', icon: '👥' },
+                  { label: 'Sportsmanship', value: 90, color: 'from-orange-500 to-yellow-500', icon: '🏅' }
                 ].map((item, i) => (
-                  <div key={i}>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="relative"
+                  >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-slate-800">{item.label}</span>
-                      <span className="text-slate-600">{item.value}%</span>
+                      <span className="text-slate-800 font-semibold flex items-center gap-2">
+                        <span className="text-lg">{item.icon}</span>
+                        {item.label}
+                      </span>
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.1 + 0.3 }}
+                        className="text-slate-600 font-bold"
+                      >
+                        {item.value}%
+                      </motion.span>
                     </div>
-                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full bg-gradient-to-r ${item.color}`}
-                        style={{ width: `${item.value}%` }}
+                    <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                      <motion.div 
+                        className={`h-full bg-gradient-to-r ${item.color} shadow-lg`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.value}%` }}
+                        transition={{ duration: 1.5, delay: i * 0.15, ease: "easeOut" }}
+                        style={{ boxShadow: `0 0 20px rgba(${item.color === 'from-green-500 to-emerald-500' ? '16, 185, 129' : item.color === 'from-blue-500 to-cyan-500' ? '59, 130, 246' : item.color === 'from-purple-500 to-pink-500' ? '168, 85, 247' : '249, 115, 22'}, 0.5)` }}
                       />
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>

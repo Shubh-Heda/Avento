@@ -392,6 +392,125 @@ export function PartyDashboard({ onNavigate, userProfile: userProfileProp, onBoo
             </div>
           </div>
 
+          {/* Upcoming Premium Experiences */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-900">✨ Premium Experiences</h2>
+              <Button variant="ghost" className="text-pink-600 hover:bg-pink-50">
+                See All →
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* VIP Experience Card */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 hover:shadow-xl transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="text-4xl">👑</div>
+                  <Badge className="bg-amber-500 text-white">VIP</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-slate-900">VIP Table Lounge</h3>
+                <p className="text-slate-600 mb-4 text-sm">Exclusive lounge access with bottle service and prime seating at any venue</p>
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-lg font-semibold text-orange-600">₹4999 onwards</span>
+                  <span className="text-xs bg-white px-3 py-1 rounded-full text-amber-700">Limited Spots</span>
+                </div>
+                <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
+                  Reserve VIP
+                </Button>
+              </div>
+
+              {/* Couple Package Card */}
+              <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-6 hover:shadow-xl transition-all">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="text-4xl">💑</div>
+                  <Badge className="bg-red-500 text-white">Special</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-slate-900">Couple's Night Out</h3>
+                <p className="text-slate-600 mb-4 text-sm">Romantic dinner-party combo with champagne and complimentary photography</p>
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-lg font-semibold text-red-600">₹2999 per couple</span>
+                  <span className="text-xs bg-white px-3 py-1 rounded-full text-red-700">Most Popular</span>
+                </div>
+                <Button className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white">
+                  Book Package
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Party Trends & Social Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-cyan-100 p-5 hover:shadow-lg transition-all">
+              <div className="text-3xl mb-2">🔥</div>
+              <p className="text-slate-600 text-sm mb-1">Trending Tonight</p>
+              <p className="text-xl font-bold text-slate-900">12 parties</p>
+              <p className="text-xs text-cyan-600 mt-2">+3 from yesterday</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-5 hover:shadow-lg transition-all">
+              <div className="text-3xl mb-2">👥</div>
+              <p className="text-slate-600 text-sm mb-1">Active Users</p>
+              <p className="text-xl font-bold text-slate-900">2.4K</p>
+              <p className="text-xs text-purple-600 mt-2">Partying now</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-pink-100 p-5 hover:shadow-lg transition-all">
+              <div className="text-3xl mb-2">⭐</div>
+              <p className="text-slate-600 text-sm mb-1">Avg Rating</p>
+              <p className="text-xl font-bold text-slate-900">4.7/5</p>
+              <p className="text-xs text-pink-600 mt-2">From 2,456 reviews</p>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 p-5 hover:shadow-lg transition-all">
+              <div className="text-3xl mb-2">🎊</div>
+              <p className="text-slate-600 text-sm mb-1">This Month</p>
+              <p className="text-xl font-bold text-slate-900">156 parties</p>
+              <p className="text-xs text-orange-600 mt-2">All genres</p>
+            </div>
+          </div>
+
+          {/* Special Offers & Deals */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">🎁 Special Deals This Week</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Early Bird Discount */}
+              <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute top-4 right-4 text-4xl">🐤</div>
+                <h3 className="text-2xl font-bold mb-2">Early Bird Special</h3>
+                <p className="text-white/90 mb-4">Book before 6 PM and get 20% off on any party</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl font-bold">20% OFF</span>
+                  <Button className="bg-white text-blue-600 hover:bg-slate-100">Use Code: EARLY20</Button>
+                </div>
+              </div>
+
+              {/* Group Discount */}
+              <div className="bg-gradient-to-br from-green-500 to-emerald-500 text-white rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute top-4 right-4 text-4xl">👫</div>
+                <h3 className="text-2xl font-bold mb-2">Group Bonanza</h3>
+                <p className="text-white/90 mb-4">Bring 4 friends and get free entry for 1 person</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl font-bold">1 FREE</span>
+                  <Button className="bg-white text-green-600 hover:bg-slate-100">Learn More</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Party Finder Assistant */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 mb-8">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">🤖 Party Finder AI</h3>
+                <p className="text-slate-600">Tell us what kind of party you're in the mood for, and we'll find perfect matches!</p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <Input placeholder="What kind of party are you looking for? (e.g., 'relaxed cocktail bar' or 'high-energy dancing')" className="flex-1 bg-white" />
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                Find Parties
+              </Button>
+            </div>
+          </div>
+        
           {/* Create Your Party CTA */}
           <div className="mt-8 bg-gradient-to-br from-pink-500 via-fuchsia-500 to-orange-500 text-white rounded-2xl p-8 shadow-xl relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>

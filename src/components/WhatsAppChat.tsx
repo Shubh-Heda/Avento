@@ -23,12 +23,14 @@ import {
   Users as UsersIcon,
   Info,
   Image as ImageIcon,
-  Camera
+  Camera,
+  Plus
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { AventoLogo } from './AventoLogo';
 import chatService from '../services/chatService';
+import { communityService } from '../services/communityService';
 import { supabase } from '../lib/supabase';
 import type { ChatRoom, ChatMessage } from '../services/chatService';
 import { toast } from 'sonner';
@@ -47,6 +49,7 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const [showRoomInfo, setShowRoomInfo] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -371,69 +374,59 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
   }
 
   return (
-    <div className="h-screen flex bg-[#0b141a]">
+    <div className="h-screen flex bg-[#F1F2FE]">
       {/* Sidebar - Chat List */}
-      <div className="w-full md:w-[170px] bg-[#111b21] border-r border-[#2a3942] flex flex-col">
+      <div className="w-[200px] md:min-w-[220px] md:max-w-[370px] bg-[#000000] border-r border-[#2a3942] flex flex-col flex-shrink-0">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-cyan-600 via-blue-600 to-purple-700 px-3 py-3 flex items-center justify-between border-b border-white/10 overflow-hidden shadow-lg">
-          {/* Animated glow orbs */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-cyan-400/30 to-transparent rounded-full blur-2xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-purple-500/30 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
-          {/* Mesh gradient overlay */}
-          <div className="absolute inset-0 opacity-30" style={{ 
-            backgroundImage: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(255,255,255,0.15) 0%, transparent 50%)"
-          }}></div>
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-10" style={{ 
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-            backgroundSize: "20px 20px"
-          }}></div>
-          {/* Shine effect */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-          
+        <div className="bg-[#080C28] px-4 py-3 flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onNavigate('dashboard')}
-            className="text-white/90 hover:text-white hover:bg-white/20 p-1.5 rounded-full h-8 w-8 relative z-10 backdrop-blur-sm"
+            className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex items-center gap-2 flex-1">
-            <AventoLogo size="sm" variant="icon-only" />
-            <h1 className="text-white text-lg font-bold relative z-10 drop-shadow-lg">Chats</h1>
-          </div>
-          <div className="flex items-center gap-1 relative z-10">
+          <h1 className="text-white text-xl font-medium flex-1 ml-4">Chats</h1>
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/90 hover:text-white hover:bg-white/20 p-1.5 rounded-full h-8 w-8 backdrop-blur-sm"
+              className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
             >
-              <Search className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/90 hover:text-white hover:bg-white/20 p-1.5 rounded-full h-8 w-8 backdrop-blur-sm"
+              className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
             >
-              <MoreVertical className="w-4 h-4" />
+              <MoreVertical className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="px-3 py-2 bg-[#111b21]">
+          <div className="flex items-center bg-[#202c33] rounded-lg px-3 py-2">
+            <Search className="w-5 h-5 text-[#8696a0] mr-3" />
+            <input
+              type="text"
+              placeholder="Search or start new chat"
+              className="bg-transparent text-white placeholder-[#8696a0] outline-none flex-1 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-2 px-3 py-2 bg-[#111b21]">
+          <button className="px-3 py-1.5 bg-[#00a884] text-white text-sm rounded-full font-medium">All</button>
+          <button className="px-3 py-1.5 bg-[#202c33] text-[#8696a0] text-sm rounded-full hover:bg-[#374955] transition-colors">Unread</button>
+          <button className="px-3 py-1.5 bg-[#202c33] text-[#8696a0] text-sm rounded-full hover:bg-[#374955] transition-colors">Groups</button>
+        </div>
+
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto relative bg-gradient-to-br from-[#1a1d21] via-[#1e2328] to-[#16191d]">
-          {/* Subtle texture overlay */}
-          <div className="absolute inset-0 opacity-20" style={{ 
-            backgroundImage: "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.02) 0%, transparent 50%)"
-          }}></div>
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-5" style={{ 
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-            backgroundSize: "40px 40px"
-          }}></div>
-          {/* Content */}
-          <div className="relative z-10">
+        <div className="flex-1 overflow-y-auto bg-[#111b21]">
           {rooms.map((room) => {
             const isSelected = selectedRoom?.id === room.id;
             const lastMessageTime = formatTime(room.last_message_at || room.created_at);
@@ -442,33 +435,29 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
               <button
                 key={room.id}
                 onClick={() => setSelectedRoom(room)}
-                className={`w-full px-4 py-3 flex items-center gap-3 transition-all border-b border-slate-700/50 ${
+                className={`w-full px-3 py-3 flex items-center gap-3 transition-colors ${
                   isSelected 
-                    ? 'bg-gradient-to-r from-slate-700/60 to-slate-600/40 shadow-lg shadow-slate-900/50' 
-                    : 'hover:bg-slate-700/30 active:bg-slate-700/50'
+                    ? 'bg-[#2a3942]' 
+                    : 'hover:bg-[#202c33]'
                 }`}
               >
                 {/* Avatar */}
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ring-2 shadow-lg ${
-                  room.room_type === 'match' 
-                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 ring-white/20' 
-                    : 'bg-gradient-to-br from-cyan-500 to-blue-600 ring-white/20'
-                }`}>
-                  {room.avatar_url || room.name.charAt(0)}
+                <div className="w-12 h-12 min-w-[48px] rounded-full flex items-center justify-center flex-shrink-0 bg-[#6b7c85] overflow-hidden">
+                  <span style={{ fontSize: '24px', lineHeight: 1 }}>{room.avatar_url || room.name.charAt(0)}</span>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-[#e9edef] font-semibold text-sm truncate">{room.name}</h3>
-                    <span className="text-xs text-[#8696a0] ml-2">{lastMessageTime}</span>
+                <div className="flex-1 min-w-0 text-left border-b border-[#222d34] pb-3">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <h3 className="text-[#e9edef] font-normal text-base truncate">{room.name}</h3>
+                    <span className="text-xs text-[#8696a0] ml-2 flex-shrink-0">{lastMessageTime}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm text-[#8696a0] truncate">
                       {room.member_count ? `${room.member_count} members` : 'Tap to chat'}
                     </p>
                     {room.unread_count && room.unread_count > 0 && (
-                      <div className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-xs font-bold rounded-full min-w-[22px] h-6 px-2 flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="bg-[#00a884] text-white text-xs font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center flex-shrink-0">
                         {room.unread_count}
                       </div>
                     )}
@@ -480,58 +469,47 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
 
           {rooms.length === 0 && (
             <div className="text-center py-12 px-4">
-              <div className="text-6xl mb-4">💬</div>
+              <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <span style={{ fontSize: '48px', lineHeight: 1 }}>💬</span>
+              </div>
               <h3 className="text-white mb-2">No chats yet</h3>
               <p className="text-[#667781] text-sm">
                 Join a match to start chatting with your team!
               </p>
             </div>
           )}
-          </div>
         </div>
       </div>
 
       {/* Chat Area */}
       {selectedRoom ? (
-        <div className="flex-1 flex flex-col bg-[#0b141a]">
+        <div className="flex-1 flex flex-col bg-[#000000]">
           {/* Chat Header */}
-          <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-4 py-2.5 flex items-center justify-between border-b border-slate-600/50 shadow-xl overflow-hidden">
-            {/* Diagonal stripe pattern */}
-            <div className="absolute inset-0 opacity-10" style={{ 
-              backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(255,255,255,0.1) 15px, rgba(255,255,255,0.1) 30px)"
-            }}></div>
-            {/* Animated shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
-            
-            <div className="flex items-center gap-3 flex-1 min-w-0 relative z-10">
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0 shadow-lg ring-2 ring-white/20 ${
-                selectedRoom.room_type === 'match'
-                  ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                  : 'bg-gradient-to-br from-cyan-500 to-blue-600'
-              }`}>
-                {selectedRoom.avatar_url || selectedRoom.name.charAt(0)}
+          <div className="bg-[#080C28] px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#6b7c85] overflow-hidden">
+                <span style={{ fontSize: '20px', lineHeight: 1 }}>{selectedRoom.avatar_url || selectedRoom.name.charAt(0)}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-white font-bold text-base truncate drop-shadow-md">{selectedRoom.name}</h2>
-                <p className="text-xs text-slate-300 truncate flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <h2 className="text-[#e9edef] font-normal text-base truncate">{selectedRoom.name}</h2>
+                <p className="text-xs text-[#8696a0] truncate">
                   {selectedRoom.member_count ? `${selectedRoom.member_count} members` : 'Group chat'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 flex-shrink-0 relative z-10">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-full h-10 w-10 transition-all hover:scale-110 backdrop-blur-sm"
+                className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
               >
                 <Video className="w-5 h-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/80 hover:text-white hover:bg-white/20 p-2 rounded-full h-10 w-10 transition-all hover:scale-110 backdrop-blur-sm"
+                className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
               >
                 <Phone className="w-5 h-5" />
               </Button>
@@ -539,9 +517,17 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowRoomInfo(!showRoomInfo)}
-                className="text-white hover:text-white hover:bg-gradient-to-br from-purple-500/30 to-pink-500/30 p-2.5 rounded-full h-11 w-11 transition-all hover:scale-110 backdrop-blur-sm border-2 border-white/30 shadow-lg"
+                className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
               >
-                <MoreVertical className="w-6 h-6 drop-shadow-lg" />
+                <Search className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowRoomInfo(!showRoomInfo)}
+                className="text-[#aebac1] hover:text-white hover:bg-[#374955] p-2 rounded-full h-10 w-10"
+              >
+                <MoreVertical className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -564,6 +550,17 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <Button
                   size="sm"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 text-xs font-semibold rounded-full px-4 shadow-lg"
+                  onClick={() => {
+                    toast.success('You\'re in! 🎉', {
+                      description: 'Confirmed attendance for the match'
+                    });
+                  }}
+                >
+                  ✓ I'm in
+                </Button>
+                <Button
+                  size="sm"
                   variant="ghost"
                   className="text-white border border-white/30 hover:bg-white/10 h-8 text-xs rounded-full px-3"
                   onClick={() => toast.info('Match details coming soon!')}
@@ -574,7 +571,7 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
                 <Button
                   size="sm"
                   className="bg-white text-purple-600 hover:bg-white/90 h-8 text-xs font-semibold rounded-full px-4"
-                  onClick={() => toast.info('Payment gateway opening soon!')}
+                  onClick={() => setShowPaymentModal(true)}
                 >
                   Pay Now
                 </Button>
@@ -652,20 +649,83 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
 
             {/* Emoji Picker */}
             {showEmojiPicker && (
-              <div className="absolute bottom-16 left-4 bg-gradient-to-br from-[#233138] to-[#1a252e] rounded-xl shadow-2xl p-4 z-50 w-[340px] border border-[#374955]">
-                <div className="grid grid-cols-8 gap-1 max-h-[300px] overflow-y-auto">
-                  {['😀','😃','😄','😁','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','👍','👎','👌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','✋','🤚','🖐️','🖖','👋','🤝','🙏','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','💋','🩸'].map(emoji => (
-                    <button
-                      key={emoji}
-                      onClick={() => {
-                        setMessageInput(prev => prev + emoji);
-                        setShowEmojiPicker(false);
-                      }}
-                      className="text-2xl hover:bg-[#374955] rounded-lg p-2 transition-all hover:scale-110"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+              <div className="absolute bottom-16 left-4 bg-gradient-to-br from-[#233138] to-[#1a252e] rounded-xl shadow-2xl p-3 z-50 w-[340px] border border-[#374955]">
+                <div className="max-h-[320px] overflow-y-auto custom-scrollbar">
+                  {/* Smileys & People */}
+                  <div className="mb-3">
+                    <p className="text-[10px] text-[#8696a0] mb-2 px-1 font-semibold">SMILEYS & PEOPLE</p>
+                    <div className="grid grid-cols-8 gap-1">
+                      {['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setMessageInput(prev => prev + emoji);
+                            setShowEmojiPicker(false);
+                          }}
+                          className="text-2xl hover:bg-[#374955] rounded-lg p-1.5 transition-all hover:scale-110 active:scale-95"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Gestures & Body Parts */}
+                  <div className="mb-3">
+                    <p className="text-[10px] text-[#8696a0] mb-2 px-1 font-semibold">GESTURES</p>
+                    <div className="grid grid-cols-8 gap-1">
+                      {['👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','💋'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setMessageInput(prev => prev + emoji);
+                            setShowEmojiPicker(false);
+                          }}
+                          className="text-2xl hover:bg-[#374955] rounded-lg p-1.5 transition-all hover:scale-110 active:scale-95"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sports & Activities */}
+                  <div className="mb-3">
+                    <p className="text-[10px] text-[#8696a0] mb-2 px-1 font-semibold">SPORTS</p>
+                    <div className="grid grid-cols-8 gap-1">
+                      {['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','🤺','⛹️','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚴','🚵','🎯','🪀','🎲','🎰','🎮','🕹️','🎳'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setMessageInput(prev => prev + emoji);
+                            setShowEmojiPicker(false);
+                          }}
+                          className="text-2xl hover:bg-[#374955] rounded-lg p-1.5 transition-all hover:scale-110 active:scale-95"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Hearts & Symbols */}
+                  <div>
+                    <p className="text-[10px] text-[#8696a0] mb-2 px-1 font-semibold">HEARTS & SYMBOLS</p>
+                    <div className="grid grid-cols-8 gap-1">
+                      {['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧️','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆕','🆓','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔢','#️⃣','*️⃣','⏏️','▶️','⏸️','⏯️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↪️','↩️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','🎵','🎶','➕','➖','➗','✖️','♾️','💲','💱','™️','©️','®️','〰️','➰','➿','🔚','🔙','🔛','🔝','🔜','✔️','☑️','🔘','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔺','🔻','🔸','🔹','🔶','🔷','🔳','🔲','▪️','▫️','◾','◽','◼️','◻️','🟥','🟧','🟨','🟩','🟦','🟪','⬛','⬜','🟫','🔈','🔇','🔉','🔊','🔔','🔕','📣','📢','💬','💭','🗯️','♠️','♣️','♥️','♦️','🃏','🎴','🀄','🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛','🕜','🕝','🕞','🕟','🕠','🕡','🕢','🕣','🕤','🕥','🕦','🕧'].map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setMessageInput(prev => prev + emoji);
+                            setShowEmojiPicker(false);
+                          }}
+                          className="text-xl hover:bg-[#374955] rounded-lg p-1.5 transition-all hover:scale-110 active:scale-95"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -742,8 +802,8 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
 
                 {/* Group Avatar */}
                 <div className="text-center mb-6">
-                  <div className="w-32 h-32 rounded-full bg-[#667781] flex items-center justify-center text-5xl mx-auto mb-3">
-                    {selectedRoom.avatar_url || selectedRoom.name.charAt(0)}
+                  <div className="w-32 h-32 min-w-[128px] min-h-[128px] max-w-[128px] max-h-[128px] rounded-full bg-[#667781] flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                    <span style={{ fontSize: '56px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{selectedRoom.avatar_url || selectedRoom.name.charAt(0)}</span>
                   </div>
                   <h3 className="text-white text-xl mb-1">{selectedRoom.name}</h3>
                   <p className="text-[#667781] text-sm">
@@ -786,6 +846,87 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
           </div>
         </div>
       )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedRoom && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+          {/* Payment modal will go here - for now just show a placeholder */}
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl">
+              <h2 className="text-2xl font-bold mb-4">Complete Payment for Match</h2>
+              <p className="text-slate-600 mb-6">{selectedRoom.name}</p>
+              
+              <div className="bg-gradient-to-r from-cyan-50 to-emerald-50 rounded-xl p-6 mb-6 border border-cyan-200">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-slate-700">Total Amount</span>
+                  <span className="text-2xl font-bold text-cyan-600">₹1800</span>
+                </div>
+                <div className="text-sm text-slate-600">
+                  5-Step Payment Process:
+                  <ol className="list-decimal list-inside mt-2 space-y-1">
+                    <li>Soft Lock (Minimum players reached)</li>
+                    <li>Payment Window (30-90 minutes)</li>
+                    <li>Hard Lock (Unpaid players removed)</li>
+                    <li>Final confirmation with exact share</li>
+                    <li>Match details confirmed</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="flex-1 px-4 py-3 border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // Payment successful - post to community
+                    handlePaymentSuccess();
+                    setShowPaymentModal(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white rounded-xl font-semibold"
+                >
+                  Complete Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+
+  function handlePaymentSuccess() {
+    if (!selectedRoom) return;
+
+    try {
+      // Create community post for the match
+      const roomName = selectedRoom.name || 'Match';
+      const area = 'sports'; // Default to sports community
+      
+      communityService.createPost({
+        area: area,
+        authorId: currentUserId || 'user_001',
+        authorName: 'Match Organizer',
+        authorAvatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=match-${selectedRoom.id}`,
+        title: `🎯 ${roomName} - Join Us Now!`,
+        content: `Join our match! We're organizing ${roomName}. \n\n⚽ Match Details:\n📍 Location: TBD\n🕐 Time: Upcoming\n💰 Cost: To be split among players\n👥 Players: ${selectedRoom.member_count || 0}\n\nClick here to join the conversation and confirm your attendance! Trust Score 80+ preferred.`,
+        category: 'event'
+      });
+
+      toast.success('Payment Successful! 🎉', {
+        description: 'Match posted to community. Others can now join!'
+      });
+
+      // Navigate to community feed
+      setTimeout(() => {
+        onNavigate('sports-community');
+      }, 1500);
+    } catch (error) {
+      console.error('Error posting to community:', error);
+      toast.error('Payment successful but failed to post to community');
+    }
+  }
 }

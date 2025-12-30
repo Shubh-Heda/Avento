@@ -1,11 +1,22 @@
 import { useState } from 'react';
-import { Heart, ArrowLeft, Star, Sparkles, Send, Users } from 'lucide-react';
+import { Heart, ArrowLeft, Star, Sparkles, Send, Users, ThumbsUp, MessageSquare, TrendingUp, Zap, Shield, Clock, Smile } from 'lucide-react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
+import { toast } from 'sonner';
 
 interface PostMatchReflectionProps {
   onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability', turfId?: string, matchId?: string) => void;
+}
+
+interface PlayerBehavior {
+  playerId: string;
+  punctuality: number; // 1-5
+  sportsmanship: number; // 1-5
+  communication: number; // 1-5
+  skillLevel: number; // 1-5
+  wouldPlayAgain: boolean;
+  notes: string;
 }
 
 export function PostMatchReflection({ onNavigate }: PostMatchReflectionProps) {
@@ -13,6 +24,16 @@ export function PostMatchReflection({ onNavigate }: PostMatchReflectionProps) {
   const [highlight, setHighlight] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
+  const [showDetailedFeedback, setShowDetailedFeedback] = useState(false);
+  
+  // Personalized behavior tracking
+  const [playerBehaviors, setPlayerBehaviors] = useState<Record<string, PlayerBehavior>>({});
+  
+  // System feedback
+  const [overallConcept, setOverallConcept] = useState<number>(0);
+  const [conceptFeedback, setConceptFeedback] = useState('');
+  const [featureRatings, setFeatureRatings] = useState<Record<string, number>>({});
+  const [improvementSuggestions, setImprovementSuggestions] = useState('');
 
   const players = [
     { id: '1', name: 'Sarah', initial: 'S', color: 'from-cyan-400 to-cyan-500' },
@@ -29,7 +50,41 @@ export function PostMatchReflection({ onNavigate }: PostMatchReflectionProps) {
     );
   };
 
+  const updatePlayerBehavior = (playerId: string, field: keyof PlayerBehavior, value: any) => {
+    setPlayerBehaviors(prev => ({
+      ...prev,
+      [playerId]: {
+        ...prev[playerId],
+        playerId,
+        [field]: value
+      }
+    }));
+  };
+
+  const setFeatureRating = (feature: string, rating: number) => {
+    setFeatureRatings(prev => ({ ...prev, [feature]: rating }));
+  };
+
   const handleSubmit = () => {
+    // Validate that at least some feedback is provided
+    if (!gratitude && !highlight && selectedPlayers.length === 0 && !overallConcept) {
+      toast.error('Please provide at least some feedback before submitting');
+      return;
+    }
+
+    // Log feedback for analytics (would send to backend)
+    console.log('Reflection submitted:', {
+      gratitude,
+      highlight,
+      selectedPlayers,
+      playerBehaviors,
+      overallConcept,
+      conceptFeedback,
+      featureRatings,
+      improvementSuggestions
+    });
+
+    toast.success('Thank you for your detailed feedback! 🙏');
     setSubmitted(true);
     setTimeout(() => {
       onNavigate('dashboard');
@@ -137,6 +192,158 @@ export function PostMatchReflection({ onNavigate }: PostMatchReflectionProps) {
             </div>
           </div>
 
+          {/* Detailed Player Feedback */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-500" />
+                <h3>Personalized Teammate Feedback (Optional)</h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDetailedFeedback(!showDetailedFeedback)}
+              >
+                {showDetailedFeedback ? 'Hide' : 'Show'} Details
+              </Button>
+            </div>
+            <p className="text-slate-600 mb-4">
+              Help us build a better community by rating each teammate's behavior
+            </p>
+            
+            {showDetailedFeedback && (
+              <div className="space-y-6 mt-6">
+                {players.map(player => (
+                  <div key={player.id} className="p-4 bg-slate-50 rounded-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${player.color} flex items-center justify-center text-white`}>
+                        {player.initial}
+                      </div>
+                      <h4 className="text-lg font-semibold">{player.name}</h4>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {/* Punctuality */}
+                      <div>
+                        <label className="text-sm text-slate-700 mb-2 flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          Punctuality
+                        </label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => (
+                            <button
+                              key={rating}
+                              onClick={() => updatePlayerBehavior(player.id, 'punctuality', rating)}
+                              className={`w-8 h-8 rounded-full text-sm ${
+                                playerBehaviors[player.id]?.punctuality === rating
+                                  ? 'bg-blue-500 text-white'
+                                  : 'bg-slate-200 hover:bg-slate-300'
+                              }`}
+                            >
+                              {rating}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Sportsmanship */}
+                      <div>
+                        <label className="text-sm text-slate-700 mb-2 flex items-center gap-1">
+                          <Shield className="w-4 h-4" />
+                          Sportsmanship
+                        </label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => (
+                            <button
+                              key={rating}
+                              onClick={() => updatePlayerBehavior(player.id, 'sportsmanship', rating)}
+                              className={`w-8 h-8 rounded-full text-sm ${
+                                playerBehaviors[player.id]?.sportsmanship === rating
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-slate-200 hover:bg-slate-300'
+                              }`}
+                            >
+                              {rating}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Communication */}
+                      <div>
+                        <label className="text-sm text-slate-700 mb-2 flex items-center gap-1">
+                          <MessageSquare className="w-4 h-4" />
+                          Communication
+                        </label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => (
+                            <button
+                              key={rating}
+                              onClick={() => updatePlayerBehavior(player.id, 'communication', rating)}
+                              className={`w-8 h-8 rounded-full text-sm ${
+                                playerBehaviors[player.id]?.communication === rating
+                                  ? 'bg-purple-500 text-white'
+                                  : 'bg-slate-200 hover:bg-slate-300'
+                              }`}
+                            >
+                              {rating}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Skill Level */}
+                      <div>
+                        <label className="text-sm text-slate-700 mb-2 flex items-center gap-1">
+                          <Zap className="w-4 h-4" />
+                          Skill Level
+                        </label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map(rating => (
+                            <button
+                              key={rating}
+                              onClick={() => updatePlayerBehavior(player.id, 'skillLevel', rating)}
+                              className={`w-8 h-8 rounded-full text-sm ${
+                                playerBehaviors[player.id]?.skillLevel === rating
+                                  ? 'bg-orange-500 text-white'
+                                  : 'bg-slate-200 hover:bg-slate-300'
+                              }`}
+                            >
+                              {rating}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Would play again */}
+                    <div className="mt-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={playerBehaviors[player.id]?.wouldPlayAgain || false}
+                          onChange={(e) => updatePlayerBehavior(player.id, 'wouldPlayAgain', e.target.checked)}
+                          className="w-4 h-4 rounded border-slate-300"
+                        />
+                        <span className="text-sm text-slate-700">Would play with {player.name} again</span>
+                      </label>
+                    </div>
+
+                    {/* Additional notes */}
+                    <div className="mt-3">
+                      <Textarea
+                        placeholder={`Any additional feedback about ${player.name}? (Optional)`}
+                        value={playerBehaviors[player.id]?.notes || ''}
+                        onChange={(e) => updatePlayerBehavior(player.id, 'notes', e.target.value)}
+                        className="text-sm min-h-20"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Gratitude */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -189,6 +396,105 @@ export function PostMatchReflection({ onNavigate }: PostMatchReflectionProps) {
                   <div className="text-sm text-slate-700">{feeling.label}</div>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* System Feedback */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+              <h3>Help Us Improve</h3>
+            </div>
+            <p className="text-slate-600 mb-6">
+              Your feedback shapes our platform. How would you rate the overall Avento experience?
+            </p>
+            
+            {/* Overall Rating */}
+            <div className="mb-6">
+              <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                Overall Experience Rating
+              </label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map(rating => (
+                  <button
+                    key={rating}
+                    onClick={() => setOverallConcept(rating)}
+                    className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                      overallConcept === rating
+                        ? 'border-blue-500 bg-blue-50 scale-105'
+                        : 'border-slate-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="text-2xl mb-1">
+                      {rating === 1 ? '😞' : rating === 2 ? '😕' : rating === 3 ? '😐' : rating === 4 ? '😊' : '🤩'}
+                    </div>
+                    <div className="text-xs text-slate-600">{rating}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Feature-specific ratings */}
+            <div className="mb-6">
+              <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                Rate Specific Features (1-5 stars)
+              </label>
+              <div className="space-y-3">
+                {[
+                  { key: 'matching', label: 'Match Finding System', icon: Users },
+                  { key: 'payment', label: '5-Stage Payment Flow', icon: TrendingUp },
+                  { key: 'communication', label: 'Chat & Communication', icon: MessageSquare },
+                  { key: 'trust', label: 'Trust Score System', icon: Shield },
+                ].map(feature => (
+                  <div key={feature.key} className="flex items-center justify-between bg-white rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <feature.icon className="w-4 h-4 text-slate-600" />
+                      <span className="text-sm text-slate-700">{feature.label}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map(rating => (
+                        <button
+                          key={rating}
+                          onClick={() => setFeatureRating(feature.key, rating)}
+                          className={`w-7 h-7 rounded text-xs ${
+                            featureRatings[feature.key] === rating
+                              ? 'bg-yellow-400 text-white'
+                              : 'bg-slate-100 hover:bg-slate-200'
+                          }`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Concept Feedback */}
+            <div className="mb-6">
+              <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                What do you think about the overall concept?
+              </label>
+              <Textarea
+                value={conceptFeedback}
+                onChange={(e) => setConceptFeedback(e.target.value)}
+                placeholder="Share your thoughts on Avento's approach to building friendships through sports..."
+                className="min-h-24"
+              />
+            </div>
+
+            {/* Improvement Suggestions */}
+            <div>
+              <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                What features would you like to see added?
+              </label>
+              <Textarea
+                value={improvementSuggestions}
+                onChange={(e) => setImprovementSuggestions(e.target.value)}
+                placeholder="Suggest improvements or new features... (e.g., 'Video highlights sharing', 'Skill-based matchmaking', etc.)"
+                className="min-h-24"
+              />
             </div>
           </div>
 

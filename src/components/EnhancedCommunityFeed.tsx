@@ -55,23 +55,23 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
   const loadFeed = useCallback(async (isLoadMore = false) => {
     try {
       setLoading(true);
-      const currentOffset = isLoadMore ? offset : 0;
       
       const response = await communityPostService.post.getFeed({
         category: category || undefined,
         limit: 20,
-        offset: currentOffset,
+        offset: isLoadMore ? offset : 0,
         sort_by: 'latest'
       });
 
       if (isLoadMore) {
         setPosts(prev => [...prev, ...response.posts]);
+        setOffset(prev => prev + response.posts.length);
       } else {
         setPosts(response.posts);
+        setOffset(response.posts.length);
       }
       
       setHasMore(response.has_more);
-      setOffset(currentOffset + response.posts.length);
     } catch (error) {
       console.error('Error loading feed:', error);
     } finally {
@@ -80,7 +80,32 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
   }, [category, offset]);
 
   useEffect(() => {
-    loadFeed();
+    // Reset and load when category changes
+    setOffset(0);
+    setPosts([]);
+    
+    const initialLoad = async () => {
+      try {
+        setLoading(true);
+        
+        const response = await communityPostService.post.getFeed({
+          category: category || undefined,
+          limit: 20,
+          offset: 0,
+          sort_by: 'latest'
+        });
+
+        setPosts(response.posts);
+        setOffset(response.posts.length);
+        setHasMore(response.has_more);
+      } catch (error) {
+        console.error('Error loading feed:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    initialLoad();
 
     // Subscribe to real-time updates
     const unsubscribe = communityPostService.realtime.subscribeToFeed(

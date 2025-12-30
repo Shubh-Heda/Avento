@@ -8,6 +8,7 @@ import { OnboardingForm } from './components/OnboardingForm';
 import { Dashboard } from './components/Dashboard';
 import { EventsDashboard } from './components/EventsDashboard';
 import { PartyDashboard } from './components/PartyDashboard';
+import { VenuePartiesPage } from './components/VenuePartiesPage';
 import { GamingHub } from './components/GamingHub';
 import { ProfilePage } from './components/ProfilePage';
 import { EventsProfilePage } from './components/EventsProfilePage';
@@ -53,7 +54,7 @@ import { AuthProvider, useAuth } from './lib/AuthProvider';
 import { MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 
-type Page = 'landing' | 'warm-onboarding' | 'auth' | 'dashboard' | 'events-dashboard' | 'party-dashboard' | 'gaming-hub' | 'gaming-profile' | 'gaming-community' | 'gaming-chat' | 'gaming-map' | 'gaming-events' | 'sports-events' | 'events-events' | 'party-events' | 'sports-photos' | 'events-photos' | 'party-photos' | 'gaming-photos' | 'sports-highlights' | 'events-highlights' | 'party-highlights' | 'gaming-highlights' | 'sports-memories' | 'events-memories' | 'party-memories' | 'gaming-memories' | 'profile' | 'events-profile' | 'parties-profile' | 'community' | 'sports-community' | 'cultural-community' | 'party-community' | 'reflection' | 'finder' | 'create-match' | 'create-event-booking' | 'create-party-booking' | 'turf-detail' | 'chat' | 'sports-chat' | 'events-chat' | 'party-chat' | 'help' | 'availability' | 'comprehensive-dashboard';
+type Page = 'landing' | 'warm-onboarding' | 'auth' | 'dashboard' | 'events-dashboard' | 'party-dashboard' | 'gaming-hub' | 'gaming-profile' | 'gaming-community' | 'gaming-chat' | 'gaming-map' | 'gaming-events' | 'sports-events' | 'events-events' | 'party-events' | 'sports-photos' | 'events-photos' | 'party-photos' | 'gaming-photos' | 'sports-highlights' | 'events-highlights' | 'party-highlights' | 'gaming-highlights' | 'sports-memories' | 'events-memories' | 'party-memories' | 'gaming-memories' | 'profile' | 'events-profile' | 'parties-profile' | 'community' | 'sports-community' | 'cultural-community' | 'party-community' | 'reflection' | 'finder' | 'create-match' | 'create-event-booking' | 'create-party-booking' | 'turf-detail' | 'chat' | 'sports-chat' | 'events-chat' | 'party-chat' | 'help' | 'availability' | 'comprehensive-dashboard' | 'venue-parties';
 
 interface UserProfile {
   name: string;
@@ -895,6 +896,7 @@ function AppContent() {
       {currentPage === 'dashboard' && <Dashboard onNavigate={navigateTo} userProfile={sportsProfile} matches={sportsMatches} />}
       {currentPage === 'events-dashboard' && <EventsDashboard onNavigate={navigateTo} userProfile={eventsProfile} onBookEvent={handleBookEvent} />}
       {currentPage === 'party-dashboard' && <PartyDashboard onNavigate={navigateTo} userProfile={partiesProfile} onBookParty={handleBookParty} />}
+      {currentPage === 'venue-parties' && <VenuePartiesPage onNavigate={navigateTo} venueId={selectedTurfId || 'nexus-nightclub'} />}
       {currentPage === 'gaming-hub' && <GamingHub onNavigate={navigateTo} />}
       {currentPage === 'gaming-profile' && <GamingProfilePage onNavigate={navigateTo} />}
       {currentPage === 'gaming-community' && <GamingCommunityFeed onNavigate={navigateTo} />}

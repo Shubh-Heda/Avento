@@ -17,7 +17,8 @@ interface PaymentModalProps {
 type PaymentMethod = 'card' | 'upi' | 'wallet';
 
 export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalAmount, turfName }: PaymentModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('upi');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [paymentStarted, setPaymentStarted] = useState(false);
   const [upiId, setUpiId] = useState('');
   const [processing, setProcessing] = useState(false);
   const [showUpiGateway, setShowUpiGateway] = useState(false);
@@ -27,6 +28,21 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
   const merchantUPI = 'merchant@upi'; // Replace with actual merchant UPI
 
   const handlePayment = async () => {
+    if (!selectedMethod) {
+      toast.error('Please select a payment method first');
+      return;
+    }
+
+    // First click - just start the payment flow
+    if (!paymentStarted) {
+      setPaymentStarted(true);
+      if (selectedMethod === 'upi') {
+        setShowUpiGateway(true);
+      }
+      return;
+    }
+
+    // Second click - actually process the payment
     if (selectedMethod === 'upi' && !showUpiGateway) {
       setShowUpiGateway(true);
       return;
@@ -105,7 +121,11 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
             <label className="block text-sm mb-3">Select Payment Method</label>
             <div className="grid grid-cols-3 gap-3">
               <button
-                onClick={() => setSelectedMethod('upi')}
+                onClick={() => {
+                  setSelectedMethod('upi');
+                  setPaymentStarted(false);
+                  setShowUpiGateway(false);
+                }}
                 className={`p-4 rounded-xl border-2 transition-all text-center ${
                   selectedMethod === 'upi'
                     ? 'border-cyan-500 bg-cyan-50'
@@ -119,7 +139,10 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
               </button>
 
               <button
-                onClick={() => setSelectedMethod('card')}
+                onClick={() => {
+                  setSelectedMethod('card');
+                  setPaymentStarted(false);
+                }}
                 className={`p-4 rounded-xl border-2 transition-all text-center ${
                   selectedMethod === 'card'
                     ? 'border-cyan-500 bg-cyan-50'
@@ -133,7 +156,10 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
               </button>
 
               <button
-                onClick={() => setSelectedMethod('wallet')}
+                onClick={() => {
+                  setSelectedMethod('wallet');
+                  setPaymentStarted(false);
+                }}
                 className={`p-4 rounded-xl border-2 transition-all text-center ${
                   selectedMethod === 'wallet'
                     ? 'border-cyan-500 bg-cyan-50'
@@ -148,8 +174,8 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
             </div>
           </div>
 
-          {/* Payment Details */}
-          {selectedMethod === 'upi' && !showUpiGateway && (
+          {/* Payment Details - Only show after clicking Pay Now */}
+          {paymentStarted && selectedMethod === 'upi' && !showUpiGateway && (
             <div>
               <label className="block text-sm mb-2">UPI ID</label>
               <Input
@@ -247,33 +273,55 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
             </div>
           )}
 
-          {selectedMethod === 'card' && (
+          {paymentStarted && selectedMethod === 'card' && (
             <div className="space-y-4">
+              {/* Amount to Pay - Show when entering card details */}
+              <div className="bg-gradient-to-r from-pink-500 to-orange-500 rounded-2xl p-6 text-white flex items-center justify-between">
+                <div>
+                  <div className="text-sm opacity-90">Amount to Pay</div>
+                  <div className="text-2xl font-bold">₹{remainingAmount}</div>
+                </div>
+                <Lock className="w-8 h-8 opacity-80" />
+              </div>
+              <p className="text-sm text-white/90 -mt-2">
+                Secure payment powered by GameSetGo. Your payment information is encrypted and safe.
+              </p>
+
               <div>
-                <label className="block text-sm mb-2">Card Number</label>
+                <label className="block text-sm mb-2 text-slate-700">Card Number</label>
                 <Input
                   placeholder="1234 5678 9012 3456"
                   maxLength={19}
+                  className="border-slate-300"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm mb-2">Expiry Date</label>
-                  <Input placeholder="MM/YY" maxLength={5} />
+                  <label className="block text-sm mb-2 text-slate-700">Expiry Date</label>
+                  <Input placeholder="MM/YY" maxLength={5} className="border-slate-300" />
                 </div>
                 <div>
-                  <label className="block text-sm mb-2">CVV</label>
-                  <Input placeholder="123" maxLength={3} type="password" />
+                  <label className="block text-sm mb-2 text-slate-700">CVV</label>
+                  <Input placeholder="123" maxLength={3} type="password" className="border-slate-300" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm mb-2">Cardholder Name</label>
-                <Input placeholder="Name on card" />
+                <label className="block text-sm mb-2 text-slate-700">Cardholder Name</label>
+                <Input placeholder="Name on card" className="border-slate-300" />
+              </div>
+
+              {/* Security Info */}
+              <div className="bg-pink-50 border border-pink-200 rounded-xl p-4 flex gap-3">
+                <Lock className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-pink-900">Secure Payment</p>
+                  <p className="text-xs text-pink-700">Your payment information is encrypted and securely processed. We never store your card details.</p>
+                </div>
               </div>
             </div>
           )}
 
-          {selectedMethod === 'wallet' && (
+          {paymentStarted && selectedMethod === 'wallet' && (
             <div className="space-y-3">
               <button className="w-full p-4 rounded-xl border-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 transition-all flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-white">
@@ -313,7 +361,19 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
         {/* Footer */}
         <div className="sticky bottom-0 bg-white border-t p-6 rounded-b-2xl">
           <div className="flex gap-3">
-            {showUpiGateway && selectedMethod === 'upi' ? (
+            {paymentStarted && !showUpiGateway ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPaymentStarted(false);
+                  setShowUpiGateway(false);
+                }}
+                className="flex-1"
+                disabled={processing}
+              >
+                Back to Methods
+              </Button>
+            ) : showUpiGateway ? (
               <Button
                 variant="outline"
                 onClick={() => setShowUpiGateway(false)}
@@ -332,25 +392,28 @@ export function PaymentModal({ onClose, matchDate, matchTime, amountPaid, totalA
                 Cancel
               </Button>
             )}
-            {!showUpiGateway && (
-              <Button
-                onClick={handlePayment}
-                disabled={processing || (selectedMethod === 'upi' && !upiId)}
-                className="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white gap-2"
-              >
-                {processing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Pay Now
-                  </>
-                )}
-              </Button>
-            )}
+            <Button
+              onClick={handlePayment}
+              disabled={processing || !selectedMethod}
+              className="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white gap-2"
+            >
+              {processing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : !paymentStarted ? (
+                <>
+                  <CreditCard className="w-4 h-4" />
+                  Proceed to Pay
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  {selectedMethod === 'upi' && !showUpiGateway ? 'Show QR & Apps' : 'Complete Payment'}
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>

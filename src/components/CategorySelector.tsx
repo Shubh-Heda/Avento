@@ -1,4 +1,8 @@
 import { ArrowRight, Gamepad2, Music, PartyPopper, Sparkles, Users } from 'lucide-react';
+import sportsImg from '../assets/categories/sports.jpg';
+import eventsImg from '../assets/categories/events.jpg';
+import partiesImg from '../assets/categories/parties.jpg';
+import gamingImg from '../assets/categories/gaming.jpg';
 
 type CategoryKey = 'sports' | 'events' | 'parties' | 'gaming';
 
@@ -21,7 +25,7 @@ const categories: Array<{
     title: 'Sports & Turf',
     blurb: 'Book reliable turfs, lock teams quickly, and play with people you trust.',
     icon: Users,
-    image: 'https://picsum.photos/seed/avento-sports/1200/675',
+    image: sportsImg,
     bullets: ['Instant turf slots', 'Trust and streak scores', 'Nearby matches'],
   },
   {
@@ -29,7 +33,7 @@ const categories: Array<{
     title: 'Cultural Events',
     blurb: 'Concerts, festivals, and art nights curated for safe, welcoming meetups.',
     icon: Music,
-    image: 'https://picsum.photos/seed/avento-events/1200/675',
+    image: eventsImg,
     bullets: ['Group RSVPs', 'Verified hosts', 'Plan with friends'],
   },
   {
@@ -37,7 +41,7 @@ const categories: Array<{
     title: 'Parties & Celebrations',
     blurb: 'Plan nights out, invite friends, and discover hosted experiences.',
     icon: PartyPopper,
-    image: 'https://picsum.photos/seed/avento-parties/1200/675',
+    image: partiesImg,
     bullets: ['Host or join', 'Flexible payments', 'Invite-only or open'],
   },
   {
@@ -45,7 +49,7 @@ const categories: Array<{
     title: 'Gaming Hub',
     blurb: 'LAN, console, and PC sessions with brackets, squads, and social play.',
     icon: Gamepad2,
-    image: 'https://picsum.photos/seed/avento-gaming/1200/675',
+    image: gamingImg,
     bullets: ['Team matchmaking', 'Bracket support', 'Clubs and lounges'],
   },
 ];

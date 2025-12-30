@@ -8,6 +8,7 @@ coverage/
 
 # Production
 dist/
+build/
 
 # Misc
 .DS_Store

@@ -311,12 +311,12 @@ export function MapView({ onClose, category = 'all', events }: MapViewProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="absolute inset-4 md:inset-8 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-[95vw] h-[95vh] md:w-[90vw] md:h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col relative"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 text-white p-4 flex items-center justify-between">

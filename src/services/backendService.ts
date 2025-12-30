@@ -580,32 +580,60 @@ export const achievementService = {
 };
 
 // ============================================================================
-// GAMING SERVICES
+// GAMING SERVICES - Complete Backend Integration
 // ============================================================================
 
-export const gamingService = {
-  async getGamingSessions() {
-    const { data, error } = await supabase
-      .from('gaming_sessions')
+export const gamingBackendService = {
+  // Gaming Clubs
+  async getGamingClubs(filters?: { city?: string; rating_min?: number }) {
+    let query = supabase
+      .from('gaming_clubs')
       .select('*')
-      .eq('status', 'open')
-      .order('date', { ascending: true });
+      .order('rating', { ascending: false });
+
+    if (filters?.city) {
+      query = query.eq('city', filters.city);
+    }
+    if (filters?.rating_min) {
+      query = query.gte('rating', filters.rating_min);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
+  async getGamingClub(clubId: string) {
+    const { data, error } = await supabase
+      .from('gaming_clubs')
+      .select(`
+        *,
+        reviews:gaming_club_reviews(
+          *,
+          user:profiles(name, avatar)
+        )
+      `)
+      .eq('id', clubId)
+      .single();
 
     if (error) throw error;
     return data;
   },
 
-  async createGamingSession(session: {
-    title: string;
-    game: string;
-    platform: string;
-    date: string;
-    max_participants?: number;
-    created_by: string;
+  async createGamingClub(club: {
+    name: string;
+    location: string;
+    city: string;
+    hourly_rate: number;
+    consoles: string[];
+    facilities: string[];
+    games_library: string[];
+    total_seats: number;
+    owner_id: string;
   }) {
     const { data, error } = await supabase
-      .from('gaming_sessions')
-      .insert(session)
+      .from('gaming_clubs')
+      .insert(club)
       .select()
       .single();
 
@@ -613,25 +641,438 @@ export const gamingService = {
     return data;
   },
 
-  async getGamingClubs() {
+  async addClubReview(review: {
+    club_id: string;
+    user_id: string;
+    rating: number;
+    review?: string;
+    ambience_rating?: number;
+    equipment_rating?: number;
+    service_rating?: number;
+  }) {
     const { data, error } = await supabase
-      .from('gaming_clubs')
-      .select('*')
-      .order('member_count', { ascending: false });
+      .from('gaming_club_reviews')
+      .insert(review)
+      .select()
+      .single();
 
     if (error) throw error;
     return data;
   },
 
-  async getTournaments() {
+  // Gaming Sessions
+  async getGamingSessions(filters?: { 
+    status?: string; 
+    game_name?: string; 
+    platform?: string;
+    date_from?: string;
+  }) {
+    let query = supabase
+      .from('gaming_sessions')
+      .select(`
+        *,
+        club:gaming_clubs(*),
+        host:profiles(id, name, avatar),
+        participants:gaming_session_participants(
+          *,
+          user:profiles(id, name, avatar)
+        )
+      `)
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters?.game_name) {
+      query = query.eq('game_name', filters.game_name);
+    }
+    if (filters?.platform) {
+      query = query.eq('platform', filters.platform);
+    }
+    if (filters?.date_from) {
+      query = query.gte('date', filters.date_from);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
+  async getGamingSession(sessionId: string) {
     const { data, error } = await supabase
-      .from('gaming_tournaments')
-      .select('*')
-      .eq('status', 'registration')
-      .order('start_date', { ascending: true });
+      .from('gaming_sessions')
+      .select(`
+        *,
+        club:gaming_clubs(*),
+        host:profiles(id, name, avatar),
+        participants:gaming_session_participants(
+          *,
+          user:profiles(id, name, avatar)
+        )
+      `)
+      .eq('id', sessionId)
+      .single();
 
     if (error) throw error;
     return data;
+  },
+
+  async createGamingSession(session: {
+    club_id: string;
+    host_id: string;
+    title: string;
+    description?: string;
+    date: string;
+    time: string;
+    duration_hours: number;
+    game_specific: boolean;
+    game_name?: string;
+    platform: string;
+    session_type: string;
+    skill_level: string;
+    min_players: number;
+    max_players: number;
+    visibility: string;
+    payment_mode: string;
+    price_per_person: number;
+    seat_type: string;
+  }) {
+    const { data, error } = await supabase
+      .from('gaming_sessions')
+      .insert(session)
+      .select(`
+        *,
+        club:gaming_clubs(*),
+        host:profiles(id, name, avatar)
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateGamingSession(sessionId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('gaming_sessions')
+      .update(updates)
+      .eq('id', sessionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteGamingSession(sessionId: string, hostId: string) {
+    const { error } = await supabase
+      .from('gaming_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('host_id', hostId);
+
+    if (error) throw error;
+  },
+
+  // Session Participants
+  async joinGamingSession(sessionId: string, userId: string, skillLevel?: string) {
+    const { data, error } = await supabase
+      .from('gaming_session_participants')
+      .insert({
+        session_id: sessionId,
+        user_id: userId,
+        role: 'player',
+        skill_level: skillLevel
+      })
+      .select(`
+        *,
+        user:profiles(id, name, avatar)
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async leaveGamingSession(sessionId: string, userId: string) {
+    const { error } = await supabase
+      .from('gaming_session_participants')
+      .update({ is_active: false, left_at: new Date().toISOString() })
+      .eq('session_id', sessionId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+  },
+
+  async updateParticipantPayment(participantId: string, paymentStatus: string, paymentId?: string) {
+    const { data, error } = await supabase
+      .from('gaming_session_participants')
+      .update({
+        payment_status: paymentStatus,
+        has_paid: paymentStatus === 'paid',
+        payment_id: paymentId
+      })
+      .eq('id', participantId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Gaming Tournaments
+  async getTournaments(filters?: { status?: string; game?: string }) {
+    let query = supabase
+      .from('gaming_tournaments')
+      .select(`
+        *,
+        club:gaming_clubs(*),
+        organizer:profiles(id, name, avatar),
+        teams:tournament_teams(count)
+      `)
+      .order('start_date', { ascending: true });
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters?.game) {
+      query = query.eq('game', filters.game);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  },
+
+  async getTournament(tournamentId: string) {
+    const { data, error } = await supabase
+      .from('gaming_tournaments')
+      .select(`
+        *,
+        club:gaming_clubs(*),
+        organizer:profiles(id, name, avatar),
+        teams:tournament_teams(
+          *,
+          captain:profiles(id, name, avatar),
+          members:tournament_team_members(
+            *,
+            user:profiles(id, name, avatar)
+          )
+        )
+      `)
+      .eq('id', tournamentId)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async createTournament(tournament: {
+    name: string;
+    description?: string;
+    game: string;
+    club_id?: string;
+    organizer_id: string;
+    start_date: string;
+    registration_end: string;
+    registration_fee: number;
+    prize_pool: number;
+    max_teams: number;
+    format: string;
+    team_size: number;
+    platform: string;
+  }) {
+    const { data, error } = await supabase
+      .from('gaming_tournaments')
+      .insert(tournament)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async registerTeam(team: {
+    tournament_id: string;
+    team_name: string;
+    captain_id: string;
+  }) {
+    const { data, error } = await supabase
+      .from('tournament_teams')
+      .insert(team)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async addTeamMember(member: {
+    team_id: string;
+    user_id: string;
+    role: string;
+    in_game_name?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('tournament_team_members')
+      .insert(member)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // User Gaming Stats
+  async getUserGamingStats(userId: string) {
+    const { data, error } = await supabase
+      .from('user_gaming_stats')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code === 'PGRST116') {
+      // Create initial stats if not exists
+      const { data: newStats } = await supabase
+        .from('user_gaming_stats')
+        .insert({ user_id: userId })
+        .select()
+        .single();
+      return newStats;
+    }
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateUserGamingStats(userId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('user_gaming_stats')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Gaming Achievements
+  async getUserAchievements(userId: string) {
+    const { data, error } = await supabase
+      .from('gaming_achievements')
+      .select('*')
+      .eq('user_id', userId)
+      .order('unlocked_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async unlockAchievement(achievement: {
+    user_id: string;
+    achievement_type: string;
+    achievement_title: string;
+    achievement_description?: string;
+    icon?: string;
+    coins_earned: number;
+    xp_earned: number;
+    rarity?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('gaming_achievements')
+      .insert(achievement)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Update user stats
+    const stats = await this.getUserGamingStats(achievement.user_id);
+    await this.updateUserGamingStats(achievement.user_id, {
+      total_achievements: (stats?.total_achievements || 0) + 1,
+      coins_balance: (stats?.coins_balance || 0) + achievement.coins_earned,
+      xp_points: (stats?.xp_points || 0) + achievement.xp_earned
+    });
+
+    return data;
+  },
+
+  // Gaming Friendships
+  async getGamingFriends(userId: string) {
+    const { data, error } = await supabase
+      .from('gaming_friendships')
+      .select(`
+        *,
+        friend:profiles!friend_id(id, name, avatar)
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'accepted')
+      .order('games_played_together', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  async sendFriendRequest(userId: string, friendId: string) {
+    const { data, error } = await supabase
+      .from('gaming_friendships')
+      .insert({
+        user_id: userId,
+        friend_id: friendId,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async acceptFriendRequest(friendshipId: string) {
+    const { data, error } = await supabase
+      .from('gaming_friendships')
+      .update({ status: 'accepted' })
+      .eq('id', friendshipId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async updateFriendshipScore(friendshipId: string, gamesPlayed: number) {
+    const { data, error } = await supabase
+      .from('gaming_friendships')
+      .update({
+        games_played_together: gamesPlayed,
+        last_played_at: new Date().toISOString()
+      })
+      .eq('id', friendshipId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};
+
+// Legacy gaming service (kept for backward compatibility)
+export const gamingService = {
+  async getGamingSessions() {
+    return gamingBackendService.getGamingSessions({ status: 'open' });
+  },
+
+  async createGamingSession(session: any) {
+    return gamingBackendService.createGamingSession(session);
+  },
+
+  async getGamingClubs() {
+    return gamingBackendService.getGamingClubs();
+  },
+
+  async getTournaments() {
+    return gamingBackendService.getTournaments({ status: 'registration' });
   }
 };
 

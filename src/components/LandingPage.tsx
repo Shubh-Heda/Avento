@@ -1,6 +1,10 @@
 import { Users, Heart, Sparkles, Music, PartyPopper, Shield, TrendingUp, ArrowRight, Star, Zap, Clock, DollarSign, CheckCircle, UserPlus, ChevronDown, Play, X, Gamepad2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import sportsImg from '../assets/categories/sports.jpg';
+import eventsImg from '../assets/categories/events.jpg';
+import partiesImg from '../assets/categories/parties.jpg';
+import gamingImg from '../assets/categories/gaming.jpg';
 import { AventoLogo } from './AventoLogo';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
@@ -620,154 +624,146 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto items-stretch">
-            {/* Sports Card */}
-            <motion.div
-              onClick={() => onCategorySelect?.('sports')}
-              whileHover={{ scale: 1.05, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0 }}
-              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-cyan-400/40 cursor-pointer hover:border-cyan-400/70 transition-all bg-white flex flex-col h-full"
-            >
-              {/* Background Image */}
-              <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1630420598771-dd52ab08c8cb?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
-                  alt="Sports and Turf"
-                  className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/30 z-10"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mx-auto items-stretch">
 
-                {/* Overlay Text */}
-                <div className="absolute bottom-4 left-4 z-20 text-white max-w-[250px]">
-                  <h3 className="text-lg font-semibold">Sports & Turf</h3>
-                  <p className="text-sm mt-1">
-                    Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks.
-                  </p>
-                  <button className="mt-3 px-4 py-2 bg-white text-black rounded-md text-sm font-medium hover:bg-gray-200 transition">
-                    Get Started
-                  </button>
-                </div>
+  {/* Sports Card */}
+  <motion.div
+    onClick={() => onCategorySelect?.("sports")}
+    whileHover={{ scale: 1.05, y: -8 }}
+    whileTap={{ scale: 0.98 }}
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 1.0 }}
+    className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-cyan-400/40 cursor-pointer hover:border-cyan-400/70 transition-all bg-white flex flex-col h-full"
+  >
+    {/* Background Image */}
+    <div className="relative h-[240px] w-full flex-shrink-0 overflow-hidden">
+      <ImageWithFallback
+        src={sportsImg}
+        alt="Sports and Turf"
+        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110 saturate-90 contrast-105"
+      />
 
-                {/* Icon */}
-                <div className="absolute top-6 left-6">
-                  <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-                    <Users className="w-7 h-7 text-cyan-600" />
-                  </div>
-                </div>
-              </div>
+      {/* 🔑 OPTICAL NORMALIZATION (NEW) */}
+      <div className="absolute inset-0 bg-black/25 mix-blend-multiply z-10"></div>
 
-              {/* Content */}
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 flex flex-col flex-1">
-                <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                  Sports & Turf
-                </h3>
-                <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
-                  Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks
-                </p>
-                <Button
-                  className="w-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-600 hover:via-cyan-500 hover:to-blue-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4"
-                >
-                  Get Started
-                  <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Cultural Events Card */}
-            <motion.div
-              onClick={() => onCategorySelect?.('events')}
-              whileHover={{ scale: 1.05, y: -8 }}
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.1 }}
-              className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-purple-400/40 cursor-pointer hover:border-purple-400/70 transition-all bg-white flex flex-col h-full"
-            >
-  {/* Background Image */}
-  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
-    <ImageWithFallback
-      src="https://images.unsplash.com/photo-1735748917428-be035e873f97?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
-      alt="Cultural Events"
-      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-    />
-    <div className="absolute inset-0 bg-black/30 z-10"></div>
-
-    {/* Icon */}
-    <div className="absolute top-6 left-6">
-      <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-        <Music className="w-7 h-7 text-purple-600" />
+      {/* Icon */}
+      <div className="absolute top-6 left-6 z-20">
+        <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+          <Users className="w-7 h-7 text-cyan-600" />
+        </div>
       </div>
     </div>
-  </div>
 
-  {/* Content */}
-  <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-5 flex flex-col flex-1">
-    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-      Cultural Events
-    </h3>
-    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1">
-      Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity.
-    </p>
-    <Button
-      className="w-full bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 hover:from-purple-600 hover:via-purple-500 hover:to-pink-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4" // consistent button size
-    >
-      Explore Events
-      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-    </Button>
-  </div>
-</motion.div>
+    {/* Content */}
+    <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 flex flex-col flex-1">
+      <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent min-h-[72px]">
+        Sports & Turf
+      </h3>
+
+      <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 min-h-[72px]">
+        Book turfs, find players, and build your sports community with Trust Scores and Friendship Streaks.
+      </p>
+
+      <Button className="w-full bg-gradient-to-r from-cyan-500 via-cyan-400 to-blue-500 hover:from-cyan-600 hover:via-cyan-500 hover:to-blue-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6 h-14">
+        Get Started
+        <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+      </Button>
+    </div>
+  </motion.div>
+
+  {/* Cultural Events Card */}
+  <motion.div
+    onClick={() => onCategorySelect?.("events")}
+    whileHover={{ scale: 1.05, y: -8 }}
+    whileTap={{ scale: 0.98 }}
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 1.1 }}
+    className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-purple-400/40 cursor-pointer hover:border-purple-400/70 transition-all bg-white flex flex-col h-full"
+  >
+    <div className="relative h-[240px] w-full flex-shrink-0 overflow-hidden">
+      <ImageWithFallback
+        src={eventsImg}
+        alt="Cultural Events"
+        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110 saturate-90 contrast-105"
+      />
+
+      {/* 🔑 OPTICAL NORMALIZATION (NEW) */}
+      <div className="absolute inset-0 bg-black/25 mix-blend-multiply z-10"></div>
+
+      <div className="absolute top-6 left-6 z-20">
+        <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
+          <Music className="w-7 h-7 text-purple-600" />
+        </div>
+      </div>
+    </div>
+
+    <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 flex flex-col flex-1">
+      <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent min-h-[72px]">
+        Cultural Events
+      </h3>
+
+      <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 min-h-[72px]">
+        Discover festivals, concerts, art exhibitions, and cultural gatherings that celebrate diversity.
+      </p>
+
+      <Button className="w-full bg-gradient-to-r from-purple-500 via-purple-400 to-pink-500 hover:from-purple-600 hover:via-purple-500 hover:to-pink-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6 h-14">
+        Explore Events
+        <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+      </Button>
+    </div>
+  </motion.div>
 
             {/* Parties Card */}
+            {/* Parties Card */}
 <motion.div
-  onClick={() => onCategorySelect?.('parties')}
+  onClick={() => onCategorySelect?.("parties")}
   whileHover={{ scale: 1.05, y: -8 }}
   whileTap={{ scale: 0.98 }}
   initial={{ opacity: 0, y: 50 }}
   animate={{ opacity: 1, y: 0 }}
   transition={{ delay: 1.2 }}
-  className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-pink-400/40 cursor-pointer hover:border-pink-400/70 transition-all bg-white flex flex-col h-full" // fixed height
+  className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-pink-400/40 cursor-pointer hover:border-pink-400/70 transition-all bg-white flex flex-col h-full"
 >
-  {/* Background Image */}
-  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+  <div className="relative h-[240px] w-full flex-shrink-0 overflow-hidden">
     <ImageWithFallback
-      src="https://images.unsplash.com/photo-1739734963154-7a8b3c8e5944?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
+      src={partiesImg}
       alt="Parties and Celebrations"
-      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110 saturate-90 contrast-105"
     />
-    <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-    {/* Icon */}
-    <div className="absolute top-6 left-6">
+    {/* Optical normalization */}
+    <div className="absolute inset-0 bg-black/25 mix-blend-multiply z-10" />
+
+    <div className="absolute top-6 left-6 z-20">
       <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
         <PartyPopper className="w-7 h-7 text-pink-600" />
       </div>
     </div>
   </div>
 
-  {/* Content */}
-  <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-5 flex flex-col flex-1">
-    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+  <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-6 flex flex-col flex-1">
+    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent min-h-[72px]">
       Parties & Celebrations
     </h3>
-    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 line-clamp-3">
+
+    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 min-h-[72px]">
       Create unforgettable nights, meet new people, and celebrate life's special moments together.
     </p>
 
-    <Button
-      className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 hover:from-pink-600 hover:via-rose-500 hover:to-red-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4" // consistent button size
-    >
+    <Button className="w-full bg-gradient-to-r from-pink-500 via-rose-400 to-red-500 hover:from-pink-600 hover:via-rose-500 hover:to-red-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6 h-14">
       Join Parties
       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
     </Button>
   </div>
 </motion.div>
 
+
+            {/* Gaming Hub Card */}
             {/* Gaming Hub Card */}
 <motion.div
-  onClick={() => onCategorySelect?.('gaming')}
+  onClick={() => onCategorySelect?.("gaming")}
   whileHover={{ scale: 1.05, y: -8 }}
   whileTap={{ scale: 0.98 }}
   initial={{ opacity: 0, y: 50 }}
@@ -775,35 +771,33 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
   transition={{ delay: 1.3 }}
   className="group overflow-hidden rounded-3xl shadow-2xl border-2 border-indigo-400/40 cursor-pointer hover:border-indigo-400/70 transition-all bg-white flex flex-col h-full"
 >
-  {/* Background Image */}
-  <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden">
+  <div className="relative h-[240px] w-full flex-shrink-0 overflow-hidden">
     <ImageWithFallback
-      src="https://images.unsplash.com/photo-1511512578047-dfb367046420?crop=entropy&cs=tinysrgb&fit=max&w=800&auto=format&fm=webp"
+      src={gamingImg}
       alt="Gaming Hub"
-      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
+      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110 saturate-90 contrast-105"
     />
-    <div className="absolute inset-0 bg-black/30 z-10"></div>
 
-    {/* Icon */}
-    <div className="absolute top-6 left-6">
+    {/* Optical normalization */}
+    <div className="absolute inset-0 bg-black/25 mix-blend-multiply z-10" />
+
+    <div className="absolute top-6 left-6 z-20">
       <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
         <Gamepad2 className="w-7 h-7 text-indigo-600" />
       </div>
     </div>
   </div>
 
-  {/* Content */}
-  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 flex flex-col flex-1">
-    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent">
+  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 flex flex-col flex-1">
+    <h3 className="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-blue-500 to-cyan-600 bg-clip-text text-transparent min-h-[72px]">
       Gaming Hub
     </h3>
-    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 line-clamp-3">
+
+    <p className="text-slate-700 mb-4 text-sm leading-relaxed font-medium flex-1 min-h-[72px]">
       Join gaming clubs, play PS5/Xbox/PC, compete in tournaments, and level up your friendships.
     </p>
 
-    <Button
-      className="w-full bg-gradient-to-r from-indigo-500 via-blue-400 to-violet-500 hover:from-indigo-600 hover:via-blue-500 hover:to-violet-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-4"
-    >
+    <Button className="w-full bg-gradient-to-r from-indigo-500 via-blue-400 to-violet-500 hover:from-indigo-600 hover:via-blue-500 hover:to-violet-600 text-white gap-2 group/btn shadow-xl font-semibold text-lg py-6 h-14">
       Start Gaming
       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
     </Button>
@@ -892,7 +886,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                     <div className="text-2xl mb-1">{badge.icon}</div>
                     <div className="text-xs font-semibold text-white">{badge.label}</div>
                   </motion.div>
-                ))})
+                ))}
               </div>
             </motion.div>
           </div>
@@ -1010,44 +1004,67 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
         </div>
       </section>
 
-      {/* Testimonials Carousel */}
-      <section className="relative py-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Testimonials — richer layout */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden>
+          <div className="absolute -left-10 top-10 h-56 w-56 rounded-full bg-gradient-to-br from-pink-400/35 via-purple-400/30 to-cyan-400/30 blur-3xl" />
+          <div className="absolute right-6 bottom-6 h-64 w-64 rounded-full bg-gradient-to-br from-amber-300/25 via-rose-300/25 to-indigo-300/25 blur-3xl" />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div 
-            className="text-center mb-10 bg-white/60 rounded-3xl p-8 mx-auto max-w-3xl border-2 border-white/80 shadow-2xl"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            className="text-center mb-12 bg-white/70 backdrop-blur-lg rounded-3xl p-8 mx-auto max-w-3xl border border-white/80 shadow-[0_24px_80px_rgba(0,0,0,0.08)]"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={getParallaxStyle(40)}
+            style={getParallaxStyle(30)}
           >
-            <h2 className="mb-3 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">Real people, quick hits</h2>
-            <p className="text-slate-800 text-lg md:text-xl font-semibold max-w-2xl mx-auto">Short quotes you can skim, not essays to scroll.</p>
+            <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-200/70 via-white to-cyan-200/60 text-slate-800 text-sm font-semibold border border-white/70">
+              Loved for trust, speed, and calm lobbies
+            </p>
+            <h2 className="mt-4 mb-3 text-slate-900 text-3xl md:text-5xl font-black tracking-tight">“It just feels easy.”</h2>
+            <p className="text-slate-800 text-lg md:text-xl font-semibold max-w-2xl mx-auto">Faster pay windows, softer nudges, and hosts who feel seen. Here’s how different cities describe Avento.</p>
           </motion.div>
 
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-2 px-2">
-              {testimonials.map((item, idx) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="min-w-[260px] max-w-[280px] snap-start rounded-2xl border border-white/15 bg-white/80 p-5 shadow-xl flex flex-col gap-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/40">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((item, idx) => (
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.06 }}
+                whileHover={{ y: -6, scale: 1.01 }}
+                className="relative rounded-3xl border border-white/70 bg-white/85 backdrop-blur-xl p-6 shadow-[0_18px_60px_rgba(0,0,0,0.12)] overflow-hidden"
+              >
+                <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br from-purple-200/70 via-pink-200/60 to-amber-200/50 blur-2xl" aria-hidden />
+                <div className="flex items-center gap-4 mb-4 relative z-10">
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md">
                       <ImageWithFallback src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
                     </div>
-                    <div>
-                      <div className="text-slate-900 font-semibold text-sm">{item.name}</div>
-                      <div className="text-slate-600 text-xs">{item.role}</div>
-                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-white" />
                   </div>
-                  <p className="text-slate-800 text-sm leading-relaxed">“{item.quote}”</p>
-                </motion.div>
-              ))}
-            </div>
+                  <div>
+                    <div className="text-slate-900 font-semibold text-base">{item.name}</div>
+                    <div className="text-slate-600 text-xs">{item.role}</div>
+                  </div>
+                  <div className="ml-auto inline-flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Trust score ready
+                  </div>
+                </div>
+
+                <p className="text-slate-900 text-lg font-semibold leading-relaxed mb-3 relative z-10">“{item.quote}”</p>
+                <div className="flex items-center gap-2 text-xs text-slate-600 relative z-10">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">{item.name}</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-semibold">{item.role}</span>
+                  <span className="ml-auto inline-flex items-center gap-1 text-amber-500 font-semibold">
+                    ★ ★ ★ ★ 
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -1110,7 +1127,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             viewport={{ once: true }}
           >
             <h2 className="mb-4 text-3xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-cyan-200 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">Business Model & Refund Policy</h2>
-            <p className="text-slate-100 text-lg md:text-xl max-w-3xl mx-auto">Flash cards instead of paragraphs: how we earn, what you unlock, and how refunds behave at each step.</p>
+            <p className="text-black text-lg md:text-xl max-w-3xl mx-auto font-semibold">Flash cards instead of paragraphs: how we earn, what you unlock, and how refunds behave at each step.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -1121,13 +1138,13 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05 }}
-                className="h-full rounded-2xl p-6 border border-white/10 bg-[#0f162e]/70 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+                className="h-full rounded-2xl p-6 border-4 border-black bg-[#0f162e]/70 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center mb-4`}>
                   <item.icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-white text-xl font-bold mb-3">{item.title}</h3>
-                <ul className="space-y-2 text-base text-white font-medium">
+                <h3 className="text-black text-xl font-bold mb-3">{item.title}</h3>
+                <ul className="space-y-2 text-base text-black font-semibold">
                   {item.points.map((point, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-amber-300" />
@@ -1141,11 +1158,11 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
 
           <div className="mt-6 grid md:grid-cols-3 gap-4">
             {[{ label: "Platform fee", value: "6-9%", note: "only on paid slots" }, { label: "Premium", value: "$6/mo", note: "cancel anytime" }, { label: "Partner take", value: "Instant", note: "auto-routed to venues" }].map((item, idx) => (
-              <div key={idx} className="rounded-xl border border-white/20 bg-black/60 px-5 py-4 flex items-center justify-between">
-                <div className="text-white text-base font-semibold">{item.label}</div>
+              <div key={idx} className="rounded-xl border-4 border-black bg-black/60 px-5 py-4 flex items-center justify-between">
+                <div className="text-black text-base font-bold">{item.label}</div>
                 <div className="text-right">
-                  <div className="text-white font-bold text-lg">{item.value}</div>
-                  <div className="text-white text-sm font-medium">{item.note}</div>
+                  <div className="text-black font-bold text-lg">{item.value}</div>
+                  <div className="text-black text-sm font-semibold">{item.note}</div>
                 </div>
               </div>
             ))}
@@ -1159,16 +1176,16 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05 }}
-                className="h-full rounded-2xl p-6 border border-white/10 bg-[#0c1326]/80 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
+                className="h-full rounded-2xl p-6 border-4 border-black bg-[#0c1326]/80 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center`}>
                     <item.icon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-sm font-semibold px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white">Refund moment</span>
+                  <span className="text-sm font-bold px-3 py-1 rounded-full bg-white/20 border-2 border-black text-black">Refund moment</span>
                 </div>
-                <h4 className="text-white text-xl font-bold mb-2">{item.title}</h4>
-                <p className="text-white text-base font-medium leading-relaxed">{item.copy}</p>
+                <h4 className="text-black text-xl font-bold mb-2">{item.title}</h4>
+                <p className="text-black text-base font-semibold leading-relaxed">{item.copy}</p>
               </motion.div>
             ))}
           </div>

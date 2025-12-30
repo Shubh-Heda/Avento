@@ -188,6 +188,18 @@ html {
   font-size: var(--font-size);
 }
 
+/* Emoji rendering - make them look exactly like Google Keyboard/WhatsApp */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Force native color emoji rendering */
+@supports (font-variation-settings: normal) {
+  * {
+    font-synthesis: none;
+  }
+}
+
 /* Custom animations */
 @keyframes shimmer {
   0% {

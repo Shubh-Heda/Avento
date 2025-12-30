@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { generateUpcomingDates, getMinBookingDate } from '../utils/dateUtils';
 import chatService from '../services/chatService';
 import { supabase } from '../lib/supabase';
+import { communityService } from '../services/communityService';
 
 interface CreateMatchPlanProps {
   onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability', turfId?: string, matchId?: string) => void;
@@ -194,19 +195,26 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
 
         // Auto-post to community if 5-step payment is enabled
         if (visibility === 'community') {
-          const postContent = `🏆 ${matchTitle}\n\n📍 ${selectedTurf?.name || 'Venue'}, ${selectedTurf?.location || 'Location'}\n📅 ${selectedDate} at ${selectedTime}\n${selectedTurf?.sport ? selectedTurf.sport : 'Sport'}\n\n👥 Looking for ${minPlayers}-${maxPlayers} players\n💰 ₹${getTurfCost()} total (₹${Math.round(getTurfCost() / parseInt(minPlayers))} per person)\n\n🎯 Join now! Slots filling fast! 🔥`;
-          
-          await supabase.from('community_posts').insert({
-            author_id: user.id,
-            content: postContent,
-            category: 'sports',
-            post_type: 'match_invite',
-            related_match_id: matchId
-          });
+          try {
+            await communityService.createPost({
+              area: 'sports',
+              authorId: user.id,
+              authorName: user.name || 'Match Organizer',
+              authorAvatar: `https://i.pravatar.cc/150?u=${user.id}`,
+              title: `🎯 ${matchTitle} - Join Us Now!`,
+              content: `📍 ${selectedTurf?.name || 'Venue'}, ${selectedTurf?.location || 'Location'}\n📅 ${selectedDate} at ${selectedTime}\n${selectedTurf?.sport ? selectedTurf.sport : 'Sport'}\n\n👥 Looking for ${minPlayers}-${maxPlayers} players\n💰 ₹${getTurfCost()} total (₹${Math.round(getTurfCost() / parseInt(minPlayers))} per person)\n\n🎯 Join now! Slots filling fast! 🔥`,
+              category: 'event'
+            });
 
-          toast.success('Posted to Community! 🌟', {
-            description: 'Your match is now visible to everyone!',
-          });
+            toast.success('Posted to Community! 🌟', {
+              description: 'Your match is now visible to everyone!',
+            });
+          } catch (error) {
+            console.error('Failed to post to community:', error);
+            toast.error('Failed to post to community', {
+              description: 'Match created but could not be shared.',
+            });
+          }
         }
 
         toast.success('Match & Group Created! 🎉', {
