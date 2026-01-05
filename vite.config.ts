@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 
 export default defineConfig(({ command }) => ({
-  base: command === 'serve' ? '/' : '/',
+  base: command === 'serve' ? '/' : '/Avento/',
   plugins: [react()],
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
