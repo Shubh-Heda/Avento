@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { publicAnonKey } from '../utils/supabase/info';
 
-const supabaseUrl = `https://${projectId}.supabase.co`;
-const supabaseKey = publicAnonKey;
+// Prefer environment vars (Vite-style) and fall back to the checked-in key for local demos.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? 'https://kouywbotopkrgxyjqylb.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? publicAnonKey;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 

@@ -216,6 +216,7 @@ export function MenuDropdown({
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-50"
+            style={{ backgroundColor: 'white' }}
           >
             {/* User Header */}
             <div className={`p-4 bg-gradient-to-r ${getGradient()} text-white`}>
@@ -236,19 +237,19 @@ export function MenuDropdown({
             </div>
 
             {/* Menu Items */}
-            <div className="py-2">
+            <div className="py-2 bg-white">
               {menuItems.map((item, index) => {
                 const Icon = item.icon;
                 return (
                   <button
                     key={index}
                     onClick={item.action}
-                    className={`w-full px-4 py-3 flex items-center gap-3 transition-colors ${item.bgColor}`}
+                    className={`w-full px-4 py-3 flex items-center gap-3 transition-colors text-black ${item.bgColor}`}
                   >
                     <div className={`w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center ${item.color}`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="flex-1 text-left text-slate-700">{item.label}</span>
+                    <span className="flex-1 text-left text-black">{item.label}</span>
                     {item.badge !== undefined && item.badge > 0 && (
                       <Badge className="bg-red-500 text-white text-xs border-0">
                         {item.badge > 9 ? '9+' : item.badge}

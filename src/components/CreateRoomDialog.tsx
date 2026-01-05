@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 interface CreateRoomDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateRoom: (roomData: RoomData) => Promise<void>;
+  onCreateRoom: (roomData: RoomData) => Promise<any>;
   category: 'cultural' | 'sports' | 'party' | 'all';
 }
 
@@ -20,6 +20,7 @@ interface RoomData {
   tags: string[];
   maxParticipants: number;
   isPublic: boolean;
+  category?: 'cultural' | 'sports' | 'party';
 }
 
 export function CreateRoomDialog({ isOpen, onClose, onCreateRoom, category }: CreateRoomDialogProps) {
@@ -56,7 +57,11 @@ export function CreateRoomDialog({ isOpen, onClose, onCreateRoom, category }: Cr
 
     setLoading(true);
     try {
-      await onCreateRoom(roomData);
+      const roomPayload = {
+        ...roomData,
+        category: category === 'all' ? 'sports' : category,
+      } as RoomData;
+      await onCreateRoom(roomPayload);
       toast.success('🎉 Room created successfully!', {
         description: 'Your vibe room is now live and others can join',
       });

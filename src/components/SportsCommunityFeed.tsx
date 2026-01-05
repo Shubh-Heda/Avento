@@ -1,308 +1,488 @@
-import { ArrowLeft, Heart, TrendingUp, MessageCircle, Trophy, Target, Award } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Award, Bell, Activity, Users, Zap, Flame, Sparkles, Loader, Send, Camera, MapPin, Share2, Bookmark, ChevronDown, X, ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { AnimatedBackground } from './AnimatedBackground';
 import { GlassCard } from './GlassCard';
 import { LiveActivityFeed } from './LiveActivityFeed';
-import { VibeRooms } from './VibeRooms';
+import { DiscordLikeRooms } from './DiscordLikeRooms';
 import { ActivityHeatmap } from './ActivityHeatmap';
+import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface SportsCommunityFeedProps {
   onNavigate: (page: any) => void;
 }
 
+type CategoryType = 'match-notifications' | 'activity-heatmap' | 'vibe-rooms';
+
+interface Category {
+  id: CategoryType;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  color: string;
+  bgGradient: string;
+  accentColor: string;
+}
+
+interface Post {
+  id: string;
+  author: string;
+  avatar: string;
+  timeAgo: string;
+  content: string;
+  likes: number;
+  comments: number;
+  isLiked?: boolean;
+}
+
 export function SportsCommunityFeed({ onNavigate }: SportsCommunityFeedProps) {
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('match-notifications');
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: '1',
+      author: 'Sarah Williams',
+      avatar: 'S',
+      timeAgo: '1 day ago',
+      content: 'Looking for 2 more players for Saturday Basketball! 🏀\n\nWe\'re a friendly group playing every Saturday morning. All skill levels welcome!',
+      likes: 45,
+      comments: 12,
+      isLiked: false
+    },
+    {
+      id: '2',
+      author: 'Mike Johnson',
+      avatar: 'M',
+      timeAgo: '2 days ago',
+      content: 'Just finished an amazing cricket match! The energy was incredible 🔥 Can\'t wait for the next one!',
+      likes: 128,
+      comments: 34,
+      isLiked: false
+    }
+  ]);
+  const [newPostContent, setNewPostContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isPosting, setIsPosting] = useState(false);
+
+  const categories: Category[] = [
+    {
+      id: 'match-notifications',
+      name: 'Match Notifications',
+      icon: <Bell className="w-5 h-5" />,
+      description: 'Live match updates & friend activity',
+      color: 'from-cyan-400 to-blue-500',
+      bgGradient: 'from-cyan-500/10 to-blue-500/10',
+      accentColor: 'cyan'
+    },
+    {
+      id: 'activity-heatmap',
+      name: 'Activity Heatmap',
+      icon: <Activity className="w-5 h-5" />,
+      description: 'Your community engagement stats',
+      color: 'from-orange-400 to-red-500',
+      bgGradient: 'from-orange-500/10 to-red-500/10',
+      accentColor: 'orange'
+    },
+    {
+      id: 'vibe-rooms',
+      name: 'Vibe Rooms',
+      icon: <Users className="w-5 h-5" />,
+      description: 'Live voice & text rooms',
+      color: 'from-purple-400 to-pink-500',
+      bgGradient: 'from-purple-500/10 to-pink-500/10',
+      accentColor: 'purple'
+    }
+  ];
+
+  const handleLike = (postId: string) => {
+    setPosts(prev => prev.map(p => 
+      p.id === postId 
+        ? { ...p, isLiked: !p.isLiked, likes: p.isLiked ? p.likes - 1 : p.likes + 1 }
+        : p
+    ));
+  };
+
+  const handlePost = async () => {
+    if (!newPostContent.trim() && selectedFiles.length === 0) {
+      toast.error('Please write something or add media');
+      return;
+    }
+
+    setIsPosting(true);
+    setTimeout(() => {
+      const newPost: Post = {
+        id: Date.now().toString(),
+        author: 'You',
+        avatar: 'Y',
+        timeAgo: 'Just now',
+        content: newPostContent,
+        likes: 0,
+        comments: 0,
+        isLiked: false
+      };
+      setPosts(prev => [newPost, ...prev]);
+      setNewPostContent('');
+      setSelectedFiles([]);
+      setIsPosting(false);
+      toast.success('Post shared! 🎉');
+    }, 800);
+  };
+
   return (
-    <AnimatedBackground variant="community">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+      {/* Animated background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+      </div>
+
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
+      <header className="relative z-40 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 bg-slate-950/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 onClick={() => onNavigate('dashboard')}
-                className="gap-2"
+                className="gap-2 hover:bg-slate-800 text-slate-100"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Back
+                <ArrowLeft className="w-5 h-5" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
               <div>
-                <h1 className="flex items-center gap-2">
-                  <span className="text-2xl">⚽</span>
-                  Sports Community
+                <h1 className="flex items-center gap-2 text-2xl font-bold">
+                  <span>⚽</span>
+                  <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Sports Community</span>
                 </h1>
-                <p className="text-sm text-slate-600">Connect with athletes and sports enthusiasts</p>
+                <p className="text-sm text-slate-400">Connect with athletes and sports enthusiasts</p>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-cyan-600 mb-1">2,847</div>
-              <p className="text-sm text-slate-600">Active Athletes</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-emerald-600 mb-1">892</div>
-              <p className="text-sm text-slate-600">Matches This Week</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-purple-600 mb-1">156</div>
-              <p className="text-sm text-slate-600">Teams Formed</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-orange-600 mb-1">45</div>
-              <p className="text-sm text-slate-600">Tournaments</p>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Live Activities */}
-        <LiveActivityFeed category="sports" />
-
-        {/* Activity Heatmap */}
-        <ActivityHeatmap category="sports" />
-
-        {/* Vibe Rooms */}
-        <VibeRooms category="sports" />
-
-        {/* Community Posts */}
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Category Selector */}
         <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <MessageCircle className="w-5 h-5 text-cyan-600" />
-            <h2>Community Feed</h2>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Categories</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {categories.map((category) => (
+              <motion.button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`relative overflow-hidden rounded-xl p-4 transition-all duration-300 group ${
+                  selectedCategory === category.id
+                    ? `bg-gradient-to-br ${category.bgGradient} border-2 border-${category.accentColor}-500/50 shadow-lg shadow-${category.accentColor}-500/20`
+                    : 'bg-slate-800/40 border border-slate-700/50 hover:border-slate-600/50 hover:bg-slate-800/60'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {selectedCategory === category.id && (
+                  <motion.div
+                    className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-5`}
+                    animate={{ opacity: [0.05, 0.1, 0.05] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                )}
+                
+                <div className="relative z-10 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${category.color} text-white shadow-lg`}>
+                      {category.icon}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-bold text-slate-100">{category.name}</h3>
+                      <p className="text-xs text-slate-400">{category.description}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedCategory === category.id && (
+                    <motion.div
+                      className={`h-1 rounded-full bg-gradient-to-r ${category.color}`}
+                      layoutId="active-indicator"
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </div>
+              </motion.button>
+            ))}
           </div>
-
-          {/* Tournament Announcement */}
-          <GlassCard variant="highlighted">
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center text-2xl flex-shrink-0">
-                  🏆
-                </div>
-                <div className="flex-1">
-                  <Badge className="bg-orange-200 text-orange-800 mb-2">Tournament Alert</Badge>
-                  <h3 className="text-orange-900 mb-2">Inter-City Cricket Championship - Register Now!</h3>
-                  <p className="text-orange-800 mb-4">
-                    Join the biggest cricket tournament of the season! Teams from across Gujarat will compete. 
-                    Register your team before November 20th. Prize pool: ₹50,000!
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-orange-700">
-                    <span>📅 Starting Dec 1st</span>
-                    <span>📍 Multiple Venues</span>
-                    <span>👥 32 teams max</span>
-                  </div>
-                </div>
-              </div>
-              <Button className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white">
-                Register Team
-              </Button>
-            </div>
-          </GlassCard>
-
-          {/* Achievement Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-full flex items-center justify-center text-white">
-                  R
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Rahul Mehta</span>
-                    <Badge className="bg-emerald-100 text-emerald-700 gap-1">
-                      <Trophy className="w-3 h-3" />
-                      Achievement
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">3 hours ago</p>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 rounded-lg p-4 mb-4 border border-emerald-200">
-                <div className="flex items-center gap-3">
-                  <Trophy className="w-12 h-12 text-emerald-600" />
-                  <div>
-                    <h3 className="text-emerald-900 mb-1">Unlocked: Hat-Trick Hero! 🎯</h3>
-                    <p className="text-sm text-emerald-700">Scored 3 consecutive wins in football matches</p>
-                  </div>
-                </div>
-              </div>
-              <p className="text-slate-700 mb-4">
-                Three wins in a row! 🔥 Massive thanks to my teammates - couldn't have done it without the 
-                amazing coordination and trust we've built. This community makes winning feel even better! ⚽💪
-              </p>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span>124</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>28</span>
-                </button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Training Tips Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-                  M
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Coach Mike</span>
-                    <Badge className="bg-blue-100 text-blue-700 gap-1">
-                      <Target className="w-3 h-3" />
-                      Pro Tips
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">5 hours ago</p>
-                </div>
-              </div>
-              <h3 className="mb-2">5 Essential Warm-up Exercises Before Any Match 🏃‍♂️</h3>
-              <p className="text-slate-700 mb-4">
-                Hey sports fam! After coaching for 10+ years, I've seen too many injuries from skipping warm-ups. 
-                Here are my go-to exercises that take just 10 minutes but make a HUGE difference in performance 
-                and injury prevention. Drop a comment if you want the detailed video tutorial!
-              </p>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
-                  <span className="text-sm">✓ Dynamic stretching</span>
-                </div>
-                <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
-                  <span className="text-sm">✓ Joint rotations</span>
-                </div>
-                <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
-                  <span className="text-sm">✓ Light cardio</span>
-                </div>
-                <div className="bg-cyan-50 rounded-lg p-3 border border-cyan-200">
-                  <span className="text-sm">✓ Sport-specific drills</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span>89</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>34</span>
-                </button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Team Formation Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center text-white">
-                  S
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Sarah Williams</span>
-                    <Badge className="bg-purple-100 text-purple-700 gap-1">
-                      <Award className="w-3 h-3" />
-                      Team Captain
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">1 day ago</p>
-                </div>
-              </div>
-              <h3 className="mb-2">Looking for 2 more players for Saturday Basketball! 🏀</h3>
-              <p className="text-slate-700 mb-4">
-                We're a friendly group playing every Saturday morning. All skill levels welcome! We focus on 
-                having fun and improving together. Newbie-friendly environment with experienced players who 
-                love to help. Join us for some great games and even better friendships!
-              </p>
-              <div className="flex items-center gap-3 mb-4">
-                <Badge variant="outline" className="bg-emerald-50 border-emerald-300 text-emerald-700">
-                  Newbie-friendly
-                </Badge>
-                <Badge variant="outline" className="bg-cyan-50 border-cyan-300 text-cyan-700">
-                  High trust zone
-                </Badge>
-                <Badge variant="outline">Saturday 8 AM</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-slate-600">
-                  <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                    <Heart className="w-4 h-4" />
-                    <span>45</span>
-                  </button>
-                  <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>12</span>
-                  </button>
-                </div>
-                <Button className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white">
-                  I'm Interested
-                </Button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Streak Celebration */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white">
-                  A
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Alex & Team Thunder</span>
-                    <Badge className="bg-orange-100 text-orange-700 gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      Streak Milestone
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">2 days ago</p>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 mb-4 border border-orange-200">
-                <div className="flex items-center gap-3">
-                  <div className="text-4xl">🔥</div>
-                  <div>
-                    <h3 className="text-orange-900 mb-1">50-Match Team Streak!</h3>
-                    <p className="text-sm text-orange-700">Playing together consistently for 6 months</p>
-                  </div>
-                </div>
-              </div>
-              <p className="text-slate-700 mb-4">
-                Half a century of matches! 🎉 What started as strangers meeting for a casual game has become 
-                a second family. Through wins, losses, and everything in between, we've grown together. 
-                Here's to the next 50! ⚽❤️
-              </p>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span>167</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>42</span>
-                </button>
-              </div>
-            </div>
-          </GlassCard>
         </div>
+
+        {/* Category-Specific Content */}
+        <AnimatePresence mode="wait">
+          {selectedCategory === 'match-notifications' && (
+            <motion.div
+              key="match-notifications"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              {/* Stats Overview */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Active Athletes', value: '2,847', color: 'cyan' },
+                  { label: 'Matches This Week', value: '892', color: 'emerald' },
+                  { label: 'Teams Formed', value: '156', color: 'purple' },
+                  { label: 'Tournaments', value: '45', color: 'orange' }
+                ].map((stat, idx) => (
+                  <motion.div
+                    key={idx}
+                    className="bg-gradient-to-br from-slate-800/60 to-slate-800/30 border border-slate-700/50 rounded-xl p-4 text-center hover:border-slate-600/50 transition-colors group"
+                    whileHover={{ y: -2 }}
+                  >
+                    <div className={`text-${stat.color}-400 text-2xl font-bold mb-1 group-hover:scale-110 transition-transform`}>{stat.value}</div>
+                    <p className="text-sm text-slate-400">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Live Activity Feed */}
+              <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
+                    <Bell className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-100">Live Match Updates</h3>
+                    <p className="text-sm text-slate-400">Real-time notifications from your community</p>
+                  </div>
+                </div>
+                <LiveActivityFeed category="sports" />
+              </div>
+            </motion.div>
+          )}
+
+          {selectedCategory === 'activity-heatmap' && (
+            <motion.div
+              key="activity-heatmap"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-100">Your Activity Stats</h3>
+                    <p className="text-sm text-slate-400">Track your community engagement</p>
+                  </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: 'Posts', value: '12', icon: <Sparkles className="w-5 h-5" /> },
+                    { label: 'Interactions', value: '48', icon: <Heart className="w-5 h-5" /> },
+                    { label: 'This Week', value: '7', icon: <Zap className="w-5 h-5" /> },
+                    { label: 'Streak', value: '5', icon: <Flame className="w-5 h-5" /> }
+                  ].map((stat, idx) => (
+                    <motion.div
+                      key={idx}
+                      className="bg-slate-800/50 border border-slate-700/30 rounded-lg p-4 text-center hover:bg-slate-800/80 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <div className="text-orange-400 flex justify-center mb-2">{stat.icon}</div>
+                      <div className="text-2xl font-bold text-slate-100">{stat.value}</div>
+                      <div className="text-xs text-slate-400 mt-1">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Heatmap Grid */}
+                <ActivityHeatmap category="sports" />
+              </div>
+            </motion.div>
+          )}
+
+          {selectedCategory === 'vibe-rooms' && (
+            <motion.div
+              key="vibe-rooms"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="-mx-6 -mb-6 -mt-2"
+            >
+              <DiscordLikeRooms category="sports" onClose={() => setSelectedCategory('match-notifications')} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Post Creation Card - Only in Match Notifications */}
+        {selectedCategory === 'match-notifications' && (
+          <motion.div
+            className="bg-slate-800/40 border border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg">
+                Y
+              </div>
+              <div className="flex-1">
+                <textarea
+                  value={newPostContent}
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                  placeholder={selectedCategory === 'match-notifications' 
+                    ? 'Share match moments, celebrate wins... 🎉' 
+                    : 'Share your activity insights... 📊'}
+                  className="w-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 focus:bg-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-400/50 transition-all text-sm"
+                  rows={3}
+                  disabled={isPosting}
+                />
+                
+                {selectedFiles.length > 0 && (
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    {selectedFiles.map((file, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="relative group"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                      >
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt="preview" 
+                          className="w-20 h-20 object-cover rounded-lg border border-slate-600"
+                        />
+                        <button
+                          onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs transition-colors shadow-lg"
+                        >
+                          ×
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="media-upload"
+                      accept="image/*,video/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="media-upload" 
+                      className="cursor-pointer text-slate-400 hover:text-cyan-400 hover:bg-slate-700/50 p-2 rounded-lg transition-all"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                    </label>
+                    <button 
+                      className="text-slate-400 hover:text-cyan-400 hover:bg-slate-700/50 p-2 rounded-lg transition-all"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <Button
+                    onClick={handlePost}
+                    disabled={(!newPostContent.trim() && selectedFiles.length === 0) || isPosting}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white gap-2 rounded-full px-4 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/25"
+                    size="sm"
+                  >
+                    {isPosting ? <><Loader className="w-4 h-4 animate-spin" /> Posting...</> : <><Send className="w-4 h-4" /> Post</>}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Posts Feed - Only in Match Notifications */}
+        {selectedCategory === 'match-notifications' && (
+          <div className="space-y-4">
+          {posts.map((post, idx) => (
+            <motion.div
+              key={post.id}
+              className="bg-slate-800/40 border border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden hover:border-slate-600/50 transition-colors group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <div className="p-4 flex items-start gap-3">
+                <motion.div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg" whileHover={{ scale: 1.1 }}>
+                  {post.avatar}
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-100">{post.author}</span>
+                  </div>
+                  <span className="text-xs text-slate-500">{post.timeAgo}</span>
+                </div>
+              </div>
+
+              <div className="px-4 pb-3">
+                <p className="text-slate-200 whitespace-pre-wrap break-words">{post.content}</p>
+              </div>
+
+              <div className="px-4 pb-3 flex items-center gap-6 text-sm border-t border-slate-700/30 pt-3">
+                <motion.button 
+                  onClick={() => handleLike(post.id)} 
+                  className={`flex items-center gap-2 transition-colors group/btn ${post.isLiked ? 'text-red-400' : 'text-slate-400 hover:text-red-400'}`}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-red-400' : 'group-hover/btn:fill-red-400/50'}`} />
+                  <span className="font-medium">{post.likes}</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors group/btn"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="font-medium">{post.comments}</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="flex items-center gap-2 text-slate-400 hover:text-purple-400 transition-colors group/btn"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span className="font-medium">Share</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="ml-auto transition-colors text-slate-400 hover:text-cyan-400"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Bookmark className="w-5 h-5" />
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+
+          {posts.length === 0 && (
+            <motion.div
+              className="text-center py-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <div className="text-6xl mb-4">🌟</div>
+              <h3 className="text-xl font-semibold text-slate-200 mb-2">No posts yet</h3>
+              <p className="text-slate-400">Be the first to share something amazing!</p>
+            </motion.div>
+          )}
+        </div>
+        )}
       </div>
-    </AnimatedBackground>
+    </div>
   );
 }

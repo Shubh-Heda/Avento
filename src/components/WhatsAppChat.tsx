@@ -786,15 +786,15 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
 
           {/* Room Info Sidebar */}
           {showRoomInfo && (
-            <div className="absolute right-0 top-0 bottom-0 w-80 bg-[#111b21] border-l border-[#2a3942] shadow-2xl z-50 overflow-y-auto">
+            <div className="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-gray-300 shadow-2xl z-50 overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white text-lg font-medium">Group Info</h3>
+                  <h3 className="text-black text-lg font-medium">Group Info</h3>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowRoomInfo(false)}
-                    className="text-[#aebac1] hover:text-white"
+                    className="text-gray-600 hover:text-black"
                   >
                     <X className="w-5 h-5" />
                   </Button>
@@ -802,35 +802,35 @@ export function WhatsAppChat({ onNavigate, matchId }: WhatsAppChatProps) {
 
                 {/* Group Avatar */}
                 <div className="text-center mb-6">
-                  <div className="w-32 h-32 min-w-[128px] min-h-[128px] max-w-[128px] max-h-[128px] rounded-full bg-[#667781] flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                  <div className="w-32 h-32 min-w-[128px] min-h-[128px] max-w-[128px] max-h-[128px] rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-3 overflow-hidden">
                     <span style={{ fontSize: '56px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{selectedRoom.avatar_url || selectedRoom.name.charAt(0)}</span>
                   </div>
-                  <h3 className="text-white text-xl mb-1">{selectedRoom.name}</h3>
-                  <p className="text-[#667781] text-sm">
+                  <h3 className="text-black text-xl mb-1">{selectedRoom.name}</h3>
+                  <p className="text-gray-600 text-sm">
                     Group • {selectedRoom.member_count || 0} members
                   </p>
                 </div>
 
                 {/* Actions */}
                 <div className="space-y-2 mb-6">
-                  <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] rounded-lg transition-colors">
-                    <BellOff className="w-5 h-5 text-[#aebac1]" />
-                    <span className="text-white">Mute notifications</span>
+                  <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                    <BellOff className="w-5 h-5 text-gray-600" />
+                    <span className="text-black">Mute notifications</span>
                   </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] rounded-lg transition-colors">
-                    <ImageIcon className="w-5 h-5 text-[#aebac1]" />
-                    <span className="text-white">View media</span>
+                  <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors">
+                    <ImageIcon className="w-5 h-5 text-gray-600" />
+                    <span className="text-black">View media</span>
                   </button>
                   <button 
                     onClick={handleLeaveGroup}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] rounded-lg transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <LogOut className="w-5 h-5 text-red-500" />
                     <span className="text-red-500">Exit group (soft)</span>
                   </button>
                 </div>
 
-                <p className="text-xs text-[#667781] px-4">
+                <p className="text-xs text-gray-600 px-4">
                   💡 Soft exit: Only the admin will be notified that you left. Others won't see any notification.
                 </p>
               </div>

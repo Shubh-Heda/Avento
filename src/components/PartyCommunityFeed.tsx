@@ -1,362 +1,480 @@
-import { ArrowLeft, Heart, MessageCircle, Zap, Music, Sparkles, PartyPopper } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, PartyPopper, Bell, Activity, Users, Music, Sparkles, Loader, Send, Camera, MapPin, Share2, Bookmark, X, ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { AnimatedBackground } from './AnimatedBackground';
-import { GlassCard } from './GlassCard';
 import { LiveActivityFeed } from './LiveActivityFeed';
-import { VibeRooms } from './VibeRooms';
+import { DiscordLikeRooms } from './DiscordLikeRooms';
 import { ActivityHeatmap } from './ActivityHeatmap';
+import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface PartyCommunityFeedProps {
   onNavigate: (page: any) => void;
-  onGetTickets?: (partyDetails: any) => void;
+  onGetTickets?: (event: any) => void;
+}
+
+type CategoryType = 'party-notifications' | 'activity-heatmap' | 'vibe-rooms';
+
+interface Category {
+  id: CategoryType;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  color: string;
+  bgGradient: string;
+  accentColor: string;
+}
+
+interface Post {
+  id: string;
+  author: string;
+  avatar: string;
+  timeAgo: string;
+  content: string;
+  likes: number;
+  comments: number;
+  isLiked?: boolean;
 }
 
 export function PartyCommunityFeed({ onNavigate, onGetTickets }: PartyCommunityFeedProps) {
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('party-notifications');
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: '1',
+      author: 'DJ Krish',
+      avatar: 'D',
+      timeAgo: '3 hours ago',
+      content: 'Epic Night Last Weekend! 🎧🔥\n\nThank you to everyone who came out! The energy was absolutely insane! Already planning the next one.',
+      likes: 389,
+      comments: 124,
+      isLiked: false
+    },
+    {
+      id: '2',
+      author: 'Ananya Patel',
+      avatar: 'A',
+      timeAgo: '1 day ago',
+      content: 'You\'re Invited: Bollywood Themed Birthday Bash! 🎂\n\nTurning 25 and celebrating Bollywood style! Dress up as your favorite character. RSVP by Monday! 💃🕺',
+      likes: 78,
+      comments: 34,
+      isLiked: false
+    }
+  ]);
+  const [newPostContent, setNewPostContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isPosting, setIsPosting] = useState(false);
+
+  const categories: Category[] = [
+    {
+      id: 'party-notifications',
+      name: 'Party Notifications',
+      icon: <Bell className="w-5 h-5" />,
+      description: 'Live party updates & event announcements',
+      color: 'from-pink-400 to-orange-500',
+      bgGradient: 'from-pink-500/10 to-orange-500/10',
+      accentColor: 'pink'
+    },
+    {
+      id: 'activity-heatmap',
+      name: 'Activity Heatmap',
+      icon: <Activity className="w-5 h-5" />,
+      description: 'Your party engagement stats',
+      color: 'from-purple-400 to-pink-500',
+      bgGradient: 'from-purple-500/10 to-pink-500/10',
+      accentColor: 'purple'
+    },
+    {
+      id: 'vibe-rooms',
+      name: 'Vibe Rooms',
+      icon: <Users className="w-5 h-5" />,
+      description: 'Live voice & text party rooms',
+      color: 'from-cyan-400 to-blue-500',
+      bgGradient: 'from-cyan-500/10 to-blue-500/10',
+      accentColor: 'cyan'
+    }
+  ];
+
+  const handleLike = (postId: string) => {
+    setPosts(prev => prev.map(p => 
+      p.id === postId 
+        ? { ...p, isLiked: !p.isLiked, likes: p.isLiked ? p.likes - 1 : p.likes + 1 }
+        : p
+    ));
+  };
+
+  const handlePost = async () => {
+    if (!newPostContent.trim() && selectedFiles.length === 0) {
+      toast.error('Please write something or add media');
+      return;
+    }
+
+    setIsPosting(true);
+    setTimeout(() => {
+      const newPost: Post = {
+        id: Date.now().toString(),
+        author: 'You',
+        avatar: 'Y',
+        timeAgo: 'Just now',
+        content: newPostContent,
+        likes: 0,
+        comments: 0,
+        isLiked: false
+      };
+      setPosts(prev => [newPost, ...prev]);
+      setNewPostContent('');
+      setSelectedFiles([]);
+      setIsPosting(false);
+      toast.success('Post shared! 🎉');
+    }, 800);
+  };
+
   return (
-    <AnimatedBackground variant="party">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+      {/* Animated background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl"></div>
+      </div>
+
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 shadow-sm">
+      <header className="relative z-40 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 bg-slate-950/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => onNavigate('party-dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </Button>
-              <div>
-                <h1 className="flex items-center gap-2">
-                  <span className="text-2xl">🎉</span>
-                  Party Community
-                </h1>
-                <p className="text-sm text-slate-600">Connect, celebrate, and create unforgettable memories</p>
-              </div>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => onNavigate('events-dashboard')}
+              className="gap-2 hover:bg-slate-800 text-slate-100"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="flex items-center gap-2 text-2xl font-bold">
+                <span>🎉</span>
+                <span className="bg-gradient-to-r from-pink-400 to-orange-500 bg-clip-text text-transparent">Party Community</span>
+              </h1>
+              <p className="text-sm text-slate-400">Celebrate life together</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-pink-600 mb-1">3,142</div>
-              <p className="text-sm text-slate-600">Party People</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-orange-600 mb-1">87</div>
-              <p className="text-sm text-slate-600">Events This Week</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-purple-600 mb-1">245</div>
-              <p className="text-sm text-slate-600">DJs & Hosts</p>
-            </div>
-          </GlassCard>
-          <GlassCard>
-            <div className="p-4 text-center">
-              <div className="text-cyan-600 mb-1">42</div>
-              <p className="text-sm text-slate-600">Venues</p>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Live Activities */}
-        <LiveActivityFeed category="parties" />
-
-        {/* Activity Heatmap */}
-        <ActivityHeatmap category="parties" />
-
-        {/* Vibe Rooms */}
-        <VibeRooms category="party" />
-
-        {/* Community Posts */}
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Category Selector */}
         <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <MessageCircle className="w-5 h-5 text-pink-600" />
-            <h2>Community Feed</h2>
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Categories</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {categories.map((category) => (
+              <motion.button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`relative overflow-hidden rounded-xl p-4 transition-all duration-300 ${
+                  selectedCategory === category.id
+                    ? 'bg-gradient-to-br ' + category.bgGradient + ' border-2 border-' + category.accentColor + '-500/50 shadow-lg'
+                    : 'bg-slate-800/40 border border-slate-700/50 hover:border-slate-600/50'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {selectedCategory === category.id && (
+                  <motion.div
+                    className={'absolute inset-0 bg-gradient-to-r ' + category.color + ' opacity-5'}
+                    animate={{ opacity: [0.05, 0.1, 0.05] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                )}
+                
+                <div className="relative z-10 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={'p-2 rounded-lg bg-gradient-to-br ' + category.color + ' text-white shadow-lg'}>
+                      {category.icon}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-bold text-slate-100">{category.name}</h3>
+                      <p className="text-xs text-slate-400">{category.description}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedCategory === category.id && (
+                    <motion.div
+                      className={'h-1 rounded-full bg-gradient-to-r ' + category.color}
+                      layoutId="active-indicator"
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </div>
+              </motion.button>
+            ))}
           </div>
-
-          {/* Featured Party Announcement */}
-          <GlassCard variant="highlighted">
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full flex items-center justify-center text-2xl flex-shrink-0 animate-bounce">
-                  🎊
-                </div>
-                <div className="flex-1">
-                  <Badge className="bg-pink-200 text-pink-800 mb-2">Featured Event</Badge>
-                  <h3 className="text-pink-900 mb-2">Neon Nights - The Ultimate Glow Party! 💫</h3>
-                  <p className="text-pink-800 mb-4">
-                    Get ready for the biggest glow party of the year! International DJ lineup, UV face painting, 
-                    glow sticks, laser shows, and more. Early bird tickets 50% off! Limited spots - grab yours now! 🎵✨
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-pink-700">
-                    <span>📅 Nov 25th</span>
-                    <span>📍 Skybar Rooftop</span>
-                    <span>🎟️ ₹999 Early Bird</span>
-                    <span>👥 200+ going</span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white" 
-                  onClick={() => onGetTickets && onGetTickets({ 
-                    id: 'neon-nights',
-                    title: 'Neon Nights - The Ultimate Glow Party!', 
-                    venue: 'Skybar Rooftop',
-                    location: 'Ahmedabad',
-                    date: 'Nov 25, 2025', 
-                    time: '9:00 PM',
-                    price: '₹999',
-                    category: 'Glow Party',
-                    image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800'
-                  })}
-                >
-                  Get Tickets
-                </Button>
-                <Button variant="outline" className="border-pink-300 text-pink-700 hover:bg-pink-50">
-                  Share Event
-                </Button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* DJ Night Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-                  D
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>DJ Krish</span>
-                    <Badge className="bg-purple-100 text-purple-700 gap-1">
-                      <Music className="w-3 h-3" />
-                      DJ
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">3 hours ago</p>
-                </div>
-              </div>
-              <h3 className="mb-2">Epic Night Last Weekend! 🎧🔥</h3>
-              <p className="text-slate-700 mb-4">
-                Thank you to everyone who came to Saturday's Retro Rewind night! The energy was absolutely insane! 
-                You guys sang every word, danced till closing, and made it a night I'll never forget. Already planning 
-                the next one - drop your song requests below! 💿✨
-              </p>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 mb-4 border border-purple-200">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <div className="text-purple-600 mb-1">450+</div>
-                    <p className="text-xs text-slate-600">Attendees</p>
-                  </div>
-                  <div>
-                    <div className="text-pink-600 mb-1">6hrs</div>
-                    <p className="text-xs text-slate-600">Non-stop</p>
-                  </div>
-                  <div>
-                    <div className="text-orange-600 mb-1">100+</div>
-                    <p className="text-xs text-slate-600">Songs</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
-                <button className="flex items-center gap-1 hover:text-purple-600 transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span>389</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-purple-600 transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>124</span>
-                </button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Birthday Bash Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white">
-                  A
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Ananya Patel</span>
-                    <Badge className="bg-orange-100 text-orange-700 gap-1">
-                      <PartyPopper className="w-3 h-3" />
-                      Host
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">1 day ago</p>
-                </div>
-              </div>
-              <h3 className="mb-2">You're Invited: Bollywood Themed Birthday Bash! 🎂</h3>
-              <p className="text-slate-700 mb-4">
-                Turning 25 and celebrating Bollywood style! 🎬 Dress up as your favorite Bollywood character, 
-                we'll have live performances, karaoke, Indian fusion food, and a photo booth. Bring your dance 
-                shoes and your best energy! RSVP by Monday! 💃🕺
-              </p>
-              <div className="flex items-center gap-3 mb-4">
-                <Badge variant="outline" className="bg-orange-50 border-orange-300 text-orange-700">
-                  Bollywood Theme
-                </Badge>
-                <Badge variant="outline" className="bg-pink-50 border-pink-300 text-pink-700">
-                  Costume Party
-                </Badge>
-                <Badge variant="outline">Nov 23rd 8 PM</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-slate-600">
-                  <button className="flex items-center gap-1 hover:text-orange-600 transition-colors">
-                    <Heart className="w-4 h-4" />
-                    <span>78</span>
-                  </button>
-                  <button className="flex items-center gap-1 hover:text-orange-600 transition-colors">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>34</span>
-                  </button>
-                </div>
-                <Button className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white">
-                  RSVP
-                </Button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Rooftop Party Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-full flex items-center justify-center text-white">
-                  M
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Mike & The Squad</span>
-                    <Badge className="bg-cyan-100 text-cyan-700 gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      Party Crew
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">2 days ago</p>
-                </div>
-              </div>
-              <h3 className="mb-2">Monthly Rooftop Sunset Session 🌅</h3>
-              <p className="text-slate-700 mb-4">
-                Our favorite monthly tradition continues! Sunset views, chill vibes, acoustic sets, and good people. 
-                BYO drinks, we've got the snacks covered. Last month was 100+ people - let's make this one even bigger! 
-                Tag your friends who need to be there! ☀️🎵
-              </p>
-              <div className="flex items-center gap-3 mb-4">
-                <Badge variant="outline" className="bg-cyan-50 border-cyan-300 text-cyan-700">
-                  Chill Vibes
-                </Badge>
-                <Badge variant="outline" className="bg-emerald-50 border-emerald-300 text-emerald-700">
-                  Sunset Views
-                </Badge>
-                <Badge variant="outline">Every Last Friday</Badge>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-slate-600">
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span>234</span>
-                </button>
-                <button className="flex items-center gap-1 hover:text-cyan-600 transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span>89</span>
-                </button>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* House Party Post */}
-          <GlassCard>
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full flex items-center justify-center text-white">
-                  S
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>Sarah's House</span>
-                    <Badge className="bg-pink-100 text-pink-700 gap-1">
-                      <Zap className="w-3 h-3" />
-                      Intimate Gathering
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-600">3 days ago</p>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg p-4 mb-4 border border-pink-200">
-                <div className="flex items-center gap-3">
-                  <div className="text-4xl">🏠</div>
-                  <div>
-                    <h3 className="text-pink-900 mb-1">Game Night & Chill - This Saturday!</h3>
-                    <p className="text-sm text-pink-700">Board games, video games, snacks & good company</p>
-                  </div>
-                </div>
-              </div>
-              <p className="text-slate-700 mb-4">
-                Looking for a more low-key weekend vibe? Join us for game night! We've got all the classics - 
-                Cards Against Humanity, UNO, Mario Kart, and more. Small group (max 15 people) for quality hangout time. 
-                Bring your favorite snacks! 🎮🍕
-              </p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-slate-600">
-                  <button className="flex items-center gap-1 hover:text-pink-600 transition-colors">
-                    <Heart className="w-4 h-4" />
-                    <span>45</span>
-                  </button>
-                  <button className="flex items-center gap-1 hover:text-pink-600 transition-colors">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>18</span>
-                  </button>
-                </div>
-                <Badge className="bg-emerald-100 text-emerald-700">
-                  12/15 spots filled
-                </Badge>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Community Celebration */}
-          <GlassCard variant="highlighted">
-            <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <Badge className="bg-purple-200 text-purple-800 mb-2">Community Milestone</Badge>
-                  <h3 className="text-purple-900 mb-2">We Hit 3000 Members! 🎉✨</h3>
-                  <p className="text-purple-800 mb-4">
-                    What started as a small group of friends has grown into an amazing community of party lovers! 
-                    To celebrate, we're throwing a massive appreciation party next week - free for all members! 
-                    Let's celebrate together! Thank you for making this community incredible! 💜
-                  </p>
-                  <div className="flex items-center gap-4 text-sm text-purple-700">
-                    <span>📅 Next Saturday</span>
-                    <span>📍 Downtown Club</span>
-                    <span>🎟️ Free for members</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </GlassCard>
         </div>
+
+        {/* Category Content */}
+        <AnimatePresence mode="wait">
+          {selectedCategory === 'party-notifications' && (
+            <motion.div
+              key="party-notifications"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Party People', value: '3,142', color: 'pink' },
+                  { label: 'Events This Week', value: '87', color: 'orange' },
+                  { label: 'DJs & Hosts', value: '245', color: 'purple' },
+                  { label: 'Venues', value: '42', color: 'cyan' }
+                ].map((stat, idx) => (
+                  <motion.div
+                    key={idx}
+                    className="bg-gradient-to-br from-slate-800/60 to-slate-800/30 border border-slate-700/50 rounded-xl p-4 text-center hover:border-slate-600/50 transition-colors"
+                    whileHover={{ y: -2 }}
+                  >
+                    <div className={'text-' + stat.color + '-400 text-2xl font-bold mb-1'}>{stat.value}</div>
+                    <p className="text-sm text-slate-400">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Live Activity */}
+              <div className="bg-gradient-to-br from-pink-500/10 to-orange-500/10 border border-pink-500/20 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-pink-500 to-orange-600 text-white">
+                    <PartyPopper className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-100">Live Party Updates</h3>
+                    <p className="text-sm text-slate-400">Real-time notifications from your community</p>
+                  </div>
+                </div>
+                <LiveActivityFeed category="parties" />
+              </div>
+            </motion.div>
+          )}
+
+          {selectedCategory === 'activity-heatmap' && (
+            <motion.div
+              key="activity-heatmap"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+                    <Activity className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-100">Your Party Stats</h3>
+                    <p className="text-sm text-slate-400">Track your party engagement</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: 'Posts', value: '18', icon: <Sparkles className="w-5 h-5" /> },
+                    { label: 'Interactions', value: '67', icon: <Heart className="w-5 h-5" /> },
+                    { label: 'This Week', value: '12', icon: <Music className="w-5 h-5" /> },
+                    { label: 'Streak', value: '8', icon: <PartyPopper className="w-5 h-5" /> }
+                  ].map((stat, idx) => (
+                    <motion.div
+                      key={idx}
+                      className="bg-slate-800/50 border border-slate-700/30 rounded-lg p-4 text-center hover:bg-slate-800/80 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <div className="text-pink-400 flex justify-center mb-2">{stat.icon}</div>
+                      <div className="text-2xl font-bold text-slate-100">{stat.value}</div>
+                      <div className="text-xs text-slate-400 mt-1">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <ActivityHeatmap category="parties" />
+              </div>
+            </motion.div>
+          )}
+
+          {selectedCategory === 'vibe-rooms' && (
+            <motion.div
+              key="vibe-rooms"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="-mx-6 -mb-6 -mt-2"
+            >
+              <DiscordLikeRooms category="parties" onClose={() => setSelectedCategory('party-notifications')} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Post Creation - Only in party-notifications */}
+        {selectedCategory === 'party-notifications' && (
+          <motion.div
+            className="bg-slate-800/40 border border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg">
+                Y
+              </div>
+              <div className="flex-1">
+                <textarea
+                  value={newPostContent}
+                  onChange={(e) => setNewPostContent(e.target.value)}
+                  placeholder="Share your party moment... 🎉"
+                  className="w-full border border-slate-700 bg-slate-800/50 hover:bg-slate-800 focus:bg-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-pink-400/50 transition-all text-sm"
+                  rows={3}
+                  disabled={isPosting}
+                />
+                
+                {selectedFiles.length > 0 && (
+                  <div className="mt-3 flex gap-2 flex-wrap">
+                    {selectedFiles.map((file, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="relative group"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                      >
+                        <img 
+                          src={URL.createObjectURL(file)} 
+                          alt="preview" 
+                          className="w-20 h-20 object-cover rounded-lg border border-slate-600"
+                        />
+                        <button
+                          onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs transition-colors shadow-lg"
+                        >
+                          ×
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="media-upload"
+                      accept="image/*,video/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="media-upload" 
+                      className="cursor-pointer text-slate-400 hover:text-pink-400 hover:bg-slate-700/50 p-2 rounded-lg transition-all"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                    </label>
+                    <button 
+                      className="text-slate-400 hover:text-pink-400 hover:bg-slate-700/50 p-2 rounded-lg transition-all"
+                    >
+                      <Camera className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <Button
+                    onClick={handlePost}
+                    disabled={(!newPostContent.trim() && selectedFiles.length === 0) || isPosting}
+                    className="bg-gradient-to-r from-pink-500 to-orange-600 hover:from-pink-600 hover:to-orange-700 text-white gap-2 rounded-full px-4 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-500/25"
+                    size="sm"
+                  >
+                    {isPosting ? <><Loader className="w-4 h-4 animate-spin" /> Posting...</> : <><Send className="w-4 h-4" /> Post</>}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Posts Feed - Only in party-notifications */}
+        {selectedCategory === 'party-notifications' && (
+          <div className="space-y-4">
+          {posts.map((post, idx) => (
+            <motion.div
+              key={post.id}
+              className="bg-slate-800/40 border border-slate-700/50 rounded-xl shadow-lg backdrop-blur-sm overflow-hidden hover:border-slate-600/50 transition-colors group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <div className="p-4 flex items-start gap-3">
+                <motion.div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-orange-600 flex items-center justify-center text-white font-semibold flex-shrink-0 shadow-lg" whileHover={{ scale: 1.1 }}>
+                  {post.avatar}
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-100">{post.author}</span>
+                  </div>
+                  <span className="text-xs text-slate-500">{post.timeAgo}</span>
+                </div>
+              </div>
+
+              <div className="px-4 pb-3">
+                <p className="text-slate-200 whitespace-pre-wrap break-words">{post.content}</p>
+              </div>
+
+              <div className="px-4 pb-3 flex items-center gap-6 text-sm border-t border-slate-700/30 pt-3">
+                <motion.button 
+                  onClick={() => handleLike(post.id)} 
+                  className={`flex items-center gap-2 transition-colors group/btn ${post.isLiked ? 'text-red-400' : 'text-slate-400 hover:text-red-400'}`}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-red-400' : 'group-hover/btn:fill-red-400/50'}`} />
+                  <span className="font-medium">{post.likes}</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="flex items-center gap-2 text-slate-400 hover:text-pink-400 transition-colors group/btn"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="font-medium">{post.comments}</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="flex items-center gap-2 text-slate-400 hover:text-orange-400 transition-colors group/btn"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span className="font-medium">Share</span>
+                </motion.button>
+                
+                <motion.button 
+                  className="ml-auto transition-colors text-slate-400 hover:text-pink-400"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <Bookmark className="w-5 h-5" />
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+
+          {posts.length === 0 && (
+            <motion.div
+              className="text-center py-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <div className="text-6xl mb-4">🌟</div>
+              <h3 className="text-xl font-semibold text-slate-200 mb-2">No posts yet</h3>
+              <p className="text-slate-400">Be the first to share something amazing!</p>
+            </motion.div>
+          )}
+        </div>
+        )}
       </div>
-    </AnimatedBackground>
+    </div>
   );
 }

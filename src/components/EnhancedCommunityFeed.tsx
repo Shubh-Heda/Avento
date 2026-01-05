@@ -303,163 +303,161 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
   };
 
   return (
-    <AnimatedBackground variant="community">
+    <div className="relative min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => onNavigate('dashboard')}
-                className="gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </Button>
-              <h1 className="text-xl font-bold">
-                {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} Community` : 'Community Feed'}
-              </h1>
-            </div>
-            <Button onClick={() => setShowCreatePost(true)} className="gap-2">
-              <Send className="w-4 h-4" />
-              Post
+      <header className="relative z-40 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 bg-slate-950/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => onNavigate('dashboard')}
+              className="gap-2 hover:bg-slate-800 text-slate-100"
+            >
+              <ArrowLeft className="w-4 h-4" />
             </Button>
+            <div>
+              <h1 className="flex items-center gap-2 text-2xl font-bold">
+                <span>🌐</span>
+                <span className="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                  {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} Community` : 'Community Feed'}
+                </span>
+              </h1>
+              <p className="text-sm text-slate-400">Connect with your community</p>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Create Post Modal */}
-        {showCreatePost && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b flex items-center justify-between">
-                <h2 className="text-xl font-bold">Create Post</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCreatePost(false)}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <textarea
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  placeholder="What's happening?"
-                  className="w-full min-h-[150px] p-4 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-
-                <input
-                  type="text"
-                  value={postLocation}
-                  onChange={(e) => setPostLocation(e.target.value)}
-                  placeholder="Add location (optional)"
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-
-                {/* Media Preview */}
-                {mediaPreview.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
-                    {mediaPreview.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        {selectedMedia[index].type.startsWith('video/') ? (
-                          <div className="relative">
-                            <video src={preview} className="w-full h-32 object-cover rounded-lg" />
-                            <Play className="absolute inset-0 m-auto w-10 h-10 text-white" />
-                          </div>
-                        ) : (
-                          <img src={preview} alt="" className="w-full h-32 object-cover rounded-lg" />
-                        )}
-                        <button
-                          onClick={() => removeMedia(index)}
-                          className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+      {/* Main Content */}
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Create Post Card */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-6 backdrop-blur-sm">
+          <textarea
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            placeholder="What's happening in your community?"
+            className="w-full min-h-[120px] p-4 bg-slate-900/50 border border-slate-700/50 rounded-lg text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+          />
+          
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/50">
+            <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={handleMediaSelect}
+                className="hidden"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2 text-slate-400 hover:text-slate-300 hover:bg-slate-700/50"
+                disabled={selectedMedia.length >= 4}
+              >
+                <ImageIcon className="w-4 h-4" />
+                {selectedMedia.length > 0 ? `${selectedMedia.length}/4` : 'Add Photo/Video'}
+              </Button>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPostContent('')}
+                className="text-slate-400 hover:text-slate-300 hover:bg-slate-700/50"
+              >
+                Clear
+              </Button>
+              <Button
+                onClick={handleCreatePost}
+                disabled={!postContent.trim() || isPosting}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700"
+              >
+                {isPosting ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin mr-2" />
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Post
+                  </>
                 )}
-
-                {/* Media Upload Buttons */}
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    onChange={handleMediaSelect}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="gap-2"
-                    disabled={selectedMedia.length >= 4}
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    Add Photo/Video
-                  </Button>
-                  <span className="text-sm text-slate-500">
-                    {selectedMedia.length}/4 media
-                  </span>
-                </div>
-
-                {/* Post Button */}
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCreatePost(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleCreatePost}
-                    disabled={!postContent.trim() || isPosting}
-                    className="bg-gradient-to-r from-cyan-500 to-emerald-500"
-                  >
-                    {isPosting ? 'Posting...' : 'Post'}
-                  </Button>
-                </div>
-              </div>
+              </Button>
             </div>
           </div>
-        )}
+
+          {/* Media Preview */}
+          {mediaPreview.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4 pt-4 border-t border-slate-700/50">
+              {mediaPreview.map((preview, index) => (
+                <div key={index} className="relative group">
+                  {selectedMedia[index].type.startsWith('video/') ? (
+                    <div className="relative bg-slate-900 rounded-lg overflow-hidden">
+                      <video src={preview} className="w-full h-24 object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/60 transition-colors">
+                        <Play className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                  ) : (
+                    <img src={preview} alt="" className="w-full h-24 object-cover rounded-lg" />
+                  )}
+                  <button
+                    onClick={() => removeMedia(index)}
+                    className="absolute top-1 right-1 bg-rose-500/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Posts Feed */}
         <div className="space-y-4">
           {loading && posts.length === 0 ? (
             <div className="text-center py-12">
               <div className="animate-spin w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-slate-600">Loading posts...</p>
+              <p className="text-slate-400">Loading posts...</p>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-slate-600 mb-4">No posts yet. Be the first to post!</p>
-              <Button onClick={() => setShowCreatePost(true)}>Create Post</Button>
+            <div className="text-center py-12 bg-slate-800/20 border border-slate-700/50 rounded-xl">
+              <p className="text-slate-400 mb-4">No posts yet. Be the first to share!</p>
+              <Button
+                onClick={() => postContent ? handleCreatePost() : null}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700"
+              >
+                Create First Post
+              </Button>
             </div>
           ) : (
-            posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-xl border shadow-sm overflow-hidden">
+            posts.map((post, index) => (
+              <div key={post.id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden hover:border-slate-600/50 transition-colors">
                 {/* Post Header */}
-                <div className="p-4 flex items-start justify-between">
+                <div className="p-4 flex items-start justify-between border-b border-slate-700/50">
                   <div className="flex items-start gap-3 flex-1">
                     <img
                       src={post.author?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author_id}`}
                       alt={post.author?.display_name}
-                      className="w-12 h-12 rounded-full"
+                      className="w-12 h-12 rounded-full border border-slate-600/50"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold">{post.author?.display_name}</span>
+                        <span className="font-bold text-slate-100">{post.author?.display_name}</span>
                         <span className="text-slate-500">@{post.author?.username}</span>
-                        <span className="text-slate-400">·</span>
+                        <span className="text-slate-600">·</span>
                         <span className="text-slate-500 text-sm">{formatTimestamp(post.created_at)}</span>
                       </div>
                       {post.location && (
@@ -470,33 +468,30 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
                       )}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Button>
                 </div>
 
                 {/* Post Content */}
-                <div className="px-4 pb-3">
-                  <p className="text-slate-900 whitespace-pre-wrap">{post.content}</p>
+                <div className="px-4 py-3">
+                  <p className="text-slate-200 whitespace-pre-wrap">{post.content}</p>
                 </div>
 
                 {/* Post Media */}
                 {post.media && post.media.length > 0 && (
                   <div className={`px-4 pb-3 grid gap-2 ${post.media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                     {post.media.map((media) => (
-                      <div key={media.id} className="relative">
+                      <div key={media.id} className="relative rounded-lg overflow-hidden bg-slate-900/50">
                         {media.media_type === 'video' ? (
                           <video
                             src={media.media_url}
                             poster={media.thumbnail_url}
                             controls
-                            className="w-full rounded-lg"
+                            className="w-full"
                           />
                         ) : (
                           <img
                             src={media.media_url}
                             alt=""
-                            className="w-full rounded-lg object-cover"
+                            className="w-full object-cover"
                           />
                         )}
                       </div>
@@ -505,46 +500,46 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
                 )}
 
                 {/* Post Actions */}
-                <div className="px-4 py-3 border-t flex items-center justify-between">
+                <div className="px-4 py-3 border-t border-slate-700/50 flex items-center justify-between">
                   <div className="flex items-center gap-6">
                     <button
                       onClick={() => handleLike(post.id, post.user_has_liked || false)}
-                      className="flex items-center gap-2 text-slate-600 hover:text-rose-500 transition-colors group"
+                      className="flex items-center gap-2 text-slate-500 hover:text-rose-400 transition-colors group"
                     >
                       <Heart
                         className={`w-5 h-5 ${post.user_has_liked ? 'fill-rose-500 text-rose-500' : ''}`}
                       />
-                      <span className="text-sm">{post.like_count}</span>
+                      <span className="text-sm group-hover:text-rose-400">{post.like_count}</span>
                     </button>
 
                     <button
                       onClick={() => handleCommentToggle(post.id)}
-                      className="flex items-center gap-2 text-slate-600 hover:text-cyan-500 transition-colors"
+                      className="flex items-center gap-2 text-slate-500 hover:text-cyan-400 transition-colors group"
                     >
                       <MessageCircle className="w-5 h-5" />
-                      <span className="text-sm">{post.comment_count}</span>
+                      <span className="text-sm group-hover:text-cyan-400">{post.comment_count}</span>
                     </button>
 
                     <button
                       onClick={() => handleShare(post.id)}
-                      className="flex items-center gap-2 text-slate-600 hover:text-green-500 transition-colors"
+                      className="flex items-center gap-2 text-slate-500 hover:text-green-400 transition-colors group"
                     >
                       <Share2 className="w-5 h-5" />
-                      <span className="text-sm">{post.share_count}</span>
+                      <span className="text-sm group-hover:text-green-400">{post.share_count}</span>
                     </button>
                     
                     <button
                       onClick={() => handleInvite(post.id)}
-                      className="flex items-center gap-2 text-slate-600 hover:text-purple-500 transition-colors"
+                      className="flex items-center gap-2 text-slate-500 hover:text-purple-400 transition-colors group"
                     >
                       <UserPlus className="w-5 h-5" />
-                      <span className="text-sm">Invite</span>
+                      <span className="text-sm group-hover:text-purple-400">Invite</span>
                     </button>
                   </div>
 
                   <button
                     onClick={() => handleBookmark(post.id, post.user_has_bookmarked || false)}
-                    className="text-slate-600 hover:text-amber-500 transition-colors"
+                    className="text-slate-500 hover:text-amber-400 transition-colors"
                   >
                     <Bookmark
                       className={`w-5 h-5 ${post.user_has_bookmarked ? 'fill-amber-500 text-amber-500' : ''}`}
@@ -554,26 +549,26 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
 
                 {/* Comments Section */}
                 {selectedPost === post.id && (
-                  <div className="border-t bg-slate-50 p-4">
+                  <div className="border-t border-slate-700/50 bg-slate-900/30 p-4">
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {comments[post.id]?.map((comment) => (
                         <div key={comment.id} className="flex gap-3">
                           <img
                             src={comment.author?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.author_id}`}
                             alt={comment.author?.display_name}
-                            className="w-8 h-8 rounded-full flex-shrink-0"
+                            className="w-8 h-8 rounded-full flex-shrink-0 border border-slate-600/50"
                           />
                           <div className="flex-1">
-                            <div className="bg-white rounded-lg p-3">
-                              <div className="font-semibold text-sm mb-1">
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
+                              <div className="font-semibold text-sm text-slate-100 mb-1">
                                 {comment.author?.display_name}
                               </div>
-                              <p className="text-sm text-slate-700">{comment.content}</p>
+                              <p className="text-sm text-slate-300">{comment.content}</p>
                             </div>
                             <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
                               <span>{formatTimestamp(comment.created_at)}</span>
-                              <button className="hover:text-rose-500">Like · {comment.like_count}</button>
-                              <button className="hover:text-cyan-500">Reply</button>
+                              <button className="hover:text-rose-400">Like · {comment.like_count}</button>
+                              <button className="hover:text-cyan-400">Reply</button>
                             </div>
                           </div>
                         </div>
@@ -591,6 +586,7 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
               <Button
                 variant="outline"
                 onClick={() => loadFeed(true)}
+                className="border-slate-700/50 hover:border-slate-600/50 text-slate-300 hover:bg-slate-800/50"
               >
                 Load More
               </Button>
@@ -598,7 +594,7 @@ export function EnhancedCommunityFeed({ onNavigate, category }: EnhancedCommunit
           )}
         </div>
       </div>
-    </AnimatedBackground>
+    </div>
   );
 }
 

@@ -25,6 +25,9 @@ Keep keys secret for production.
 1. Create a new Supabase project at https://app.supabase.com
 2. Go to Storage → Create a bucket named `images` (public for demo, or set policies for private)
 3. Go to SQL Editor and run the schema below.
+4. Apply migrations in `supabase/migrations` (latest adds Vibe Rooms + Realtime voice/chat scaffolding):
+  - With Supabase CLI: `supabase db push`
+  - Or run the SQL from `supabase/migrations/010_vibe_rooms.sql` manually.
 
 ### Minimal SQL schema
 ```sql
@@ -104,6 +107,11 @@ await supabase.from('photos').insert([{ album_id: '<album-uuid>', owner_id: '<us
 - Add RLS policies to the DB to protect user data.
 - Add background functions to generate thumbnails and moderate uploads (or integrate 3rd-party moderation API).
 - Add analytics (Supabase Edge Functions + events or third-party like Plausible/GA) and link to the Traction component.
+
+## Live activity map prerequisites (matches table)
+- Ensure `matches` rows carry geographic coordinates: set `lat` and `lng` (float) on every active row; otherwise provide a known Ahmedabad venue name (e.g., "Sardar Patel Stadium") so the client lookup can resolve it.
+- Enable Realtime on `matches` (insert/update/delete) in Supabase: Database → Replication → Realtime → enable table so the heatmap and modal map stay live.
+- Optional: store `current_players` to make the heatmap intensity more accurate; the UI will use it automatically if present.
 
 ---
 
