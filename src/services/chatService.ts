@@ -511,18 +511,6 @@ class ChatService {
     if (error) throw error;
   }
 
-  async deleteMessage(messageId: string): Promise<void> {
-    const { error } = await supabase
-      .from('chat_messages')
-      .update({
-        is_deleted: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', messageId);
-
-    if (error) throw error;
-  }
-
   // ==================== REACTION OPERATIONS ====================
 
   async addReaction(messageId: string, emoji: string): Promise<void> {
@@ -625,23 +613,6 @@ class ChatService {
   }
 
   // ==================== UTILITY OPERATIONS ====================
-
-  async searchMessages(roomId: string, query: string): Promise<ChatMessage[]> {
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select(`
-        *,
-        sender:profiles(id, full_name, avatar_url)
-      `)
-      .eq('room_id', roomId)
-      .eq('is_deleted', false)
-      .ilike('content', `%${query}%`)
-      .order('created_at', { ascending: false })
-      .limit(20);
-
-    if (error) throw error;
-    return data || [];
-  }
 
   async getUnreadCount(roomId: string): Promise<number> {
     const { data: { user } } = await supabase.auth.getUser();
