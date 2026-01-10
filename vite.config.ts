@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 
 export default defineConfig(({ command }) => ({
-  base: '/',
+  base: process.env.GITHUB_PAGES === 'true' ? '/Avento/' : '/',
   plugins: [react()],
   
   // Build optimizations
