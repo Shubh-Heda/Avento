@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, PartyPopper, HelpCircle, Ticket, Clock, Zap, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { UpcomingItemsSection } from './UpcomingItemsSection';
@@ -13,6 +13,7 @@ import { GlobalSearch } from './GlobalSearch';
 import { NotificationInbox } from './NotificationInbox';
 import { MatchCountdownTimer } from './MatchCountdownTimer';
 import { MenuDropdown } from './MenuDropdown';
+import { FirstTimeUserGuide } from './FirstTimeUserGuide';
 import partyHeroImage from 'figma:asset/0af8b90ac57008e9f3c2d27238a5b8e1f3b85480.png';
 
 interface UserProfile {
@@ -31,6 +32,15 @@ interface PartyDashboardProps {
 
 export function PartyDashboard({ onNavigate, userProfile: userProfileProp, onBookParty }: PartyDashboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showFirstTimeGuide, setShowFirstTimeGuide] = useState(false);
+
+  // Check if user is new (first time visiting parties)
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('avento_parties_guide_completed');
+    if (!hasSeenGuide) {
+      setShowFirstTimeGuide(true);
+    }
+  }, []);
 
   // Mock user profile - in production this would come from context/props
   const userProfile: UserProfile = userProfileProp || {
@@ -77,6 +87,13 @@ export function PartyDashboard({ onNavigate, userProfile: userProfileProp, onBoo
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* First Time User Guide */}
+      {showFirstTimeGuide && (
+        <FirstTimeUserGuide 
+          onClose={() => setShowFirstTimeGuide(false)}
+          category="party"
+        />
+      )}
       {/* STUNNING Background Image - DJ performing at nightclub with energetic crowd */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

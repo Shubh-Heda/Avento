@@ -164,7 +164,7 @@ export function UpcomingItemsSection({
           {upcomingItems.map(item => (
             <div 
               key={item.id} 
-              className="flex items-start gap-4 p-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl border border-slate-600 hover:shadow-md transition-shadow"
+              className="flex items-start gap-4 p-4 bg-black rounded-xl border border-slate-700 hover:shadow-md transition-shadow"
             >
               <ImageWithFallback 
                 src={item.image || defaults.image}

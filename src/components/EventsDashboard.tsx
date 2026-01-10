@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Users, Heart, Sparkles, User, MessageCircle, Calendar, TrendingUp, Star, MapPin, Shield, Music, HelpCircle, Ticket, Clock, Map, Trophy, Camera, Video, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { AventoLogo } from './AventoLogo';
@@ -13,6 +13,7 @@ import { NotificationInbox } from './NotificationInbox';
 import { MatchCountdownTimer } from './MatchCountdownTimer';
 import { MenuDropdown } from './MenuDropdown';
 import { UpcomingItemsSection } from './UpcomingItemsSection';
+import { FirstTimeUserGuide } from './FirstTimeUserGuide';
 import eventsBackgroundImage from 'figma:asset/5920481c5d9f82bea22cf2d117dfcaeb8e4a39c7.png';
 import eventsHeroImage from 'figma:asset/a405f329b597be91eeb4b4ea02415753c919ddd2.png';
 
@@ -32,6 +33,15 @@ interface EventsDashboardProps {
 
 export function EventsDashboard({ onNavigate, userProfile, onBookEvent }: EventsDashboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showFirstTimeGuide, setShowFirstTimeGuide] = useState(false);
+
+  // Check if user is new (first time visiting events)
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('avento_events_guide_completed');
+    if (!hasSeenGuide) {
+      setShowFirstTimeGuide(true);
+    }
+  }, []);
 
   // Mock upcoming events data
   const [upcomingEvents] = useState([
@@ -69,6 +79,13 @@ export function EventsDashboard({ onNavigate, userProfile, onBookEvent }: Events
 
   return (
     <div className="min-h-screen relative">
+      {/* First Time User Guide */}
+      {showFirstTimeGuide && (
+        <FirstTimeUserGuide 
+          onClose={() => setShowFirstTimeGuide(false)}
+          category="events"
+        />
+      )}
       {/* STUNNING Background Image - Outdoor concert with live performance and audience */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
