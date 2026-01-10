@@ -131,24 +131,23 @@ export function UpcomingItemsSection({
         </div>
       )}
 
-      {showActions && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Button
-            onClick={onNavigateToFind}
-            className="h-16 w-full justify-start px-6 text-lg font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl"
-          >
-            <span className="text-2xl mr-3">🔍</span>
-            {findLabel || defaults.findLabel}
-          </Button>
-          <Button
-            onClick={onNavigateToCreate}
-            className="h-16 w-full justify-start px-6 text-lg font-semibold rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl"
-          >
-            <span className="text-2xl mr-3">✨</span>
-            {createLabel || defaults.createLabel}
-          </Button>
-        </div>
-      )}
+      {/* Always show action buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Button
+          onClick={onNavigateToFind}
+          className="h-16 w-full justify-start px-6 text-lg font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg hover:shadow-xl"
+        >
+          <span className="text-2xl mr-3">🔍</span>
+          {findLabel || defaults.findLabel}
+        </Button>
+        <Button
+          onClick={onNavigateToCreate}
+          className="h-16 w-full justify-start px-6 text-lg font-semibold rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl"
+        >
+          <span className="text-2xl mr-3">✨</span>
+          {createLabel || defaults.createLabel}
+        </Button>
+      </div>
 
       {upcomingItems.length === 0 ? (
         <EmptyState
@@ -165,7 +164,7 @@ export function UpcomingItemsSection({
           {upcomingItems.map(item => (
             <div 
               key={item.id} 
-              className="flex items-start gap-4 p-4 bg-gradient-to-r from-cyan-50 to-emerald-50 rounded-xl border border-cyan-200 hover:shadow-md transition-shadow"
+              className="flex items-start gap-4 p-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl border border-slate-600 hover:shadow-md transition-shadow"
             >
               <ImageWithFallback 
                 src={item.image || defaults.image}
@@ -175,13 +174,13 @@ export function UpcomingItemsSection({
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-2 gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="truncate">{item.title}</h3>
-                    <p className="text-slate-600 truncate">{item.venueName}{item.location ? ` • ${item.location}` : ''}</p>
+                    <h3 className="truncate text-white font-semibold">{item.title}</h3>
+                    <p className="text-slate-300 truncate">{item.venueName}{item.location ? ` • ${item.location}` : ''}</p>
                   </div>
                   <Badge className="bg-cyan-500 text-white flex-shrink-0">{item.category}</Badge>
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-slate-600 mb-3 flex-wrap">
+                <div className="flex items-center gap-4 text-sm text-slate-200 mb-3 flex-wrap">
                   <span className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
                     {item.date}, {item.time}
@@ -193,7 +192,7 @@ export function UpcomingItemsSection({
                     </span>
                   )}
                   {item.amount && (
-                    <span className="flex items-center gap-1 text-emerald-600">
+                    <span className="flex items-center gap-1 text-emerald-300 font-semibold">
                       <CreditCard className="w-4 h-4" />
                       ₹{item.amount}
                     </span>
@@ -203,11 +202,11 @@ export function UpcomingItemsSection({
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-500 border-2 border-white flex items-center justify-center text-xs text-white shadow-md">S</div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 border-2 border-white flex items-center justify-center text-xs text-white shadow-md">M</div>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 border-2 border-white flex items-center justify-center text-xs text-white shadow-md">R</div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-500 border-2 border-slate-600 flex items-center justify-center text-xs text-white shadow-md">S</div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500 border-2 border-slate-600 flex items-center justify-center text-xs text-white shadow-md">M</div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-500 border-2 border-slate-600 flex items-center justify-center text-xs text-white shadow-md">R</div>
                     </div>
-                    <span className="text-sm text-slate-600">Friends attending</span>
+                    <span className="text-sm text-slate-200">Friends attending</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
