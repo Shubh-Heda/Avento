@@ -444,7 +444,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
           </motion.div>
           
           <motion.h1 
-            className="mb-4 relative text-5xl md:text-7xl font-black leading-tight tracking-tight"
+            className="mb-4 relative text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -459,7 +459,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
           </motion.h1>
           
           <motion.p 
-            className="text-white text-xl md:text-2xl mb-6 max-w-3xl mx-auto relative bg-black/50 rounded-2xl px-8 py-5 border-2 border-white/50 font-medium leading-relaxed shadow-2xl"
+            className="text-white text-base sm:text-lg md:text-xl lg:text-2xl mb-6 max-w-3xl mx-auto relative bg-black/50 rounded-2xl px-4 sm:px-6 md:px-8 py-4 sm:py-5 border-2 border-white/50 font-medium leading-relaxed shadow-2xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -473,34 +473,34 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
           {/* Remove the buttons section completely */}
 
           <motion.div
-            className="flex flex-wrap justify-center gap-4 text-lg md:text-xl text-white mb-8"
+            className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 text-sm sm:text-base md:text-lg lg:text-xl text-white mb-8"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             style={getParallaxStyle(28)}
           >
             <motion.div
-              className="px-8 py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-cyan-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
+              className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-cyan-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
               whileHover={{ scale: 1.08, y: -2 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🤝</span>
-                <span className="text-xl md:text-2xl leading-relaxed"><span className="text-slate-900 font-semibold">Play</span> with people you trust</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="text-2xl sm:text-3xl">🤝</span>
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed"><span className="text-slate-900 font-semibold">Play</span> with people you trust</span>
               </div>
             </motion.div>
             <motion.div
-              className="px-8 py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-purple-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
+              className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 rounded-full bg-white/95 backdrop-blur-md border-2 border-purple-400/90 text-slate-900 font-semibold shadow-2xl hover:shadow-3xl transition-shadow"
               whileHover={{ scale: 1.08, y: -2 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🎭</span>
-                <span className="text-xl md:text-2xl leading-relaxed"><span className="text-slate-900 font-semibold">Celebrate</span> culture together</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="text-2xl sm:text-3xl">🎭</span>
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed"><span className="text-slate-900 font-semibold">Celebrate</span> culture together</span>
               </div>
             </motion.div>
           </motion.div>
@@ -520,7 +520,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800&auto=format&fm=webp"
                     alt="Friends celebrating after a match"
-                    className="w-full h-[400px] object-cover"
+                    className="w-full h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px] object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   

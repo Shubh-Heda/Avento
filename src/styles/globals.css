@@ -213,3 +213,29 @@ body {
 .animate-shimmer {
   animation: shimmer 3s infinite;
 }
+
+/* Mobile-First Responsive Improvements */
+@media (max-width: 768px) {
+  /* Touch targets - minimum 44x44px */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better font rendering on mobile */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 14px;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve spacing on mobile */
+  .container {
+    @apply px-3 sm:px-4;
+  }
+}

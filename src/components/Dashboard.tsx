@@ -229,7 +229,7 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
           </div>
 
           {/* Emotional Dashboard Highlights */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
             <div className="bg-white/80 backdrop-blur-sm border border-cyan-200 shadow-lg hover:shadow-xl transition-all p-6 rounded-2xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="relative z-10 group-hover:text-white transition-colors">
@@ -289,7 +289,7 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-8">
             <Button
               size="lg"
               onClick={() => onNavigate('availability')}
@@ -441,7 +441,7 @@ export function Dashboard({ onNavigate, userProfile, matches }: DashboardProps) 
               </Button>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <TurfCard
                 id="1"
                 image="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop"
