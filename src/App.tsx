@@ -335,35 +335,32 @@ function AppContent() {
         setCurrentPage('auth');
       } else {
         console.log('🎮 User logged in - going directly to gaming-hub');
-        setCurrentPage('gaming-hub');
         setCurrentCategory('gaming');
+        setCurrentPage('gaming-hub');
+        setPendingCategory(null);
       }
       return;
     }
     
     // Store the selected category for sports/events/parties
     setPendingCategory(category);
+    setCurrentCategory(category);
     
     // If user is not authenticated, show auth page
     if (!user) {
       setCurrentPage('auth');
     } else {
       // If already authenticated and location was granted, go directly to dashboard
-      setCurrentCategory(category);
-      
       if (locationPermissionGranted) {
         // Navigate directly to the appropriate dashboard
-        // Use setTimeout to ensure state updates are properly batched and processed
-        setTimeout(() => {
-          if (category === 'sports') {
-            setCurrentPage('dashboard');
-          } else if (category === 'events') {
-            setCurrentPage('events-dashboard');
-          } else if (category === 'parties') {
-            setCurrentPage('party-dashboard');
-          }
-          setPendingCategory(null);
-        }, 0);
+        if (category === 'sports') {
+          setCurrentPage('dashboard');
+        } else if (category === 'events') {
+          setCurrentPage('events-dashboard');
+        } else if (category === 'parties') {
+          setCurrentPage('party-dashboard');
+        }
+        setPendingCategory(null);
       } else {
         // Otherwise, request location
         setShowLocationRequest(true);
