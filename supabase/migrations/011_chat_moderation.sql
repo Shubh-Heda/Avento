@@ -36,8 +36,8 @@ CREATE INDEX IF NOT EXISTS idx_chat_message_reports_message ON chat_message_repo
 CREATE INDEX IF NOT EXISTS idx_chat_moderation_actions_room ON chat_moderation_actions(room_id, created_at DESC);
 
 -- Row Level Security
-ALTER TABLE chat_message_reports 
-ALTER TABLE chat_moderation_actions 
+ALTER TABLE chat_message_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_moderation_actions ENABLE ROW LEVEL SECURITY;
 
 -- Helper predicate: member of room
 -- (Uses existing chat_room_members table)

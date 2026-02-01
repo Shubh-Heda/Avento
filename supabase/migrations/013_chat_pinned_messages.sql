@@ -1,5 +1,12 @@
+CREATE TABLE IF NOT EXISTS chat_pinned_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id UUID NOT NULL REFERENCES chat_rooms(id) ON DELETE CASCADE,
+  message_id UUID NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
+  pinned_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE SET NULL,
+  pinned_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-ALTER TABLE chat_pinned_messages 
+ALTER TABLE chat_pinned_messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Members can view pinned messages in their rooms"
   ON chat_pinned_messages FOR SELECT

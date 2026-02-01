@@ -1,51 +1,51 @@
 
-ALTER TABLE user_trust_scores 
-ALTER TABLE trust_score_history 
-ALTER TABLE user_feedback 
-ALTER TABLE user_reports 
-ALTER TABLE achievements 
-ALTER TABLE user_achievements 
+ALTER TABLE IF EXISTS user_trust_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS trust_score_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS user_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS user_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS user_achievements ENABLE ROW LEVEL SECURITY;
 
 -- Trust scores: Public read, owner write
-CREATE POLICY "Trust scores are publicly visible"
+CREATE POLICY IF NOT EXISTS "Trust scores are publicly visible"
   ON user_trust_scores FOR SELECT
   TO public
   USING (true);
 
-CREATE POLICY "Users can update own trust score"
+CREATE POLICY IF NOT EXISTS "Users can update own trust score"
   ON user_trust_scores FOR UPDATE
   USING (user_id = auth.uid());
 
 -- History: Users can view their own history
-CREATE POLICY "Users can view their score history"
+CREATE POLICY IF NOT EXISTS "Users can view their score history"
   ON trust_score_history FOR SELECT
   USING (user_id = auth.uid());
 
 -- Feedback: Users can give and view feedback
-CREATE POLICY "Users can view feedback about them"
+CREATE POLICY IF NOT EXISTS "Users can view feedback about them"
   ON user_feedback FOR SELECT
   USING (to_user_id = auth.uid() OR from_user_id = auth.uid());
 
-CREATE POLICY "Users can give feedback"
+CREATE POLICY IF NOT EXISTS "Users can give feedback"
   ON user_feedback FOR INSERT
   WITH CHECK (from_user_id = auth.uid());
 
 -- Reports: Users can report others
-CREATE POLICY "Users can view their reports"
+CREATE POLICY IF NOT EXISTS "Users can view their reports"
   ON user_reports FOR SELECT
   USING (reporter_id = auth.uid() OR reported_user_id = auth.uid());
 
-CREATE POLICY "Users can create reports"
+CREATE POLICY IF NOT EXISTS "Users can create reports"
   ON user_reports FOR INSERT
   WITH CHECK (reporter_id = auth.uid());
 
 -- Achievements: Public read
-CREATE POLICY "Achievements are publicly visible"
+CREATE POLICY IF NOT EXISTS "Achievements are publicly visible"
   ON achievements FOR SELECT
   TO public
   USING (true);
 
-CREATE POLICY "User achievements are publicly visible"
+CREATE POLICY IF NOT EXISTS "User achievements are publicly visible"
   ON user_achievements FOR SELECT
   TO public
   USING (true);

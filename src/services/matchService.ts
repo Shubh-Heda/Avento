@@ -7,6 +7,7 @@ import { localStorageService } from './localStorageService';
 import { paymentFlowService, MatchPaymentState } from './paymentFlowService';
 import { trustScoreService } from './trustScoreService';
 import { friendshipStreakService } from './friendshipStreakService';
+import { groupChatService } from './groupChatService';
 
 export type MatchVisibility = 'community' | 'nearby' | 'private';
 export type MatchStatus = 'open' | 'soft_locked' | 'payment_pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
@@ -126,7 +127,34 @@ class MatchService {
     };
 
     this.saveMatch(match);
+    
+    // Auto-create group chat for this match
+    this.createMatchGroupChat(match, organizerId);
+    
     return match;
+  }
+
+  /**
+   * Create group chat for match (async operation)
+   */
+  private async createMatchGroupChat(match: Match, organizerId: string): Promise<void> {
+    try {
+      const groupChat = await groupChatService.createMatchGroupChat(
+        match.id,
+        match.title,
+        match.totalCost,
+        organizerId,
+        match.organizer.name,
+        'INR'
+      );
+      
+      // Update match with chat ID
+      match.chatId = groupChat.id;
+      this.saveMatch(match);
+    } catch (error) {
+      console.error('Error creating group chat for match:', error);
+      // Don't fail match creation if chat fails
+    }
   }
 
   /**
@@ -182,7 +210,33 @@ class MatchService {
     }
 
     this.saveMatch(match);
+    
+    // Add member to group chat if it exists
+    if (match.chatId) {
+      this.addPlayerToGroupChat(match.chatId, userId);
+    }
+    
     return match;
+  }
+
+  /**
+   * Add player to group chat (async)
+   */
+  private async addPlayerToGroupChat(groupChatId: string, userId: string): Promise<void> {
+    try {
+      // Get group chat to find total cost
+      const groupChat = await groupChatService.getGroupChatDetails(groupChatId);
+      if (groupChat) {
+        await groupChatService.addGroupChatMember(
+          groupChatId,
+          userId,
+          groupChat.total_cost,
+          0
+        );
+      }
+    } catch (error) {
+      console.error('Error adding player to group chat:', error);
+    }
   }
 
   /**

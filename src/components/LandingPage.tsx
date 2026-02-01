@@ -34,7 +34,7 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isDemoPlaying, setIsDemoPlaying] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(true);
   const [feedbackRating, setFeedbackRating] = useState<number>(0);
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackFeature, setFeedbackFeature] = useState<'Sports' | 'Events' | 'Gaming' | ''>('');
@@ -419,15 +419,6 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
               </motion.p>
             </div>
           </motion.div>
-
-          <button
-            onClick={() => setReduceMotion(!reduceMotion)}
-            className="flex items-center gap-2 text-xs font-medium px-4 py-2 rounded-full border border-white/15 bg-white/5 hover:border-white/30 transition"
-            aria-pressed={reduceMotion}
-          >
-            <Zap className="w-4 h-4" />
-            {reduceMotion ? 'Motion Off' : 'Motion On'}
-          </button>
         </div>
       </motion.header>
 
@@ -485,17 +476,45 @@ export function LandingPage({ onGetStarted, onCategorySelect }: LandingPageProps
             </span>
           </motion.h1>
           
-          <motion.p 
-            className="text-white text-xl md:text-2xl mb-6 max-w-3xl mx-auto relative bg-black/50 rounded-2xl px-8 py-5 border-2 border-white/50 font-medium leading-relaxed shadow-2xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            style={getParallaxStyle(35)}
-          >
-            <span className="relative z-10">
-              Book games, join festivals, and meet people you can trust. Avento connects you to experiences that feel safe, welcoming, and memorable.
-            </span>
-          </motion.p>
+          <div className="max-w-4xl mx-auto mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-lg">
+                <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-cyan-100" />
+                <div className="absolute -bottom-2 -left-2 h-8 w-8 rounded-full bg-amber-100" />
+                <div className="relative flex items-start gap-3">
+                  <span className="text-3xl">⚽</span>
+                  <div className="text-left">
+                    <div className="text-lg font-bold text-slate-900">Book Games</div>
+                    <div className="text-sm text-slate-600 leading-relaxed">Find nearby games, lock your slot, and show up with confidence.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-lg">
+                <div className="absolute -top-2 -left-2 h-10 w-10 rounded-full bg-purple-100" />
+                <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-pink-100" />
+                <div className="relative flex items-start gap-3">
+                  <span className="text-3xl">🎭</span>
+                  <div className="text-left">
+                    <div className="text-lg font-bold text-slate-900">Join Festivals</div>
+                    <div className="text-sm text-slate-600 leading-relaxed">Discover cultural events and plan nights out with your community.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-lg">
+                <div className="absolute -top-2 -right-2 h-10 w-10 rounded-full bg-emerald-100" />
+                <div className="absolute -bottom-2 -left-2 h-8 w-8 rounded-full bg-sky-100" />
+                <div className="relative flex items-start gap-3">
+                  <span className="text-3xl">🤝</span>
+                  <div className="text-left">
+                    <div className="text-lg font-bold text-slate-900">Meet People You Can Trust</div>
+                    <div className="text-sm text-slate-600 leading-relaxed">Connect with verified profiles and build real friendships.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
           <motion.div
