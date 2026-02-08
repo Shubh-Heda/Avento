@@ -1,4 +1,19 @@
-import { supabase } from '../lib/supabase';
+import { supabaseAuth } from './supabaseAuthService';
+import { supabase, supabaseEnabled } from '../lib/supabaseClient';
+// Firebase imports removed
+// import { collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
+
+// Storage keys for localStorage fallback
+const STORAGE_KEYS = {
+  coaches: 'coaching_coaches',
+  plans: 'coaching_plans',
+  slots: 'coaching_slots',
+  bookings: 'coaching_bookings',
+  subscriptions: 'coaching_subscriptions',
+  availability: 'coaching_availability',
+};
+
+const FIREBASE_ENABLED = import.meta.env.VITE_FIREBASE_ENABLED !== 'false';
 
 export interface Coach {
   id: string;
@@ -80,150 +95,149 @@ export interface CoachingSubscription {
 // ========== Coach Management ==========
 
 export async function getCoaches(sport?: string) {
-  let query = supabase
-    .from('coaches')
-    .select('*')
-    .eq('is_active', true)
-    .order('rating', { ascending: false });
+  try {
+    if (!FIREBASE_ENABLED) {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.coaches) || '[]');
+      return data.filter((c: Coach) => c.is_active && (!sport || c.expertise?.includes(sport))).sort((a: Coach, b: Coach) => b.rating - a.rating) as Coach[];
+    }
 
-  const { data, error } = await query;
-  
-  if (error) throw error;
-  return data as Coach[];
+    const q = query(collection(db, 'coaches'), where('is_active', '==', true));
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Coach));
+    return data.sort((a, b) => b.rating - a.rating);
+  } catch (error) {
+    console.error('Error fetching coaches:', error);
+    return [];
+  }
 }
 
 export async function getCoachById(coachId: string) {
-  const { data, error } = await supabase
-    .from('coaches')
-    .select('*')
-    .eq('id', coachId)
-    .single();
+  try {
+    if (!FIREBASE_ENABLED) {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.coaches) || '[]');
+      return data.find((c: Coach) => c.id === coachId) as Coach;
+    }
 
-  if (error) throw error;
-  return data as Coach;
+    const docRef = doc(db, 'coaches', coachId);
+    const snapshot = await getDoc(docRef);
+    if (!snapshot.exists()) throw new Error('Coach not found');
+    return { id: snapshot.id, ...snapshot.data() } as Coach;
+  } catch (error) {
+    console.error('Error fetching coach:', error);
+    throw error;
+  }
 }
 
 // ========== Coaching Plans ==========
 
 export async function getCoachingPlans(coachId?: string) {
-  let query = supabase
-    .from('coaching_plans')
-    .select('*')
-    .eq('is_active', true);
+  try {
+    if (!FIREBASE_ENABLED) {
+      let data = JSON.parse(localStorage.getItem(STORAGE_KEYS.plans) || '[]');
+      data = data.filter((p: CoachingPlan) => p.is_active);
+      if (coachId) data = data.filter((p: CoachingPlan) => p.coach_id === coachId);
+      return data.sort((a: CoachingPlan, b: CoachingPlan) => a.price - b.price) as CoachingPlan[];
+    }
 
-  if (coachId) {
-    query = query.eq('coach_id', coachId);
+    const q = query(collection(db, 'coaching_plans'), where('is_active', '==', true));
+    const snapshot = await getDocs(q);
+    let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CoachingPlan));
+    if (coachId) data = data.filter((p: CoachingPlan) => p.coach_id === coachId);
+    return data.sort((a, b) => a.price - b.price);
+  } catch (error) {
+    console.error('Error fetching coaching plans:', error);
+    return [];
   }
-
-  const { data, error } = await query.order('price', { ascending: true });
-  
-  if (error) throw error;
-  return data as CoachingPlan[];
 }
 
 // ========== Coaching Slots & Calendar ==========
 
-/**
- * Get available coaching slots for a specific coach and date
- */
 export async function getAvailableCoachingSlots(
   coachId: string,
   date: Date,
   sport?: string
 ) {
-  const { data, error } = await supabase.rpc('get_available_coaching_slots', {
-    p_coach_id: coachId,
-    p_date: date.toISOString().split('T')[0],
-    p_sport: sport || null,
-  });
+  try {
+    if (!FIREBASE_ENABLED) {
+      const slots = JSON.parse(localStorage.getItem(STORAGE_KEYS.slots) || '[]');
+      return slots.filter((s: CoachingSlot) => 
+        s.coach_id === coachId && s.is_available && (!sport || s.sport === sport)
+      );
+    }
 
-  if (error) throw error;
-  return data;
-}
-
-/**
- * Get all recurring slots for a coach (for displaying weekly schedule)
- */
-export async function getCoachRecurringSlots(coachId: string, sport?: string) {
-  let query = supabase
-    .from('coaching_slots')
-    .select('*')
-    .eq('coach_id', coachId)
-    .eq('is_available', true)
-    .eq('is_recurring', true)
-    .order('day_of_week', { ascending: true })
-    .order('start_time', { ascending: true });
-
-  if (sport) {
-    query = query.eq('sport', sport);
+    const q = query(
+      collection(db, 'coaching_slots'),
+      where('coach_id', '==', coachId),
+      where('is_available', '==', true)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CoachingSlot));
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
+    return [];
   }
-
-  const { data, error } = await query;
-  
-  if (error) throw error;
-  return data as CoachingSlot[];
 }
 
-/**
- * Get available time slots for a specific date (with actual availability)
- */
+export async function getCoachRecurringSlots(coachId: string, sport?: string): Promise<CoachingSlot[]> {
+  try {
+    if (!FIREBASE_ENABLED) {
+      const slots = JSON.parse(localStorage.getItem(STORAGE_KEYS.slots) || '[]');
+      return slots.filter((s: CoachingSlot) => 
+        s.coach_id === coachId && s.is_available && s.is_recurring && (!sport || s.sport === sport)
+      ).sort((a: CoachingSlot, b: CoachingSlot) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time));
+    }
+
+    const q = query(
+      collection(db, 'coaching_slots'),
+      where('coach_id', '==', coachId),
+      where('is_recurring', '==', true),
+      where('is_available', '==', true)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CoachingSlot));
+  } catch (error) {
+    console.error('Error fetching recurring slots:', error);
+    return [];
+  }
+}
+
 export async function getAvailableTimeSlots(
   coachId: string,
   date: Date
-): Promise<{ time: string; available: boolean; spotsLeft: number }[]> {
-  const dayOfWeek = date.getDay();
-  
-  // Get recurring slots for this day of week
-  const { data: slots, error: slotsError } = await supabase
-    .from('coaching_slots')
-    .select('*')
-    .eq('coach_id', coachId)
-    .eq('day_of_week', dayOfWeek)
-    .eq('is_available', true)
-    .order('start_time', { ascending: true });
+): Promise<any[]> {
+  try {
+    const dayOfWeek = date.getDay();
+    const slots = await getCoachRecurringSlots(coachId);
+    const filteredSlots = slots.filter((s: CoachingSlot) => s.day_of_week === dayOfWeek);
 
-  if (slotsError) throw slotsError;
+    // Get bookings for this date
+    const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.bookings) || '[]');
+    const dateStr = date.toISOString().split('T')[0];
+    const dayBookings = bookings.filter((b: CoachingBooking) => 
+      b.coach_id === coachId && b.booking_date === dateStr && b.status === 'confirmed'
+    );
 
-  if (!slots || slots.length === 0) {
-    return [];
-  }
+    const bookingCounts: Record<string, number> = {};
+    dayBookings.forEach((b: CoachingBooking) => {
+      bookingCounts[b.slot_id] = (bookingCounts[b.slot_id] || 0) + 1;
+    });
 
-  // Get existing bookings for this date
-  const { data: bookings, error: bookingsError } = await supabase
-    .from('coaching_bookings')
-    .select('slot_id, status')
-    .eq('coach_id', coachId)
-    .eq('booking_date', date.toISOString().split('T')[0])
-    .eq('status', 'confirmed');
-
-  if (bookingsError) throw bookingsError;
-
-  // Calculate spots left for each slot
-  const bookingCounts = (bookings || []).reduce((acc, booking) => {
-    acc[booking.slot_id] = (acc[booking.slot_id] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  return slots.map(slot => {
-    const bookedCount = bookingCounts[slot.id] || 0;
-    const spotsLeft = slot.max_spots - bookedCount;
-    
-    return {
+    return filteredSlots.map((slot: CoachingSlot) => ({
       time: slot.start_time,
-      available: spotsLeft > 0,
-      spotsLeft: spotsLeft,
+      available: (slot.max_spots - (bookingCounts[slot.id] || 0)) > 0,
+      spotsLeft: slot.max_spots - (bookingCounts[slot.id] || 0),
       slotId: slot.id,
       startTime: slot.start_time,
       endTime: slot.end_time,
-    };
-  });
+    }));
+  } catch (error) {
+    console.error('Error fetching available time slots:', error);
+    return [];
+  }
 }
 
 // ========== Booking Management ==========
 
-/**
- * Book a coaching slot
- */
 export async function bookCoachingSlot(
   coachId: string,
   slotId: string,
@@ -231,149 +245,167 @@ export async function bookCoachingSlot(
   planId?: string,
   amount?: number
 ) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = firebaseAuth.getCurrentUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase.rpc('book_coaching_slot', {
-    p_user_id: user.id,
-    p_coach_id: coachId,
-    p_slot_id: slotId,
-    p_booking_date: bookingDate.toISOString().split('T')[0],
-    p_plan_id: planId || null,
-    p_amount: amount || null,
-  });
+  try {
+    const booking: CoachingBooking = {
+      id: `booking-${Date.now()}`,
+      user_id: user.id,
+      coach_id: coachId,
+      plan_id: planId,
+      slot_id: slotId,
+      booking_date: bookingDate.toISOString().split('T')[0],
+      start_time: '',
+      end_time: '',
+      status: 'confirmed',
+      payment_status: 'paid',
+      amount,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
-  if (error) throw error;
-  return data;
+    if (!FIREBASE_ENABLED) {
+      const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.bookings) || '[]');
+      bookings.push(booking);
+      localStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(bookings));
+      return booking;
+    }
+
+    return booking;
+  } catch (error) {
+    console.error('Error booking slot:', error);
+    throw error;
+  }
 }
 
-/**
- * Get user's coaching bookings
- */
 export async function getUserCoachingBookings(userId?: string) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = firebaseAuth.getCurrentUser();
   const targetUserId = userId || user?.id;
   
   if (!targetUserId) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase
-    .from('coaching_bookings')
-    .select(`
-      *,
-      coach:coaches(name, image_url),
-      slot:coaching_slots(sport, start_time, end_time, duration_minutes)
-    `)
-    .eq('user_id', targetUserId)
-    .order('booking_date', { ascending: true })
-    .order('start_time', { ascending: true });
+  try {
+    if (!FIREBASE_ENABLED) {
+      const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.bookings) || '[]');
+      return bookings.filter((b: CoachingBooking) => b.user_id === targetUserId)
+        .sort((a: CoachingBooking, b: CoachingBooking) => new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime());
+    }
 
-  if (error) throw error;
-  return data;
+    const q = query(collection(db, 'coaching_bookings'), where('user_id', '==', targetUserId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CoachingBooking));
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    return [];
+  }
 }
 
-/**
- * Cancel a coaching booking
- */
 export async function cancelCoachingBooking(bookingId: string) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = firebaseAuth.getCurrentUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase.rpc('cancel_coaching_booking', {
-    p_booking_id: bookingId,
-    p_user_id: user.id,
-  });
-
-  if (error) throw error;
-  return data;
+  try {
+    if (!FIREBASE_ENABLED) {
+      const bookings = JSON.parse(localStorage.getItem(STORAGE_KEYS.bookings) || '[]');
+      const booking = bookings.find((b: CoachingBooking) => b.id === bookingId);
+      if (booking && booking.user_id === user.id) {
+        booking.status = 'cancelled';
+        localStorage.setItem(STORAGE_KEYS.bookings, JSON.stringify(bookings));
+        return booking;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error cancelling booking:', error);
+    throw error;
+  }
 }
 
 // ========== Subscription Management ==========
 
-/**
- * Create a coaching subscription
- */
 export async function createCoachingSubscription(
   coachId: string,
   planId: string,
   startDate: Date
 ) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = firebaseAuth.getCurrentUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  // Get plan details
-  const { data: plan, error: planError } = await supabase
-    .from('coaching_plans')
-    .select('*')
-    .eq('id', planId)
-    .single();
+  try {
+    const plans = JSON.parse(localStorage.getItem(STORAGE_KEYS.plans) || '[]');
+    const plan = plans.find((p: CoachingPlan) => p.id === planId);
+    
+    if (!plan) throw new Error('Plan not found');
 
-  if (planError) throw planError;
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + plan.duration_months);
 
-  // Calculate end date
-  const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + plan.duration_months);
-
-  const { data, error } = await supabase
-    .from('coaching_subscriptions')
-    .insert({
+    const subscription: CoachingSubscription = {
+      id: `sub-${Date.now()}`,
       user_id: user.id,
       coach_id: coachId,
       plan_id: planId,
       start_date: startDate.toISOString().split('T')[0],
       end_date: endDate.toISOString().split('T')[0],
       sessions_total: plan.sessions_count,
+      sessions_used: 0,
       sessions_remaining: plan.sessions_count,
-      amount_paid: plan.price,
       status: 'active',
       payment_status: 'paid',
-    })
-    .select()
-    .single();
+      amount_paid: plan.price,
+    };
 
-  if (error) throw error;
-  return data as CoachingSubscription;
+    if (!FIREBASE_ENABLED) {
+      const subscriptions = JSON.parse(localStorage.getItem(STORAGE_KEYS.subscriptions) || '[]');
+      subscriptions.push(subscription);
+      localStorage.setItem(STORAGE_KEYS.subscriptions, JSON.stringify(subscriptions));
+      return subscription;
+    }
+
+    return subscription;
+  } catch (error) {
+    console.error('Error creating subscription:', error);
+    throw error;
+  }
 }
 
-/**
- * Get user's coaching subscriptions
- */
 export async function getUserCoachingSubscriptions() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = firebaseAuth.getCurrentUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase
-    .from('coaching_subscriptions')
-    .select(`
-      *,
-      coach:coaches(name, image_url, specializations),
-      plan:coaching_plans(name, duration_months, sessions_count)
-    `)
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  try {
+    if (!FIREBASE_ENABLED) {
+      const subscriptions = JSON.parse(localStorage.getItem(STORAGE_KEYS.subscriptions) || '[]');
+      return subscriptions.filter((s: CoachingSubscription) => s.user_id === user.id)
+        .sort((a: CoachingSubscription, b: CoachingSubscription) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+    }
 
-  if (error) throw error;
-  return data;
+    const q = query(collection(db, 'coaching_subscriptions'), where('user_id', '==', user.id));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CoachingSubscription));
+  } catch (error) {
+    console.error('Error fetching subscriptions:', error);
+    return [];
+  }
 }
 
 // ========== Coach Availability ==========
 
-/**
- * Set coach unavailability for specific dates
- */
 export async function setCoachUnavailability(
   coachId: string,
   date: Date,
@@ -381,72 +413,66 @@ export async function setCoachUnavailability(
   endTime: string,
   reason?: string
 ) {
-  const { data, error } = await supabase
-    .from('coach_availability')
-    .insert({
-      coach_id: coachId,
-      date: date.toISOString().split('T')[0],
-      start_time: startTime,
-      end_time: endTime,
-      is_available: false,
-      reason: reason || null,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  try {
+    if (!FIREBASE_ENABLED) {
+      const availability = JSON.parse(localStorage.getItem(STORAGE_KEYS.availability) || '[]');
+      availability.push({
+        id: `avail-${Date.now()}`,
+        coach_id: coachId,
+        date: date.toISOString().split('T')[0],
+        start_time: startTime,
+        end_time: endTime,
+        is_available: false,
+        reason: reason || null,
+      });
+      localStorage.setItem(STORAGE_KEYS.availability, JSON.stringify(availability));
+      return availability[availability.length - 1];
+    }
+    return null;
+  } catch (error) {
+    console.error('Error setting unavailability:', error);
+    throw error;
+  }
 }
 
-/**
- * Get coach unavailable dates
- */
 export async function getCoachUnavailableDates(
   coachId: string,
   startDate: Date,
   endDate: Date
 ) {
-  const { data, error } = await supabase
-    .from('coach_availability')
-    .select('*')
-    .eq('coach_id', coachId)
-    .eq('is_available', false)
-    .gte('date', startDate.toISOString().split('T')[0])
-    .lte('date', endDate.toISOString().split('T')[0]);
-
-  if (error) throw error;
-  return data;
+  try {
+    if (!FIREBASE_ENABLED) {
+      const availability = JSON.parse(localStorage.getItem(STORAGE_KEYS.availability) || '[]');
+      const startStr = startDate.toISOString().split('T')[0];
+      const endStr = endDate.toISOString().split('T')[0];
+      return availability.filter((a: any) => 
+        a.coach_id === coachId && a.date >= startStr && a.date <= endStr && !a.is_available
+      );
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching unavailable dates:', error);
+    return [];
+  }
 }
 
 // ========== Helper Functions ==========
 
-/**
- * Format time slot for display
- */
 export function formatTimeSlot(startTime: string, endTime: string): string {
   return `${startTime} - ${endTime}`;
 }
 
-/**
- * Get day name from day of week number
- */
 export function getDayName(dayOfWeek: number): string {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[dayOfWeek];
 }
 
-/**
- * Check if a date is in the past
- */
 export function isDateInPast(date: Date): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return date < today;
 }
 
-/**
- * Get next 7 days from today
- */
 export function getNext7Days(): Date[] {
   const dates: Date[] = [];
   const today = new Date();

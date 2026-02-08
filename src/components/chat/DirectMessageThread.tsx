@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { directMessageService } from '../../services/directMessageService';
-import { supabaseClient } from '../../services/supabaseClient';
+import { directMessageBackend as directMessageService } from '../../services/directMessageBackend';
+import { firebaseAuth } from '../../services/firebaseService';
 import './DirectMessageThread.css';
 
 interface DirectMessage {
@@ -17,8 +16,8 @@ interface Conversation {
   id: string;
   user1_id: string;
   user2_id: string;
-  last_message: string;
-  last_message_at: string;
+  last_message?: string;
+  last_message_at?: string;
   other_user?: {
     id: string;
     name: string;
@@ -26,16 +25,33 @@ interface Conversation {
   };
 }
 
-export const DirectMessageThread: React.FC = () => {
-  const { conversationId } = useParams<{ conversationId: string }>();
+interface DirectMessageThreadProps {
+  conversationId: string;
+  onNavigate?: (page: string) => void;
+}
+
+export const DirectMessageThread: React.FC<DirectMessageThreadProps> = ({ conversationId, onNavigate }) => {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const currentUserId = localStorage.getItem('userId');
+  useEffect(() => {
+    let isMounted = true;
+    const loadUser = async () => {
+      const user = firebaseAuth.getCurrentUser();
+      if (!isMounted) return;
+      setCurrentUserId(user?.uid ?? null);
+    };
+
+    loadUser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Load initial conversation and messages
   useEffect(() => {
@@ -44,12 +60,14 @@ export const DirectMessageThread: React.FC = () => {
         setLoading(true);
         if (!conversationId) return;
 
+        // Load conversation metadata
+        const conv = await directMessageService.getConversation(conversationId);
+        if (conv) {
+          setConversation(conv);
+        }
+
         // Get messages
-        const msgs = await directMessageService.getMessages(
-          conversationId,
-          50,
-          0
-        );
+        const msgs = await directMessageService.getMessages(conversationId);
         setMessages(msgs);
 
         // Mark as read
@@ -67,40 +85,21 @@ export const DirectMessageThread: React.FC = () => {
     loadConversation();
   }, [conversationId, currentUserId]);
 
-  // Real-time message subscription
+  // Subscribe to new messages
   useEffect(() => {
     if (!conversationId) return;
 
-    const channel = supabaseClient
-      .channel(`dm_${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'direct_messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        (payload: any) => {
-          setMessages(prev => [...prev, payload.new]);
-          // Mark as read if we're the receiver
-          if (
-            currentUserId &&
-            payload.new.receiver_id === currentUserId
-          ) {
-            directMessageService.markAsRead(
-              conversationId,
-              currentUserId
-            );
-          }
-        }
-      )
-      .subscribe();
+    const unsubscribe = directMessageService.subscribeToMessages(
+      conversationId,
+      (msgs: DirectMessage[]) => {
+        setMessages(msgs);
+      }
+    );
 
     return () => {
-      channel.unsubscribe();
+      if (typeof unsubscribe === 'function') unsubscribe();
     };
-  }, [conversationId, currentUserId]);
+  }, [conversationId]);
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !conversationId || !currentUserId) return;
@@ -132,13 +131,9 @@ export const DirectMessageThread: React.FC = () => {
 
     try {
       const nextPage = page + 1;
-      const msgs = await directMessageService.getMessages(
-        conversationId,
-        50,
-        nextPage * 50
-      );
+      const msgs = await directMessageService.getMessages(conversationId);
       if (msgs.length > 0) {
-        setMessages(prev => [...msgs, ...prev]); // prepend older messages
+        setMessages(msgs);
         setPage(nextPage);
       }
     } catch (err) {

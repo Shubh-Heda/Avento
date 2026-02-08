@@ -20,7 +20,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import chatService from '../services/chatService';
-import { supabase } from '../lib/supabase';
+import { firebaseAuth } from '../services/firebaseService';
 import type { ChatRoom, ChatMessage, ChatModerationAction, ChatMemberRole, ChatRoomMember, ChatPinnedMessage } from '../services/chatService';
 import { validateMessageContent, MessageRateLimiter } from '../utils/contentModeration';
 import { toast } from 'sonner';
@@ -57,9 +57,9 @@ export function EnhancedGroupChat({ onNavigate, matchId }: EnhancedGroupChatProp
 
   const loadRooms = async () => {
     try {
-      // Get current user from Supabase
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id ?? null);
+      // Get current user from Firebase
+      const user = firebaseAuth.getCurrentUser();
+      setCurrentUserId(user?.uid ?? null);
       if (!user) {
         // For demo purposes, show mock rooms if not authenticated
         setRooms([

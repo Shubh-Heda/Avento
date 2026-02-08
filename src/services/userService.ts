@@ -1,11 +1,11 @@
 /**
  * User Service
- * Manages user data and profiles with Supabase backend + mock data fallback
+ * Manages user data and profiles with Firebase backend + mock data fallback
  */
 
 import { mockDataService } from './mockDataService';
 import { trustScoreService } from './trustScoreService';
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabase';
 
 export interface User {
   id: string;

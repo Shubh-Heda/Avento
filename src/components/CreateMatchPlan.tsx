@@ -8,14 +8,15 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { AnimatedBackground } from './AnimatedBackground';
 import { toast } from 'sonner';
 import { generateUpcomingDates, getMinBookingDate } from '../utils/dateUtils';
-import chatService from '../services/chatService';
-import { supabase } from '../lib/supabase';
+import { realGroupChatService } from '../services/groupChatServiceReal';
+import { firebaseAuth } from '../services/firebaseService';
 import { communityService } from '../services/communityService';
 import { pricingService } from '../services/pricingService';
 import { deadlineReminderService } from '../services/deadlineReminderService';
+import { supabase, supabaseEnabled } from '../lib/supabaseClient';
 
 interface CreateMatchPlanProps {
-  onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability', turfId?: string, matchId?: string) => void;
+  onNavigate: (page: 'dashboard' | 'profile' | 'community' | 'reflection' | 'finder' | 'create-match' | 'turf-detail' | 'chat' | 'availability' | 'group-chat', turfId?: string, matchId?: string, groupChatId?: string) => void;
   onMatchCreate: (match: {
     id: string;
     title: string;
@@ -177,11 +178,43 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
       paymentDeadline: deadlineInfo.deadline.toISOString(),
     };
 
-    // Auto-create WhatsApp group chat for the match
+    let createdGroupChatId: string | undefined;
+    // Auto-create group chat for the match
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       
-      if (user) {
+      if (user && supabaseEnabled && supabase) {
+        // Save match to Supabase
+        const { data: matchData, error: matchError } = await supabase
+          .from('matches')
+          .insert({
+            id: matchId,
+            user_id: user.id,
+            title: matchTitle,
+            turf_name: selectedTurf?.name || '',
+            date: selectedDate,
+            time: selectedTime,
+            sport: selectedTurf?.sport || '',
+            status: 'upcoming',
+            visibility: visibility,
+            payment_option: paymentMethod === 'direct' ? 'direct' : 'split',
+            amount: getTurfCost(),
+            location: selectedTurf?.location || '',
+            min_players: parseInt(minPlayers),
+            max_players: parseInt(maxPlayers),
+            turf_cost: getTurfCost(),
+            payment_deadline: deadlineInfo.deadline.toISOString(),
+            category: 'sports'
+          })
+          .select()
+          .single();
+
+        if (matchError) {
+          console.error('Error saving match:', matchError);
+        } else {
+          console.log('✅ Match saved to Supabase:', matchData);
+        }
+
         // Schedule deadline reminders for the organizer
         deadlineReminderService.createReminder(
           matchId,
@@ -198,37 +231,41 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
             createdAt: new Date().toISOString(),
           })
         );
-        // Create group chat room for this match
-        const chatRoom = await chatService.createRoom({
-          name: `${matchTitle} 🏃‍♂️`,
-          description: `Group chat for ${matchTitle} at ${selectedTurf?.name || 'venue'} on ${selectedDate}`,
-          room_type: 'match',
-          is_private: visibility === 'private',
-          category: 'sports',
-          related_id: matchId,
-          avatar_url: selectedTurf?.sport === 'Football' ? '⚽' : 
-                      selectedTurf?.sport === 'Cricket' ? '🏏' : 
-                      selectedTurf?.sport === 'Basketball' ? '🏀' : '🏃‍♂️'
-        });
+        
+        // Create group chat for this match (name = match title)
+        const groupChat = await realGroupChatService.createGroupChat(
+          matchId,
+          matchTitle,
+          `Group chat for ${matchTitle} at ${selectedTurf?.name || 'venue'} on ${selectedDate}`,
+          user.id,
+          user.user_metadata?.full_name || user.email || 'Organizer',
+          user.email || 'organizer@example.com'
+        );
+
+        createdGroupChatId = groupChat.id;
+        console.log('✅ Group chat created:', groupChat.id);
 
         // Send welcome system message
-        const paymentInfo = paymentMethod === 'direct' 
+        const paymentInfo = paymentMethod === 'direct'
           ? `💰 Cost: ₹${getTurfCost()} total\n💳 Payment: Direct booking with payment required upfront`
           : `💰 Cost: ₹${getTurfCost()} (₹${Math.round(getTurfCost() / parseInt(minPlayers))} per person)\n💳 Payment: 5-step process - Opens after ${minPlayers} players join`;
-        
-        await chatService.sendMessage(
-          chatRoom.id,
+
+        await realGroupChatService.sendMessage(
+          groupChat.id,
+          user.id,
+          user.user_metadata?.full_name || user.email || 'Organizer',
           `🎉 Welcome to ${matchTitle}!\n\n📍 Venue: ${selectedTurf?.name || 'TBD'}\n📅 Date: ${selectedDate}\n⏰ Time: ${selectedTime}\n\n${paymentInfo}\n\nLet's make this match amazing! 🚀`,
           'system'
         );
 
-        // Auto-post to community if 5-step payment is enabled
+        // Auto-post to community if community visibility
         if (visibility === 'community') {
           try {
+            const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Match Organizer';
             await communityService.createPost({
               area: 'sports',
               authorId: user.id,
-              authorName: user.name || 'Match Organizer',
+              authorName: userName,
               authorAvatar: `https://i.pravatar.cc/150?u=${user.id}`,
               title: `🎯 ${matchTitle} - Join Us Now!`,
               content: `📍 ${selectedTurf?.name || 'Venue'}, ${selectedTurf?.location || 'Location'}\n📅 ${selectedDate} at ${selectedTime}\n${selectedTurf?.sport ? selectedTurf.sport : 'Sport'}\n\n👥 Looking for ${minPlayers}-${maxPlayers} players\n💰 ₹${getTurfCost()} total (₹${Math.round(getTurfCost() / parseInt(minPlayers))} per person)\n\n🎯 Join now! Slots filling fast! 🔥`,
@@ -240,14 +277,11 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
             });
           } catch (error) {
             console.error('Failed to post to community:', error);
-            toast.error('Failed to post to community', {
-              description: 'Match created but could not be shared.',
-            });
           }
         }
 
-        toast.success('Match & Group Created! 🎉', {
-          description: 'WhatsApp-style group chat is ready for your team!',
+        toast.success('Match & Chat Created! 🎉', {
+          description: 'Match and group chat saved to database!',
         });
       } else {
         // Demo mode - no backend
@@ -256,7 +290,7 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
         });
       }
     } catch (error) {
-      console.error('Error creating group chat:', error);
+      console.error('Error creating match/chat:', error);
       // Still show success for match creation
       toast.success('Match Created! 🎉', {
         description: 'Group chat will be available soon.',
@@ -275,7 +309,7 @@ export function CreateMatchPlan({ onNavigate, onMatchCreate }: CreateMatchPlanPr
     
     // Short delay then navigate to chat
     setTimeout(() => {
-      onNavigate('sports-chat', undefined, matchId);
+      onNavigate('group-chat', undefined, undefined, createdGroupChatId || matchId);
     }, 1500);
   };
 

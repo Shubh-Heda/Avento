@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { MemoryUpload } from './MemoryUpload';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { firebaseAuth } from '../services/firebaseService';
 import { supabase } from '../lib/supabase';
 import { DiscordLikeRooms } from './DiscordLikeRooms';
 import { Badge } from './ui/badge';
@@ -112,14 +113,14 @@ export function CommunityFeed({ onNavigate, matches }: CommunityFeedProps) {
   }, []);
 
   const initializeUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUserId(user?.id || 'demo-user');
+    const user = firebaseAuth.getCurrentUser();
+    setCurrentUserId(user?.uid || 'demo-user');
   };
 
   const loadPosts = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       
       if (user) {
         // Try to load from database
@@ -210,7 +211,7 @@ export function CommunityFeed({ onNavigate, matches }: CommunityFeedProps) {
 
     setIsPosting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       
       let mediaUrls: string[] = [];
       

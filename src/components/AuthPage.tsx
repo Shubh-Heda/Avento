@@ -27,7 +27,7 @@ export function AuthPage({ onAuthSuccess, onBack }: AuthPageProps) {
     setTimeout(async () => {
       setLoading(true);
       try {
-        const { data, error } = await signIn('demo@gamesetgo.com', 'demo123');
+        const { data, error } = await signIn('demo@avento.com', 'demo123');
         
         if (error) {
           console.error('Demo login error:', error);
@@ -224,10 +224,14 @@ export function AuthPage({ onAuthSuccess, onBack }: AuthPageProps) {
                         <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-xs text-blue-900 mb-1">
-                            <strong>First time here?</strong> Try the demo account.
+                            <strong>Try Demo Account (Shubh's Profile)</strong>
                           </p>
-                          <p className="text-xs text-blue-700">
-                            Demo: demo@gamesetgo.com • Password: demo123
+                          <p className="text-xs text-blue-700 font-mono">
+                            Email: demo@avento.com<br/>
+                            Password: demo123
+                          </p>
+                          <p className="text-xs text-blue-600 mt-2">
+                            ✨ Full access to all features with pre-loaded data
                           </p>
                         </div>
                       </div>

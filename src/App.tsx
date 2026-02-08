@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useMemo, useCallback } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo, useCallback, useRef } from 'react';
 import { Toaster, toast } from 'sonner@2.0.3';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -32,6 +32,9 @@ const CreateEventBooking = lazy(() => import('./components/CreateEventBooking').
 const CreatePartyBooking = lazy(() => import('./components/CreatePartyBooking').then(m => ({ default: m.CreatePartyBooking })));
 const TurfDetail = lazy(() => import('./components/TurfDetail').then(m => ({ default: m.TurfDetail })));
 const WhatsAppChat = lazy(() => import('./components/WhatsAppChat').then(m => ({ default: m.WhatsAppChat })));
+const GroupChatRoom = lazy(() => import('./components/chat/GroupChatRoom').then(m => ({ default: m.GroupChatRoom })));
+const GroupChatComponent = lazy(() => import('./components/GroupChatComponent'));
+const DirectMessageThread = lazy(() => import('./components/chat/DirectMessageThread').then(m => ({ default: m.DirectMessageThread })));
 const HelpSupport = lazy(() => import('./components/HelpSupport').then(m => ({ default: m.HelpSupport })));
 const RealTimeAvailability = lazy(() => import('./components/RealTimeAvailability').then(m => ({ default: m.RealTimeAvailability })));
 const GamingProfilePage = lazy(() => import('./components/GamingProfilePage').then(m => ({ default: m.GamingProfilePage })));
@@ -47,11 +50,12 @@ import { gratitudeService } from './services/gratitudeService';
 import { postMatchService } from './services/postMatchService';
 import { achievementService } from './services/achievementService';
 import { profileService, matchService, initializeDefaultData } from './services/backendService';
+import { realGroupChatService } from './services/groupChatServiceReal';
 import { AuthProvider, useAuth } from './lib/AuthProvider';
 import { MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 
-type Page = 'landing' | 'warm-onboarding' | 'auth' | 'dashboard' | 'events-dashboard' | 'party-dashboard' | 'gaming-hub' | 'gaming-profile' | 'gaming-community' | 'gaming-chat' | 'gaming-map' | 'gaming-events' | 'sports-events' | 'events-events' | 'party-events' | 'sports-photos' | 'events-photos' | 'party-photos' | 'gaming-photos' | 'sports-highlights' | 'events-highlights' | 'party-highlights' | 'gaming-highlights' | 'sports-memories' | 'events-memories' | 'party-memories' | 'gaming-memories' | 'profile' | 'events-profile' | 'parties-profile' | 'community' | 'sports-community' | 'cultural-community' | 'party-community' | 'reflection' | 'finder' | 'create-match' | 'create-event-booking' | 'create-party-booking' | 'turf-detail' | 'chat' | 'sports-chat' | 'events-chat' | 'party-chat' | 'help' | 'availability' | 'comprehensive-dashboard' | 'venue-parties';
+type Page = 'landing' | 'warm-onboarding' | 'auth' | 'dashboard' | 'events-dashboard' | 'party-dashboard' | 'gaming-hub' | 'gaming-profile' | 'gaming-community' | 'gaming-chat' | 'gaming-map' | 'gaming-events' | 'sports-events' | 'events-events' | 'party-events' | 'sports-photos' | 'events-photos' | 'party-photos' | 'gaming-photos' | 'sports-highlights' | 'events-highlights' | 'party-highlights' | 'gaming-highlights' | 'sports-memories' | 'events-memories' | 'party-memories' | 'gaming-memories' | 'profile' | 'events-profile' | 'parties-profile' | 'community' | 'sports-community' | 'cultural-community' | 'party-community' | 'reflection' | 'finder' | 'create-match' | 'create-event-booking' | 'create-party-booking' | 'turf-detail' | 'chat' | 'sports-chat' | 'events-chat' | 'party-chat' | 'group-chat' | 'dm-chat' | 'help' | 'availability' | 'comprehensive-dashboard' | 'venue-parties';
 
 interface UserProfile {
   name: string;
@@ -85,6 +89,8 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [selectedTurfId, setSelectedTurfId] = useState<string | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [selectedGroupChatId, setSelectedGroupChatId] = useState<string | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
   const [showLocationRequest, setShowLocationRequest] = useState(false);
   const [chatGroups, setChatGroups] = useState<{[key: string]: string}>({});
@@ -92,6 +98,7 @@ function AppContent() {
   const [selectedEventDetails, setSelectedEventDetails] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [pendingCategory, setPendingCategory] = useState<'sports' | 'events' | 'parties' | 'gaming' | null>(null);
+  const inviteHandledRef = useRef(false);
   
   // Separate user profiles for each category
   const [sportsProfile, setSportsProfile] = useState<UserProfile>({
@@ -714,7 +721,7 @@ function AppContent() {
     // Save to backend if user is logged in
     if (user) {
       try {
-        await matchService.createMatch({
+        const { data: createdMatch, error: matchError } = await matchService.addMatch({
           user_id: user.uid,
           title: match.title,
           turf_name: match.turfName,
@@ -733,18 +740,47 @@ function AppContent() {
           turf_cost: match.turfCost,
           category: 'sports'
         });
+
+        if (matchError) {
+          throw new Error(matchError);
+        }
+
+        const totalCost = match.amount ?? match.turfCost ?? 0;
+        // ALWAYS create group chat for match, regardless of cost
+        try {
+          const matchId = createdMatch?.id || match.id;
+          const groupChat = await realGroupChatService.createGroupChat(
+            matchId,
+            match.title,
+            `Meet up for ${match.sport || 'sports'} at ${match.turfName || 'the venue'}`,
+            user.uid,
+            user.name || user.email || 'Organizer',
+            user.email || 'organizer@example.com'
+          );
+          setSelectedGroupChatId(groupChat.id);
+          navigateTo('group-chat', undefined, undefined, groupChat.id);
+          console.log('✅ Group chat created for match:', groupChat.id);
+        } catch (chatError) {
+          console.error('Note: Group chat creation failed (using local chat instead):', chatError);
+          // Even if group chat fails, navigate to the match group-chat page
+          navigateTo('group-chat', undefined, undefined, match.id);
+        }
+        
         console.log('✅ Match saved to backend:', match.title);
         toast.success('Match Created Successfully! 🎉', {
-          description: 'Your match has been saved and is ready!',
+          description: 'Group chat created - tap to join!',
         });
       } catch (error) {
         console.error('❌ Error saving match to backend:', error);
-        // Don't show error toast here - match is still created locally
-        console.warn('Match created locally, will sync when connection is restored');
+        // Still navigate to group chat even if backend save fails
+        navigateTo('group-chat', undefined, undefined, match.id);
+        toast.info('Match Created! 🎉', {
+          description: 'Group chat ready - opening now!',
+        });
       }
     } else {
       toast.info('Match Created! 🎉', {
-        description: 'Sign in to sync your match with the cloud!',
+        description: 'Sign in to create group chat!',
       });
     }
   };
@@ -763,15 +799,13 @@ function AppContent() {
     if (user) {
       try {
         // Create or join the match in backend
-        const existingMatch = await matchService.getMatches({ 
-          category: 'sports' 
-        });
+        const existingMatch = await matchService.getMatches('sports');
         
         const matchExists = existingMatch.find(m => m.id === match.id);
         
         if (!matchExists) {
           // Create the match if it doesn't exist
-          await matchService.createMatch({
+          const { error: createError } = await matchService.addMatch({
             user_id: user.uid,
             title: match.title,
             turf_name: match.turfName,
@@ -790,15 +824,54 @@ function AppContent() {
             turf_cost: match.turfCost,
             category: 'sports'
           });
+
+          if (createError) {
+            throw new Error(createError);
+          }
+        }
+
+        const totalCost = match.amount ?? match.turfCost ?? 0;
+        // ALWAYS get or create group chat for match, regardless of cost
+        try {
+          let groupChat = await realGroupChatService.getGroupChatByMatchId(match.id);
+          if (!groupChat) {
+            groupChat = await realGroupChatService.createGroupChat(
+              match.id,
+              match.title,
+              `Meet up for ${match.sport || 'sports'} at ${match.turfName || 'the venue'}`,
+              user.uid,
+              user.name || user.email || 'Organizer',
+              user.email || 'organizer@example.com'
+            );
+          } else {
+            // Add user as member
+            await realGroupChatService.addMember(
+              groupChat.id,
+              user.uid,
+              'member',
+              user.name || user.email || 'Player',
+              user.email || 'player@example.com'
+            );
+          }
+
+          setSelectedGroupChatId(groupChat.id);
+          navigateTo('group-chat', undefined, undefined, groupChat.id);
+          console.log('✅ Group chat for match ready:', groupChat.id);
+        } catch (chatError) {
+          console.error('Note: Group chat access failed:', chatError);
+          // Navigate to group chat page anyway
+          navigateTo('group-chat', undefined, undefined, match.id);
         }
         
         toast.success('Joined Match! ⚽', {
-          description: 'You\'re all set for the game!',
+          description: 'Group chat opened - let\'s play!',
         });
       } catch (error) {
         console.error('❌ Error joining match:', error);
+        // Still try to navigate to group chat
+        navigateTo('group-chat', undefined, undefined, match.id);
         toast.info('Joined Locally! 📱', {
-          description: 'Will sync when online.',
+          description: 'Group chat ready to use!',
         });
       }
     } else {
@@ -823,7 +896,7 @@ function AppContent() {
     // Save to backend if user is logged in
     if (user) {
       try {
-        await matchService.createMatch({
+        const { error: eventError } = await matchService.addMatch({
           user_id: user.uid,
           title: event.title,
           turf_name: event.venueName || event.location,
@@ -842,6 +915,10 @@ function AppContent() {
           turf_cost: event.amount || event.ticketPrice,
           category: 'events'
         });
+
+        if (eventError) {
+          throw new Error(eventError);
+        }
         toast.success('Event Booked! 🎉', {
           description: 'Your booking has been confirmed!',
         });
@@ -880,7 +957,7 @@ function AppContent() {
       // Save to backend if user is logged in
       if (user) {
         try {
-          await matchService.createMatch({
+          const { error: partyError } = await matchService.addMatch({
             user_id: user.uid,
             title: partyDetails.title,
             turf_name: partyDetails.venueName,
@@ -899,6 +976,10 @@ function AppContent() {
             turf_cost: partyDetails.amount || partyDetails.ticketPrice,
             category: 'parties'
           });
+
+          if (partyError) {
+            throw new Error(partyError);
+          }
           toast.success('Party Booked! 🎉', {
             description: 'Get ready to party!',
           });
@@ -920,12 +1001,18 @@ function AppContent() {
     }
   };
 
-  const navigateTo = (page: Page, turfId?: string, matchId?: string) => {
+  const navigateTo = (page: Page, turfId?: string, matchId?: string, groupChatId?: string, conversationId?: string) => {
     if (turfId) {
       setSelectedTurfId(turfId);
     }
     if (matchId) {
       setSelectedMatchId(matchId);
+    }
+    if (groupChatId) {
+      setSelectedGroupChatId(groupChatId);
+    }
+    if (conversationId) {
+      setSelectedConversationId(conversationId);
     }
     
     // Reset category when navigating to landing
@@ -947,7 +1034,7 @@ function AppContent() {
     } else if (page === 'gaming-hub' || page === 'gaming-profile' || page === 'gaming-community' || page === 'gaming-chat' || page === 'gaming-map' || page === 'gaming-events' || page === 'gaming-photos' || page === 'gaming-highlights' || page === 'gaming-memories') {
       setCurrentCategory('gaming');
     }
-    // For 'comprehensive-dashboard', 'availability', 'help', 'chat', etc., keep the current category
+    // For 'comprehensive-dashboard', 'availability', 'help', 'chat', 'group-chat', 'dm-chat', etc., keep the current category
     
     // Show notification when navigating to community if there are upcoming matches
     if (page === 'community' && sportsMatches.filter(m => m.status === 'upcoming').length > 0) {
@@ -959,6 +1046,41 @@ function AppContent() {
     
     setCurrentPage(page);
   };
+
+  useEffect(() => {
+    if (!user || inviteHandledRef.current) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get('invite');
+    if (!inviteToken) {
+      return;
+    }
+
+    inviteHandledRef.current = true;
+
+    const acceptInvite = async () => {
+      const result = await realGroupChatService.acceptInvite(
+        inviteToken,
+        user.uid,
+        user.name || user.email || 'Member',
+        user.email || 'member@example.com'
+      );
+
+      if (result.success && result.groupChatId) {
+        setSelectedGroupChatId(result.groupChatId);
+        navigateTo('group-chat', undefined, undefined, result.groupChatId);
+        toast.success('Invite accepted! 🎉');
+      } else {
+        toast.error(result.error || 'Invite invalid');
+      }
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    };
+
+    acceptInvite();
+  }, [user, navigateTo]);
 
   // Show loading state while checking auth
   if (loading) {
@@ -1149,6 +1271,16 @@ function AppContent() {
         {currentPage === 'sports-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} category="sports" />}
         {currentPage === 'events-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} category="events" />}
         {currentPage === 'party-chat' && <WhatsAppChat onNavigate={navigateTo} matchId={selectedMatchId} category="party" />}
+        {currentPage === 'group-chat' && selectedGroupChatId && (
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading chat...</div>}>
+            <GroupChatComponent chatId={selectedGroupChatId} onClose={() => navigateTo('dashboard')} />
+          </Suspense>
+        )}
+        {currentPage === 'dm-chat' && selectedConversationId && (
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading messages...</div>}>
+            <DirectMessageThread conversationId={selectedConversationId} onNavigate={navigateTo} />
+          </Suspense>
+        )}
         {currentPage === 'help' && <HelpSupport onNavigate={navigateTo} category={currentCategory} />}
         {currentPage === 'availability' && <RealTimeAvailability onNavigate={navigateTo} category={currentCategory} />}
         {currentPage === 'comprehensive-dashboard' && (

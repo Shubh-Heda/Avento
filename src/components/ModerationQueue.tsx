@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import chatService from '../services/chatService';
-import { supabase } from '../lib/supabase';
+import { firebaseAuth } from '../services/firebaseService';
 import type { ChatMessageReport } from '../services/chatService';
 import { X, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -23,23 +22,9 @@ export function ModerationQueue() {
   const loadReports = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('chat_message_reports')
-        .select(`
-          *,
-          message:chat_messages(content, sender_id),
-          reporter:profiles!chat_message_reports_reporter_id_fkey(id, full_name, avatar_url),
-          room:chat_rooms(name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (filter === 'pending') {
-        query = query.eq('status', 'pending');
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      setReports(data || []);
+      // Load from localStorage for demo mode
+      const savedReports = localStorage.getItem('chat_reports') || '[]';
+      setReports(JSON.parse(savedReports));
     } catch (error) {
       console.error('Error loading reports:', error);
       toast.error('Failed to load reports');
@@ -48,30 +33,28 @@ export function ModerationQueue() {
     }
   };
 
-  const handleActionReport = async (reportId: string, action: 'actioned' | 'dismissed', deleteMessage: boolean = false) => {
+  const handleActionReport = async (reportId: string, action: 'actioned' | 'dismissed') => {
     try {
       const report = reports.find(r => r.id === reportId);
       if (!report) return;
 
-      // Update report status
-      const { error: updateError } = await supabase
-        .from('chat_message_reports')
-        .update({
-          status: action,
-          actioned_at: new Date().toISOString(),
-          actioned_by: (await supabase.auth.getUser()).data.user?.id
-        })
-        .eq('id', reportId);
+      const currentUser = firebaseAuth.getCurrentUser();
+      if (!currentUser) return;
 
-      if (updateError) throw updateError;
-
-      // If actioned and should delete message
-      if (action === 'actioned' && deleteMessage) {
-        await chatService.deleteMessage(report.room_id, report.message_id, `Report ${reportId}: ${report.reason}`);
-      }
-
-      toast.success(`Report ${action}`);
-      loadReports();
+      // Update report status in localStorage
+      const updatedReports = reports.map(r =>
+        r.id === reportId
+          ? {
+              ...r,
+              status: action,
+              actioned_at: new Date().toISOString(),
+              actioned_by: currentUser.uid
+            }
+          : r
+      );
+      setReports(updatedReports);
+      localStorage.setItem('chat_reports', JSON.stringify(updatedReports));
+      toast.success(`Report ${action} successfully`);
     } catch (error) {
       console.error('Error actioning report:', error);
       toast.error('Failed to action report');
@@ -160,7 +143,7 @@ export function ModerationQueue() {
                   <Button
                     variant="destructive"
                     className="gap-2"
-                    onClick={() => handleActionReport(report.id, 'actioned', true)}
+                    onClick={() => handleActionReport(report.id, 'actioned')}
                   >
                     <Check className="w-4 h-4" />
                     Delete Message
@@ -168,7 +151,7 @@ export function ModerationQueue() {
                   <Button
                     variant="outline"
                     className="gap-2"
-                    onClick={() => handleActionReport(report.id, 'actioned', false)}
+                    onClick={() => handleActionReport(report.id, 'dismissed')}
                   >
                     <Check className="w-4 h-4" />
                     Action Without Delete

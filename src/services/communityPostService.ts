@@ -2,6 +2,7 @@
 // Real Community Service - Twitter-like Backend
 // ============================================
 import { supabase } from '../lib/supabase';
+import { firebaseAuth } from './firebaseService';
 import type {
   CommunityPost,
   PostComment,
@@ -138,7 +139,7 @@ export const postOperations = {
       }
 
       if (following_only) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = firebaseAuth.getCurrentUser();
         if (user) {
           const { data: following } = await supabase
             .from('user_follows')
@@ -170,7 +171,7 @@ export const postOperations = {
       if (error) throw error;
 
       // Check if current user has liked each post
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       let postsWithLikeStatus = data || [];
 
       if (user && postsWithLikeStatus.length > 0) {
@@ -235,7 +236,7 @@ export const postOperations = {
    */
   async createPost(request: CreatePostRequest): Promise<CommunityPost | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       // Get user's profile
@@ -410,7 +411,7 @@ export const commentOperations = {
    */
   async createComment(request: CreateCommentRequest): Promise<PostComment | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -467,7 +468,7 @@ export const likeOperations = {
    */
   async likePost(postId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -493,7 +494,7 @@ export const likeOperations = {
    */
   async unlikePost(postId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -518,7 +519,7 @@ export const likeOperations = {
    */
   async likeComment(commentId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -544,7 +545,7 @@ export const likeOperations = {
    */
   async unlikeComment(commentId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -575,7 +576,7 @@ export const followOperations = {
    */
   async followUser(followingId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -601,7 +602,7 @@ export const followOperations = {
    */
   async unfollowUser(followingId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -690,7 +691,7 @@ export const inviteOperations = {
    */
   async inviteUsers(postId: string, userIds: string[], message?: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -772,7 +773,7 @@ export const bookmarkOperations = {
    */
   async bookmarkPost(postId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);
@@ -798,7 +799,7 @@ export const bookmarkOperations = {
    */
   async removeBookmark(postId: string): Promise<boolean> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       if (!user) throw new Error('User not authenticated');
 
       const profile = await profileOperations.getProfile(user.id);

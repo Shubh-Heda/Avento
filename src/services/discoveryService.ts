@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+// Discovery Service - Using Firebase  
+import { firebaseAuth } from './firebaseService';
 import { toast } from 'sonner';
 
 export interface PresencePoint {
@@ -73,36 +74,37 @@ class DiscoveryService {
   async upsertPresence(point: PresencePoint) {
     const payload = {
       ...point,
+      id: point.id || `presence-${Date.now()}`,
       status: point.status ?? 'active',
       radius_km: point.radius_km ?? defaultRadiusKm,
       expires_at: point.expires_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      created_at: point.created_at || new Date().toISOString()
     };
 
-    const { error, data } = await supabase
-      .from('presence_events')
-      .upsert(payload)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as PresencePoint;
+    const presences = JSON.parse(localStorage.getItem('presence_events') || '[]');
+    const index = presences.findIndex((p: any) => p.user_id === point.user_id && p.sport === point.sport);
+    if (index >= 0) {
+      presences[index] = payload;
+    } else {
+      presences.push(payload);
+    }
+    localStorage.setItem('presence_events', JSON.stringify(presences));
+    return payload as PresencePoint;
   }
 
   async getPresence(options: { sport?: string; maxAgeMinutes?: number } = {}) {
     const { sport, maxAgeMinutes = 180 } = options;
     const since = new Date(Date.now() - maxAgeMinutes * 60 * 1000).toISOString();
 
-    let query = supabase
-      .from('presence_events')
-      .select('*')
-      .gte('created_at', since)
-      .eq('status', 'active');
+    let presences = JSON.parse(localStorage.getItem('presence_events') || '[]');
+    
+    presences = presences.filter((p: any) => 
+      p.created_at >= since && 
+      p.status === 'active' &&
+      (!sport || p.sport === sport)
+    );
 
-    if (sport) query = query.eq('sport', sport);
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return (data ?? []) as PresencePoint[];
+    return (presences ?? []) as PresencePoint[];
   }
 
   cluster(points: PresencePoint[], radiusKm = 1): ClusterBucket[] {
@@ -130,54 +132,54 @@ class DiscoveryService {
   }
 
   async saveSearch(search: SavedSearch) {
-    const payload = { ...search, notify: search.notify ?? true };
-    const { data, error } = await supabase.from('saved_searches').upsert(payload).select().single();
-    if (error) throw error;
-    return data as SavedSearch;
+    const payload = { ...search, id: search.id || `search-${Date.now()}`, notify: search.notify ?? true };
+    const searches = JSON.parse(localStorage.getItem('saved_searches') || '[]');
+    const index = searches.findIndex((s: any) => s.id === payload.id);
+    if (index >= 0) {
+      searches[index] = payload;
+    } else {
+      searches.push(payload);
+    }
+    localStorage.setItem('saved_searches', JSON.stringify(searches));
+    return payload as SavedSearch;
   }
 
   async listSavedSearches(userId: string) {
-    const { data, error } = await supabase
-      .from('saved_searches')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as SavedSearch[];
+    const searches = JSON.parse(localStorage.getItem('saved_searches') || '[]');
+    return searches.filter((s: any) => s.user_id === userId) as SavedSearch[];
   }
 
   async subscribeAlert(alert: GeoAlertSubscription) {
     const payload = {
       ...alert,
+      id: alert.id || `alert-${Date.now()}`,
       active: alert.active ?? true,
       days_of_week: alert.days_of_week ?? [0, 1, 2, 3, 4, 5, 6],
       notify_channels: alert.notify_channels ?? ['push'],
     };
-    const { data, error } = await supabase
-      .from('geo_alert_subscriptions')
-      .upsert(payload)
-      .select()
-      .single();
-    if (error) throw error;
-    return data as GeoAlertSubscription;
+    const alerts = JSON.parse(localStorage.getItem('geo_alert_subscriptions') || '[]');
+    const index = alerts.findIndex((a: any) => a.id === payload.id);
+    if (index >= 0) {
+      alerts[index] = payload;
+    } else {
+      alerts.push(payload);
+    }
+    localStorage.setItem('geo_alert_subscriptions', JSON.stringify(alerts));
+    return payload as GeoAlertSubscription;
   }
 
   async listGeoAlerts(userId: string) {
-    const { data, error } = await supabase
-      .from('geo_alert_subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as GeoAlertSubscription[];
+    const alerts = JSON.parse(localStorage.getItem('geo_alert_subscriptions') || '[]');
+    return alerts.filter((a: any) => a.user_id === userId) as GeoAlertSubscription[];
   }
 
   async recordAlertTrigger(alertId: string) {
-    const { error } = await supabase
-      .from('geo_alert_subscriptions')
-      .update({ last_triggered: new Date().toISOString() })
-      .eq('id', alertId);
-    if (error) throw error;
+    const alerts = JSON.parse(localStorage.getItem('geo_alert_subscriptions') || '[]');
+    const alert = alerts.find((a: any) => a.id === alertId);
+    if (alert) {
+      alert.last_triggered = new Date().toISOString();
+      localStorage.setItem('geo_alert_subscriptions', JSON.stringify(alerts));
+    }
   }
 
   async getPresenceWithFilters({

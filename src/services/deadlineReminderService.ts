@@ -7,7 +7,8 @@
  * - Hourly reminders when less than 1 day away
  */
 
-import { supabase } from '../lib/supabase';
+// Deadline Reminder Service - Using Firebase
+import { firebaseAuth } from './firebaseService';
 import { notificationService } from './notificationService';
 
 export interface DeadlineReminder {

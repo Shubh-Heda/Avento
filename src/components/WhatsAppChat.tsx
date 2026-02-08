@@ -31,7 +31,7 @@ import { Input } from './ui/input';
 import { AventoLogo } from './AventoLogo';
 import chatService from '../services/chatService';
 import { communityService } from '../services/communityService';
-import { supabase } from '../lib/supabase';
+import { firebaseAuth } from '../services/firebaseService';
 import type { ChatRoom, ChatMessage } from '../services/chatService';
 import { toast } from 'sonner';
 
@@ -62,7 +62,7 @@ export function WhatsAppChat({ onNavigate, matchId, category = 'sports' }: Whats
 
   const initializeChat = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = firebaseAuth.getCurrentUser();
       
       if (!user) {
         // Demo mode with mock data
@@ -72,7 +72,7 @@ export function WhatsAppChat({ onNavigate, matchId, category = 'sports' }: Whats
         return;
       }
 
-      setCurrentUserId(user.id);
+      setCurrentUserId(user.uid);
       await loadRooms(user.id);
     } catch (error) {
       console.error('Error initializing chat:', error);

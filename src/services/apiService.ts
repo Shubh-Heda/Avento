@@ -22,13 +22,14 @@ class ApiService {
    * Initialize the backend system
    */
   async initialize(): Promise<void> {
-    await simulateDelay(300);
-    
-    // Check if data exists, if not initialize with mock data
-    const existingMatches = localStorageService.getSportsMatches();
-    
-    if (!existingMatches || existingMatches.length === 0) {
-      mockDataService.initializeMockData();
+    // Minimal initialization - defer heavy operations
+    try {
+      const existingMatches = localStorageService.getSportsMatches();
+      if (!existingMatches || existingMatches.length === 0) {
+        mockDataService.initializeMockData();
+      }
+    } catch (error) {
+      console.warn('Initialize error:', error);
     }
   }
 
@@ -37,14 +38,36 @@ class ApiService {
   // ============================================
 
   async login(email: string, password: string): Promise<any> {
-    await simulateDelay(800);
+    // Demo account credentials
+    const demoAccounts = {
+      'demo@avento.com': { password: 'demo123', name: 'Shubh Heda', demoAccount: true },
+      'demo@gamesetgo.com': { password: 'demo123', name: 'Demo User', demoAccount: true },
+    };
+
+    // Check if this is a demo account
+    const account = demoAccounts[email as keyof typeof demoAccounts];
     
-    // Mock login - always succeeds
+    if (account && account.password === password) {
+      // Demo account login
+      const user = {
+        id: 'demo_user',
+        name: account.name,
+        email,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${account.name}`,
+        joinedDate: new Date(),
+        isDemoAccount: true,
+      };
+
+      localStorageService.setUserProfile(user);
+      return { success: true, user };
+    }
+
+    // Mock login - any other credentials succeed for testing
     const user = {
       id: 'user_current',
-      name: 'Current User',
+      name: email.split('@')[0] || 'Current User',
       email,
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
       joinedDate: new Date(),
     };
 
@@ -53,8 +76,6 @@ class ApiService {
   }
 
   async signup(name: string, email: string, password: string): Promise<any> {
-    await simulateDelay(1000);
-    
     const user = {
       id: `user_${Date.now()}`,
       name,
@@ -72,7 +93,6 @@ class ApiService {
   }
 
   async logout(): Promise<void> {
-    await simulateDelay(300);
     localStorageService.remove('avento_user_profile');
   }
 
@@ -81,8 +101,6 @@ class ApiService {
   // ============================================
 
   async getMatches(filters?: any): Promise<any> {
-    await simulateDelay(600);
-    
     if (filters?.sport) {
       return matchService.searchMatches({ sport: filters.sport });
     }
@@ -95,37 +113,30 @@ class ApiService {
   }
 
   async getMatch(matchId: string): Promise<any> {
-    await simulateDelay(400);
     return matchService.getMatch(matchId);
   }
 
   async createMatch(matchData: any, userId: string): Promise<any> {
-    await simulateDelay(700);
     return matchService.createMatch(matchData, userId);
   }
 
   async joinMatch(matchId: string, userId: string, userName: string): Promise<any> {
-    await simulateDelay(500);
     return matchService.joinMatch(matchId, userId, userName);
   }
 
   async leaveMatch(matchId: string, userId: string): Promise<any> {
-    await simulateDelay(500);
     return matchService.leaveMatch(matchId, userId);
   }
 
   async getUserMatches(userId: string): Promise<any> {
-    await simulateDelay(500);
     return matchService.getUserMatches(userId);
   }
 
   async searchMatches(query: any): Promise<any> {
-    await simulateDelay(600);
     return matchService.searchMatches(query);
   }
 
   async getNearbyMatches(latitude: number, longitude: number, radius?: number): Promise<any> {
-    await simulateDelay(700);
     return matchService.getNearbyMatches(latitude, longitude, radius);
   }
 
@@ -134,8 +145,6 @@ class ApiService {
   // ============================================
 
   async processPayment(matchId: string, userId: string, amount: number, method: string = 'upi'): Promise<any> {
-    await simulateDelay(1500); // Longer delay for payment processing
-    
     try {
       const paymentStatus = paymentFlowService.processPayment(matchId, userId, amount, method as any);
       const match = matchService.processPayment(matchId, userId, amount);
@@ -155,17 +164,14 @@ class ApiService {
   }
 
   async getPaymentSummary(matchId: string): Promise<any> {
-    await simulateDelay(300);
     return paymentFlowService.getPaymentSummary(matchId);
   }
 
   async triggerHardLock(matchId: string): Promise<any> {
-    await simulateDelay(500);
     return paymentFlowService.triggerHardLock(matchId);
   }
 
   async confirmFinalTeam(matchId: string): Promise<any> {
-    await simulateDelay(500);
     return paymentFlowService.confirmFinalTeam(matchId);
   }
 
@@ -174,17 +180,14 @@ class ApiService {
   // ============================================
 
   async getTrustScore(userId: string): Promise<any> {
-    await simulateDelay(300);
     return trustScoreService.getTrustScoreSummary(userId);
   }
 
   async recordTrustAction(action: any): Promise<any> {
-    await simulateDelay(400);
     return trustScoreService.recordAction(action);
   }
 
   async getTopTrustedUsers(limit?: number): Promise<any> {
-    await simulateDelay(500);
     return trustScoreService.getTopTrustedUsers(limit);
   }
 
@@ -193,17 +196,14 @@ class ApiService {
   // ============================================
 
   async getFriendshipStreak(user1Id: string, user2Id: string): Promise<any> {
-    await simulateDelay(300);
     return friendshipStreakService.getStreakStatus(user1Id, user2Id);
   }
 
   async getUserStreaks(userId: string): Promise<any> {
-    await simulateDelay(400);
     return friendshipStreakService.getUserStreaks(userId);
   }
 
   async getStreakSummary(userId: string): Promise<any> {
-    await simulateDelay(400);
     return friendshipStreakService.getStreakSummary(userId);
   }
 
@@ -212,19 +212,15 @@ class ApiService {
   // ============================================
 
   async getEvents(): Promise<any> {
-    await simulateDelay(600);
     return localStorageService.getEvents();
   }
 
   async getEvent(eventId: string): Promise<any> {
-    await simulateDelay(400);
     const events = localStorageService.getEvents();
     return events.find((e: any) => e.id === eventId);
   }
 
   async bookEvent(eventId: string, userId: string): Promise<any> {
-    await simulateDelay(700);
-    
     const events = localStorageService.getEvents();
     const event = events.find((e: any) => e.id === eventId);
     
@@ -250,19 +246,15 @@ class ApiService {
   // ============================================
 
   async getParties(): Promise<any> {
-    await simulateDelay(600);
     return localStorageService.getParties();
   }
 
   async getParty(partyId: string): Promise<any> {
-    await simulateDelay(400);
     const parties = localStorageService.getParties();
     return parties.find((p: any) => p.id === partyId);
   }
 
   async joinParty(partyId: string, userId: string): Promise<any> {
-    await simulateDelay(700);
-    
     const parties = localStorageService.getParties();
     const party = parties.find((p: any) => p.id === partyId);
     
@@ -288,13 +280,10 @@ class ApiService {
   // ============================================
 
   async getChatMessages(matchId: string): Promise<any> {
-    await simulateDelay(400);
     return localStorageService.getChatMessages(matchId);
   }
 
   async sendChatMessage(matchId: string, userId: string, userName: string, message: string): Promise<any> {
-    await simulateDelay(300);
-    
     const messages = localStorageService.getChatMessages(matchId);
     const newMessage = {
       id: `msg_${Date.now()}`,

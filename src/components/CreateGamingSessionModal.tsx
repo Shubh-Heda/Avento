@@ -8,9 +8,10 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { gamingService, GamingClub, GamingSession } from '../services/gamingService';
+import { gamingBackendService, GamingSession } from '../services/gamingBackendService';
+import { GamingClub } from '../services/gamingService';
 import { matchService } from '../services/backendService';
-import { supabase } from '../lib/supabase';
+import { firebaseAuth } from '../services/firebaseService';
 import { toast } from 'sonner';
 
 interface CreateGamingSessionModalProps {
@@ -56,62 +57,67 @@ export function CreateGamingSessionModal({
   const handleCreateSession = async () => {
     if (!selectedClub) return;
 
-    const pricePerPerson = (selectedClub.hourlyRate * sessionData.duration) / sessionData.maxPlayers;
-    
-    const newSession = gamingService.createGamingSession({
-      clubId: selectedClub.id,
-      clubName: selectedClub.name,
-      hostId: userId,
-      hostName: userName,
-      date: sessionData.date,
-      time: sessionData.time,
-      duration: sessionData.duration,
-      gameSpecific: sessionData.gameSpecific,
-      gameName: sessionData.gameSpecific ? sessionData.gameName : undefined,
-      platform: sessionData.platform,
-      sessionType: sessionData.sessionType,
-      skillLevel: sessionData.skillLevel,
-      minPlayers: sessionData.minPlayers,
-      maxPlayers: sessionData.maxPlayers,
-      visibility: sessionData.visibility,
-      paymentMode: sessionData.paymentMode,
-      pricePerPerson,
-      seatType: sessionData.seatType,
-      streamingAvailable: sessionData.streamingAvailable,
-      hasFood: sessionData.hasFood,
-      players: []
-    });
-
-    // Save to backend
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const pricePerPerson = (selectedClub.hourlyRate * sessionData.duration) / sessionData.maxPlayers;
       
-      if (user) {
-        await matchService.createMatch({
-          user_id: user.id,
-          title: `${sessionData.gameName || 'Gaming'} Session at ${selectedClub.name}`,
-          turf_name: selectedClub.name,
+      // Create using real backend service (auto-creates chat and community post)
+      const newSession = await gamingBackendService.createGamingSession(
+        {
+          clubId: selectedClub.id,
+          clubName: selectedClub.name,
           date: sessionData.date,
           time: sessionData.time,
-          sport: sessionData.gameName || 'Gaming',
-          status: 'upcoming',
-          visibility: sessionData.visibility === 'public' ? 'community' : sessionData.visibility,
-          payment_option: sessionData.paymentMode === '5-stage' ? 'split' : 'Pay Directly',
-          amount: selectedClub.hourlyRate * sessionData.duration,
-          location: selectedClub.location,
-          min_players: sessionData.minPlayers,
-          max_players: sessionData.maxPlayers,
-          turf_cost: selectedClub.hourlyRate * sessionData.duration,
-          category: 'gaming'
-        });
-        console.log('✅ Gaming session saved to backend');
-      }
-    } catch (error) {
-      console.error('❌ Error saving gaming session:', error);
-      // Still create locally
-    }
+          duration: sessionData.duration,
+          gameName: sessionData.gameSpecific ? sessionData.gameName : undefined,
+          platform: sessionData.platform,
+          sessionType: sessionData.sessionType,
+          skillLevel: sessionData.skillLevel,
+          minPlayers: sessionData.minPlayers,
+          maxPlayers: sessionData.maxPlayers,
+          visibility: sessionData.visibility,
+          paymentMode: sessionData.paymentMode,
+          pricePerPerson,
+          seatType: sessionData.seatType,
+          streamingAvailable: sessionData.streamingAvailable,
+          hasFood: sessionData.hasFood,
+        },
+        userId,
+        userName
+      );
 
-    onSessionCreated(newSession);
+      // Also save to matchService for cross-compatibility
+      try {
+        const user = firebaseAuth.getCurrentUser();
+        
+        if (user) {
+          await matchService.createMatch({
+            user_id: user.uid,
+            title: `${sessionData.gameName || 'Gaming'} Session at ${selectedClub.name}`,
+            turf_name: selectedClub.name,
+            date: sessionData.date,
+            time: sessionData.time,
+            sport: sessionData.gameName || 'Gaming',
+            status: 'upcoming',
+            visibility: sessionData.visibility === 'public' ? 'community' : sessionData.visibility,
+            payment_option: sessionData.paymentMode === '5-stage' ? 'split' : 'Pay Directly',
+            amount: selectedClub.hourlyRate * sessionData.duration,
+            location: selectedClub.location,
+            min_players: sessionData.minPlayers,
+            max_players: sessionData.maxPlayers,
+            turf_cost: selectedClub.hourlyRate * sessionData.duration,
+            category: 'gaming'
+          });
+        }
+      } catch (error) {
+        console.warn('Cross-save to matchService failed (non-critical):', error);
+      }
+
+      toast.success('🎮 Gaming session created! Group chat & community post auto-created');
+      onSessionCreated(newSession);
+    } catch (error: any) {
+      console.error('❌ Error creating gaming session:', error);
+      toast.error(error.message || 'Failed to create gaming session');
+    }
   };
 
   return (

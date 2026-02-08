@@ -10,7 +10,8 @@ import {
   Gift, Camera, Share2, Mail, ChevronDown, ArrowUpRight,
   Settings, Edit, LogOut, CreditCard, History, BarChart3
 } from 'lucide-react';
-import { gamingService, GamingClub, GamingSession } from '../services/gamingService';
+import { gamingBackendService, GamingSession } from '../services/gamingBackendService';
+import { gamingService, GamingClub } from '../services/gamingService';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -62,9 +63,19 @@ export function GamingHub({ onNavigate }: GamingHubProps) {
     }
   }, []);
 
-  const loadData = () => {
+  const loadData = async () => {
+    // Load clubs from mock service (these are locations)
     setGamingClubs(gamingService.getGamingClubs());
-    setGamingSessions(gamingService.getGamingSessions());
+    
+    // Load sessions from real backend service
+    try {
+      const sessions = await gamingBackendService.getGamingSessions();
+      setGamingSessions(sessions);
+    } catch (error) {
+      console.error('Failed to load gaming sessions:', error);
+      // Fallback to mock if needed
+      setGamingSessions(gamingService.getGamingSessions());
+    }
   };
 
   const popularGames = [

@@ -1,8 +1,8 @@
 // ============================================
 // Chat Service - Real-time Messaging Backend
 // ============================================
-import { supabase } from '../lib/supabase';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
+import { firebaseAuth, chatModerationService } from './firebaseService';
 
 // Types
 export interface ChatRoom {
@@ -100,7 +100,7 @@ export interface MessageReaction {
 
 // Chat Service
 class ChatService {
-  private subscriptions: Map<string, RealtimeChannel> = new Map();
+  private subscriptions: Map<string, any> = new Map();
 
   // ==================== ROOM OPERATIONS ====================
 
@@ -133,14 +133,16 @@ class ChatService {
     related_id?: string;
     avatar_url?: string;
   }): Promise<ChatRoom> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Create room in Supabase
     const { data, error } = await supabase
       .from('chat_rooms')
       .insert({
         ...room,
-        created_by: user.id
+        created_by: user.id,
+        is_private: room.is_private ?? false
       })
       .select()
       .single();
@@ -150,6 +152,7 @@ class ChatService {
     // Add creator as admin member
     await this.addMember(data.id, user.id, 'admin');
 
+    console.log('✅ Chat room created in Supabase:', data.id);
     return data;
   }
 
@@ -186,7 +189,7 @@ class ChatService {
     return data || [];
   }
 
-  async addMember(roomId: string, userId: string, role: ChatRoomMember['role'] = 'member'): Promise<void> {
+  async addMember(roomId: string, userId: string, role: ChatMemberRole = 'member'): Promise<void> {
     const { error } = await supabase
       .from('chat_room_members')
       .insert({
@@ -196,10 +199,11 @@ class ChatService {
       });
 
     if (error) throw error;
+    console.log('✅ Member added to chat room:', userId);
   }
 
   async getMemberRole(roomId: string): Promise<ChatMemberRole | null> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) return null;
 
     const { data, error } = await supabase
@@ -242,7 +246,7 @@ class ChatService {
   }
 
   async markAsRead(roomId: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) return;
 
     const { error } = await supabase
@@ -279,7 +283,7 @@ class ChatService {
   }
 
   async deleteMessage(roomId: string, messageId: string, reason?: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -296,7 +300,7 @@ class ChatService {
 
     if (error) throw error;
 
-    await supabase.from('chat_moderation_actions').insert({
+    await chatModerationService.recordAction({
       room_id: roomId,
       actor_id: user.id,
       action_type: 'delete_message',
@@ -306,7 +310,7 @@ class ChatService {
   }
 
   async reportMessage(roomId: string, messageId: string, reason: string, details?: string): Promise<ChatMessageReport> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -341,7 +345,7 @@ class ChatService {
   // ==================== PINNED MESSAGES ====================
 
   async pinMessage(roomId: string, messageId: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -354,7 +358,7 @@ class ChatService {
 
     if (error) throw error;
 
-    await supabase.from('chat_moderation_actions').insert({
+    await chatModerationService.recordAction({
       room_id: roomId,
       actor_id: user.id,
       action_type: 'pin_message',
@@ -392,12 +396,12 @@ class ChatService {
   // ==================== USER MODERATION ====================
 
   async kickUser(roomId: string, userId: string, reason?: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     await this.removeMember(roomId, userId);
 
-    await supabase.from('chat_moderation_actions').insert({
+    await chatModerationService.recordAction({
       room_id: roomId,
       actor_id: user.id,
       action_type: 'kick_user',
@@ -407,12 +411,12 @@ class ChatService {
   }
 
   async banUser(roomId: string, userId: string, reason?: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     await this.removeMember(roomId, userId);
 
-    await supabase.from('chat_moderation_actions').insert({
+    await chatModerationService.recordAction({
       room_id: roomId,
       actor_id: user.id,
       action_type: 'ban_user',
@@ -422,7 +426,7 @@ class ChatService {
   }
 
   async muteUser(roomId: string, userId: string, reason?: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -433,7 +437,7 @@ class ChatService {
 
     if (error) throw error;
 
-    await supabase.from('chat_moderation_actions').insert({
+    await chatModerationService.recordAction({
       room_id: roomId,
       actor_id: user.id,
       action_type: 'mute_user',
@@ -472,7 +476,7 @@ class ChatService {
   }
 
   async sendMessage(roomId: string, content: string, messageType: ChatMessage['message_type'] = 'text', mediaUrl?: string): Promise<ChatMessage> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -495,6 +499,7 @@ class ChatService {
     // Mark as read for sender
     await this.markAsRead(roomId);
 
+    console.log('✅ Message sent to Supabase:', data.id);
     return data;
   }
 
@@ -514,7 +519,7 @@ class ChatService {
   // ==================== REACTION OPERATIONS ====================
 
   async addReaction(messageId: string, emoji: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -529,7 +534,7 @@ class ChatService {
   }
 
   async removeReaction(messageId: string, emoji: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     const { error } = await supabase
@@ -615,7 +620,7 @@ class ChatService {
   // ==================== UTILITY OPERATIONS ====================
 
   async getUnreadCount(roomId: string): Promise<number> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) return 0;
 
     const { data, error } = await supabase.rpc('get_unread_message_count', {
@@ -633,7 +638,7 @@ class ChatService {
    * Regular members don't see any notification
    */
   async softExitGroup(roomId: string): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = firebaseAuth.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
     // Get room details and admin

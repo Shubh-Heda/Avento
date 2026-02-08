@@ -1,54 +1,119 @@
-# Avento - Sports & Social Connection Platform 🏆
+# Avento - Sports & Events Connection Platform
 
-**Live site:** https://shubh-heda.github.io/Avento/
+Modern social platform built with **React + TypeScript + Vite** and powered by **Firebase**.
 
-A comprehensive social platform that connects people through sports, events, parties, and gaming. Built with React, TypeScript, and modern web technologies.
-
-## ✨ Features
-
-### 🏃 Sports Hub
-- **Match Finder**: Discover and join sports matches in your area
-- **Real-time Availability**: See live player availability and match status
-- **Trust Score System**: Build reputation through verified participation
-- **Smart Payment Flow**: Secure split payments among participants
-- **Activity Heatmap**: Track your sports activity over time
-
-### 🎮 Gaming Zone
-- Create and join gaming sessions
-- Community gaming feed
-- Gaming profile and stats
-- Interactive map view for local gaming events
-
-### 🎉 Events & Parties
-- Browse and book cultural events
-- Party planning and squad formation
-- Group chat for attendees
-- Ticket booking with visibility controls
-
-### 💬 Community Features
-- **Group Chat**: Real-time chat for matches, events, and parties
-- **Activity Feed**: Stay updated with community activities
-- **Gratitude Wall**: Express appreciation to other players
-- **Memory Timeline**: Save and share match memories
-- **Photo Albums**: Create shared albums from events
-- **Achievement System**: Unlock badges and milestones
-
-### 🎯 Advanced Features
-- **Vibe Rooms**: Voice chat rooms for different sports communities
-- **Coaching Dashboard**: Connect with coaches and improve your game
-- **Friendship Map**: Visualize your sports network
-- **Post-Match Rituals**: Reflect and rate your experience
-- **Pre-Match Ice Breakers**: Get to know your teammates
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Node.js 16+
 - npm or yarn
+- Firebase account (free tier works)
 
 ### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+```
+
+Server runs at: **http://localhost:3001**
+
+---
+
+## Firebase Setup
+
+### 1. Get Firebase Credentials
+1. Go to [Firebase Console](https://console.firebase.google.com/project/avento-us)
+2. Click ⚙️ **Settings** → **Project Settings**
+3. Under "Your apps", click the **Web** icon
+4. Copy the config values
+
+### 2. Add to `.env.local`
+```env
+VITE_FIREBASE_API_KEY="your_api_key"
+VITE_FIREBASE_AUTH_DOMAIN="avento-us.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID="avento-us"
+VITE_FIREBASE_STORAGE_BUCKET="avento-us.firebasestorage.app"
+VITE_FIREBASE_MESSAGING_SENDER_ID="your_sender_id"
+VITE_FIREBASE_APP_ID="your_app_id"
+```
+
+### 3. Enable Firebase Services
+- **Firestore Database**: Build → Firestore Database → Create (test mode)
+- **Authentication**: Build → Authentication → Email/Password + Google
+- **Realtime Database** (optional): Build → Realtime Database → Create (test mode)
+
+### 4. Refresh & Done ✅
+Hard refresh browser (`Ctrl+Shift+R`) → App now uses live Firebase
+
+---
+
+## Project Structure
+
+```
+src/
+  ├── components/    # React components
+  ├── services/      # Firebase & business logic
+  ├── lib/           # Firebase config, auth, utilities
+  └── App.tsx        # Main app component
+
+public/             # Static assets
+build/              # Production build output
+.env.local          # Firebase credentials (gitignored)
+```
+
+---
+
+## Key Features
+
+- ✅ User authentication (Email/Password, Google)
+- ✅ Real-time user activity (Firestore)
+- ✅ Sports matches & event booking
+- ✅ Community chat & messaging
+- ✅ Trust scoring system
+- ✅ Payment integration
+
+---
+
+## Build & Deploy
+
+```bash
+# Build for production
+npm run build
+
+# Preview build
+npm run preview
+
+# Deploy to Vercel (configured)
+vercel
+```
+
+---
+
+## Troubleshooting
+
+**Port 3000 already in use?** → Dev server automatically switches to 3001
+
+**Firebase config errors?** → Check `.env.local` has all required keys and no typos
+
+**Demo mode showing?** → Open console (F12) → If you see "Demo mode", credentials aren't loaded. Check `.env.local` is saved correctly.
+
+---
+
+## Tech Stack
+
+- **Frontend**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Backend**: Firebase (Auth, Firestore, Realtime DB)
+- **Styling**: Tailwind CSS
+- **UI**: Shadcn/ui, Sonner toast notifications
+
+---
+
+For questions or issues, check the browser console for detailed error messages.bash
 # Clone the repository
 git clone https://github.com/Shubh-Heda/Avento.git
 

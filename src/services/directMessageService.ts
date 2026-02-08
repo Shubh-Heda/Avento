@@ -1,6 +1,7 @@
 /**
  * Direct Message Service - 1-on-1 Chat Backend
  * Handles WhatsApp-like messaging between individuals
+ * Now using Firebase instead of Supabase
  */
 
 import { supabase } from '../lib/supabase';

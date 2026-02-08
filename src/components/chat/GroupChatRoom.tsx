@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import { groupChatService } from '../../services/groupChatService';
-import { supabaseClient } from '../../services/supabaseClient';
+import { firebaseAuth } from '../../services/firebaseService';
 import './GroupChatRoom.css';
 
 interface GroupChatMessage {
@@ -19,6 +18,11 @@ interface GroupChatMember {
   share_amount: number;
   payment_status: 'pending' | 'paid';
   user_name?: string;
+  user?: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  };
 }
 
 interface GroupChat {
@@ -29,16 +33,33 @@ interface GroupChat {
   member_count: number;
 }
 
-export const GroupChatRoom: React.FC = () => {
-  const { groupChatId } = useParams<{ groupChatId: string }>();
+interface GroupChatRoomProps {
+  groupChatId: string;
+  onNavigate?: (page: string) => void;
+}
+
+export const GroupChatRoom: React.FC<GroupChatRoomProps> = ({ groupChatId, onNavigate }) => {
   const [groupChat, setGroupChat] = useState<GroupChat | null>(null);
   const [messages, setMessages] = useState<GroupChatMessage[]>([]);
   const [members, setMembers] = useState<GroupChatMember[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  const currentUserId = localStorage.getItem('userId'); // Get from your auth system
+  useEffect(() => {
+    let isMounted = true;
+    const loadUser = async () => {
+      const user = firebaseAuth.getCurrentUser();
+      if (!isMounted) return;
+      setCurrentUserId(user?.uid ?? null);
+    };
+
+    loadUser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Load initial data
   useEffect(() => {
@@ -48,10 +69,14 @@ export const GroupChatRoom: React.FC = () => {
         if (!groupChatId) return;
 
         // Get group chat details
-        const details = await groupChatService.getGroupChatDetails(groupChatId);
-        setGroupChat(details);
-        setMessages(details.messages || []);
-        setMembers(details.members || []);
+        const details = await groupChatService.getGroupChat(groupChatId);
+        if (details) {
+          setGroupChat(details);
+        }
+        
+        // Load messages separately
+        const msgs = await groupChatService.getMessages(groupChatId);
+        setMessages(msgs);
       } catch (err) {
         console.error('Error loading group chat:', err);
         setError('Failed to load group chat');
@@ -63,28 +88,21 @@ export const GroupChatRoom: React.FC = () => {
     loadGroupChat();
   }, [groupChatId]);
 
-  // Real-time message subscription
+  // Poll for new messages every 3 seconds
   useEffect(() => {
     if (!groupChatId) return;
 
-    const channel = supabaseClient
-      .channel(`group_${groupChatId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'group_messages',
-          filter: `group_chat_id=eq.${groupChatId}`
-        },
-        (payload: any) => {
-          setMessages(prev => [...prev, payload.new]);
-        }
-      )
-      .subscribe();
+    const interval = setInterval(async () => {
+      try {
+        const msgs = await groupChatService.getMessages(groupChatId);
+        setMessages(msgs);
+      } catch (err) {
+        console.error('Error polling messages:', err);
+      }
+    }, 3000);
 
     return () => {
-      channel.unsubscribe();
+      clearInterval(interval);
     };
   }, [groupChatId]);
 
@@ -92,14 +110,14 @@ export const GroupChatRoom: React.FC = () => {
     if (!messageInput.trim() || !groupChatId || !currentUserId) return;
 
     try {
-      await groupChatService.sendGroupMessage(
+      await groupChatService.postMessage(
         groupChatId,
         currentUserId,
         messageInput,
         'text'
       );
       setMessageInput('');
-      // Message will appear via real-time subscription
+      // Message will appear via polling
     } catch (err) {
       console.error('Error sending message:', err);
       setError('Failed to send message');
@@ -110,10 +128,12 @@ export const GroupChatRoom: React.FC = () => {
     if (!groupChatId || !currentUserId) return;
 
     try {
-      await groupChatService.markPaymentDone(groupChatId, currentUserId);
-      // Refresh members
-      const details = await groupChatService.getGroupChatDetails(groupChatId);
-      setMembers(details.members || []);
+      const chat = await groupChatService.getGroupChat(groupChatId);
+      const amount = chat?.total_cost || 0;
+      await groupChatService.markPaymentDone(groupChatId, currentUserId, amount);
+      // Refresh messages to show payment
+      const msgs = await groupChatService.getMessages(groupChatId);
+      setMessages(msgs);
     } catch (err) {
       console.error('Error marking payment:', err);
       setError('Failed to mark payment');
@@ -150,7 +170,7 @@ export const GroupChatRoom: React.FC = () => {
             {members.map(member => (
               <div key={member.id} className="member-item">
                 <div className="member-info">
-                  <div className="member-name">{member.user_name || 'User'}</div>
+                  <div className="member-name">{member.user?.full_name || member.user_name || 'User'}</div>
                   <div className="member-share">
                     Share: {groupChat.currency} {member.share_amount.toFixed(2)}
                   </div>

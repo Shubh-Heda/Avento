@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import { communityService } from '../services/communityService';
 import { PaymentModal } from './PaymentModal';
 import chatService from '../services/chatService';
-import { supabase } from '../lib/supabase';
 
 interface CreateEventBookingProps {
   onNavigate: (page: string, eventId?: string) => void;

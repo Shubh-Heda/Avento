@@ -4,15 +4,15 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthProvider';
+import { usersService } from '../services/supabaseAuthService';
 
 interface OnboardingFormProps {
   onComplete: () => void;
 }
 
 export function OnboardingForm({ onComplete }: OnboardingFormProps) {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -46,61 +46,37 @@ export function OnboardingForm({ onComplete }: OnboardingFormProps) {
     setLoading(true);
 
     try {
-      // Update email if it changed
-      if (formData.email !== user?.email) {
-        const { error: emailError } = await supabase.auth.updateUser({
-          email: formData.email,
-        });
-        if (emailError) throw emailError;
+      if (!user?.id) {
+        throw new Error('No authenticated user found');
       }
 
-      // Update user metadata in Supabase with onboarding_completed = true
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          full_name: formData.name,
-          age: formData.age,
-          phone: formData.phone,
-          profession: formData.profession || 'Not specified',
-          onboarding_completed: true,
-          onboarding_completed_at: new Date().toISOString(),
-        },
+      // Update user profile in Supabase
+      const { error } = await usersService.updateUserProfile(user.id, {
+        full_name: formData.name,
+        age: Number(formData.age),
+        phone: formData.phone,
+        email: formData.email,
+        profession: formData.profession || 'Not specified',
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString(),
       });
 
-      if (error) throw error;
-
-      // Also save to a profiles table if you want to query this data easily
-      if (user?.id) {
-        try {
-          const { error: dbError } = await supabase
-            .from('profiles')
-            .upsert(
-              {
-                id: user.id,
-                name: formData.name,
-                age: Number(formData.age),
-                phone: formData.phone,
-                email: formData.email,
-                profession: formData.profession || 'Not specified',
-                onboarding_completed: true,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: 'id' }
-            );
-
-          if (dbError && dbError.code !== 'PGRST116') {
-            console.warn('Profile table might not exist:', dbError);
-          }
-        } catch (tableError) {
-          console.warn('Could not save to profiles table:', tableError);
-        }
+      if (error) {
+        throw new Error(error);
       }
 
+      // Update the user context with the new profile data
+      updateUserProfile({
+        name: formData.name,
+        age: formData.age,
+        phone: formData.phone,
+        email: formData.email,
+        profession: formData.profession || 'Not specified',
+        onboarding_completed: true,
+      });
+
       toast.success('Profile completed! Welcome aboard! 🎉');
-      
-      // Refresh the session to ensure user object is updated with new metadata
-      await supabase.auth.refreshSession();
-      
-      // Wait a moment for the user object to update in the parent component
+
       setTimeout(() => {
         onComplete();
       }, 500);
